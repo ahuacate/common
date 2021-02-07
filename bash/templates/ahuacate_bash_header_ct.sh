@@ -40,7 +40,7 @@ function info() {
 function section() {
   local REASON="  \e[97m$1\e[37m"
   printf -- '-%.0s' {1..84}; echo ""
-  msg "$REASON"
+  msg "$SECTION_HEAD - $REASON"
   printf -- '-%.0s' {1..84}; echo ""
   echo
 }
