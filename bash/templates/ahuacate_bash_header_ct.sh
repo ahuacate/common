@@ -44,8 +44,8 @@ function section() {
   printf -- '-%.0s' {1..100}; echo ""
   echo
 }
-# Echo Box Function
-function echo_box () {
+# Msg Box Function
+function msg_box () {
   echo -e "$1" | fmt -w 80 | boxes -d stone -p a1l3 -s 84
 }
 function cleanup_failed() {
