@@ -142,23 +142,32 @@ function indent() {
 }
 # Set PVE CT Hostname Function
 function set_ct_hostname() {
-  msg "Setting CT hostname..."
+  msg "Setting ${CT_HOSTNAME_VAR^} CT hostname..."
   while true; do
-    read -p "Enter a CT CT hostname: " -e -i $CT_HOSTNAME_VAR CT_HOSTNAME
+    read -p "Enter a CT hostname: " -e -i $CT_HOSTNAME_VAR CT_HOSTNAME
     CT_HOSTNAME=${CT_HOSTNAME,,}
     if [ $(pct_list | grep -w $CT_HOSTNAME >/dev/null; echo $?) == 0 ]; then
-      warn "\nThere are problems with your input:\n1. The CT hostname \"$CT_HOSTNAME\" already exists.\n\n   Try again..."
+      warn "There are problems with your input:
+      
+      1. The CT hostname \"$CT_HOSTNAME\" already exists.
+      
+      Try again..."
       echo
     elif [ $(pct_list | grep -w $CT_HOSTNAME >/dev/null; echo $?) == 1 ] && [ $CT_HOSTNAME  = "$CT_HOSTNAME_VAR" ]; then
-      info "$SECTION_HEAD CT hostname is set: ${YELLOW}$CT_HOSTNAME${NC}"
+      info "${CT_HOSTNAME_VAR^} CT hostname is set: ${YELLOW}$CT_HOSTNAME${NC}"
       echo
       break  
-    elif [ $(pct_list | grep -w $CT_HOSTNAME >/dev/null; echo $?) == 1 ] && [ "$CT_HOSTNAME"  = "$CT_HOSTNAME_VAR" ]; then
-      warn "\nThere maybe issues with your input:\n1. The CT hostname \"$CT_HOSTNAME\" is suitable and is available, BUT\n2. We recommended you adhere to our naming convention and use the default\n   hostname \"$CT_HOSTNAME_VAR\". But your CT hostname \"$CT_HOSTNAME\"\n   can also be used.\n\n   Proceed with caution - you have been advised."
-      read -p "Accept your non-standard CT hostname ${RED}"$CT_HOSTNAME"${NC} [y/n]?: " -n 1 -r
+    elif [ $(pct_list | grep -w $CT_HOSTNAME >/dev/null; echo $?) == 1 ] && [ "$CT_HOSTNAME" != "$CT_HOSTNAME_VAR" ]; then
+      warn "There maybe issues with your input:
+      
+      1. The CT hostname \"$CT_HOSTNAME\" is suitable and is available, BUT
+      2. We recommended you adhere to our naming convention and use the default hostname \"$CT_HOSTNAME_VAR\". But your CT hostname \"$CT_HOSTNAME\" can also be used despite being irregular.
+      
+      Proceed with caution - you have been advised."
+      read -p "Accept your non-standard ${CT_HOSTNAME_VAR^} CT hostname ${RED}"$CT_HOSTNAME"${NC} [y/n]?: " -n 1 -r
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        info "$SECTION_HEAD CT hostname is set: ${YELLOW}$CT_HOSTNAME${NC} (non-standard)"
+        info "${CT_HOSTNAME_VAR^} CT hostname is set: ${YELLOW}$CT_HOSTNAME${NC} (non-standard)"
         echo
         break
       else
@@ -170,7 +179,7 @@ function set_ct_hostname() {
 }
 # Set PVE CT IP Function
 function set_ct_ip() {
-  msg "Setting CT IPv4 address..."
+  msg "Setting ${CT_HOSTNAME_VAR^} CT IPv4 address..."
   while true; do
     read -p "Enter a CT IPv4 address: " -e -i $CT_IP_VAR CT_IP
     msg "Performing checks on your input (be patient, may take a while)..."
@@ -263,32 +272,42 @@ function set_ct_ip() {
 }
 # Set PVE CT Gateway IPv4 Address
 function set_ct_gw() {
-  msg "Setting CT \"$CT_HOSTNAME\" Gateway IPv4 address..."
+  msg "Setting ${CT_HOSTNAME_VAR^} CT Gateway IPv4 address..."
   while true; do
     if [ $CT_IP = $CT_IP_VAR ] && [ $(ping -s 1 -c 2 $CT_GW_VAR > /dev/null; echo $?) = 0 ]; then
       CT_GW=CT_GW_VAR
-      info "$SECTION_HEAD CT Gateway IP is set: ${YELLOW}$CT_GW${NC}"
+      info "${CT_HOSTNAME_VAR^} CT Gateway IP is set: ${YELLOW}$CT_GW${NC}"
       echo
       break
     elif [ $(echo $CT_IP | awk -F'.' -v OFS="." '{print $1,$2,$3}') =  $(ip route show | grep default | awk '{print $3}' | awk -F'.' -v OFS="." '{print $1,$2,$3}') ] && [ $(ping -s 1 -c 2 $(ip route show | grep default | awk '{print $3}') > /dev/null; echo $?) = 0 ]; then
       CT_GW=$(ip route show | grep default | awk '{print $3}')
-      info "$SECTION_HEAD CT Gateway IP is set: ${YELLOW}$CT_GW${NC}"
+      info "${CT_HOSTNAME_VAR^} CT Gateway IP is set: ${YELLOW}$CT_GW${NC}"
       echo
       break
     elif [ $CT_IP != $CT_IP_VAR ] || [ $(echo $CT_IP | awk -F'.' -v OFS="." '{print $1,$2,$3}') != $(ip route show | grep default | awk '{print $3}' | awk -F'.' -v OFS="." '{print $1,$2,$3}') ]; then
-      msg "Because you have chosen to use a non-standard CT IP ${WHITE}$CT_IP${NC} and VLAN setting\nwe cannot determine your Gateway IP address for this CT.\nYou must manually input a working Gateway IPv4 address."
+      msg "Because you have chosen to use a non-standard ${CT_HOSTNAME_VAR^} CT IP ${WHITE}$CT_IP${NC} and VLAN setting we cannot determine your Gateway IP address for this CT.
+      You must manually input a working Gateway IPv4 address."
       echo
       read -p "Enter a working Gateway IPv4 address for this CT: " -e -i $(echo $CT_IP | awk -F'.' -v OFS="." '{print $1,$2,$3,"xxx"}') CT_GW
       msg "Performing checks on your input (be patient, may take a while)..."
       if [ $(valid_ip $CT_GW >/dev/null; echo $?) == 1 ]; then
-        warn "\nThere are problems with your input:\n1. Your IP address is incorrectly formatted.\n   It must be in the IPv4 format, quad-dotted octet format (i.e xxx.xxx.xxx.xxx ).\n\n   Try again..."
+        warn "There are problems with your input:
+        
+        1. Your IP address is incorrectly formatted. It must be in the IPv4 format, quad-dotted octet format (i.e xxx.xxx.xxx.xxx ).
+        
+        Try again..."
         echo
       elif [ $(valid_ip $CT_GW >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 $CT_GW > /dev/null; echo $?) == 0 ]; then
-        info "$SECTION_HEAD Gateway IP is set: ${YELLOW}$CT_GW${NC}"
+        info "${CT_HOSTNAME_VAR^} Gateway IP is set: ${YELLOW}$CT_GW${NC}"
         echo
         break
       elif [ $(valid_ip $CT_GW >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 $CT_GW > /dev/null; echo $?) = 1 ]; then
-        warn "\nThere are problems with your input:\n1. The IP address meets the IPv4 standard, BUT\n2. The IP address $CT_GW is NOT reachable (cannot ping).\n\n   Try again..."
+        warn "There are problems with your input:
+        
+        1. The IP address meets the IPv4 standard, BUT
+        2. The IP address $CT_GW is NOT reachable (cannot ping).
+        
+        Try again..."
         echo
       fi
     fi
@@ -296,49 +315,64 @@ function set_ct_gw() {
 }
 # Set PVE CT ID
 function set_ctid() {
-  msg "Setting CT \"$CT_HOSTNAME\" container CTID..."
+  msg "Setting ${CT_HOSTNAME_VAR^} CT container CTID..."
   while true; do
     if [ $(echo $CT_IP | awk -F'.' '{print $4}') -ge 100 ]; then
       CTID_VAR=$(echo $CT_IP | awk -F'.' '{print $4}')
-      msg "Proxmox CTID numeric IDs must be greater than 100. Our PVE CTID numeric ID\nsystem uses the last octet or host section value of your CT IPv4 address to\ncalculate a valid CTID."
+      msg "Proxmox CTID numeric IDs must be greater than 100. Our PVE CTID numeric ID system uses the last octet or host section value of your ${CT_HOSTNAME_VAR^} CT IPv4 address to calculate a valid CTID."
       if [ "$(pct_list | grep -w $CTID_VAR > /dev/null; echo $?)" != 0 ]; then
         CTID=$CTID_VAR
-        info "$SECTION_HEAD CTID is set: ${YELLOW}$CTID${NC}"
+        info "${CT_HOSTNAME_VAR^} CTID is set: ${YELLOW}$CTID${NC}"
         echo
         break
       else
-        warn "\nThere are problems with your input:\n1. PVE CTID numeric ID $CTID_VAR is in use by another CT labelled \"$(pct_list | grep -w $CTID_VAR | awk -F',' '{print $4}')\".\n\n   PVE will auto-generate a valid CTID.\n   (press ENTER to accept)."
+        warn "There are problems with your input:
+        
+        1. PVE CTID numeric ID $CTID_VAR is in use by another CT labelled \"$(pct_list | grep -w $CTID_VAR | awk -F',' '{print $4}')\".
+        
+        PVE will auto-generate a valid CTID (press ENTER to accept)."
         read -p "Accept the PVE generated CTID or type a new CTID numeric ID: " -e -i "$(pvesh get /cluster/nextid)" CTID_VAR
         if [ "$(pct_list | grep -w $CTID_VAR > /dev/null; echo $?)" != 0 ]; then
           CTID=$CTID_VAR
-          info "$SECTION_HEAD CTID is set: ${YELLOW}$CTID${NC}"
+          info "${CT_HOSTNAME_VAR^} CTID is set: ${YELLOW}$CTID${NC}"
           echo
           break
         else
-          warn "\nThere are problems with your input:\n1. PVE CTID numeric ID $CTID_VAR is also in use by another CT labelled \"$(pct_list | grep -w $CTID_VAR | awk -F',' '{print $4}')\".\n\n   Try again..."
+          warn " There are problems with your input:
+          1. PVE CTID numeric ID $CTID_VAR is also in use by another CT labelled \"$(pct_list | grep -w $CTID_VAR | awk -F',' '{print $4}')\".
+          
+          Try again..."
           echo
         fi
       fi
     elif [ $(echo $CT_IP | awk -F'.' '{print $4}') -lt 100 ]; then
       CTID_VAR="$(( $(echo $CT_IP | awk -F'.' '{print $4}') + 100 ))"
-      msg "Proxmox CTID numeric IDs must be greater than 100. Our PVE CTID numeric ID\nsystem uses the last octet or host section value of your CT IPv4 address to\ncalculate a valid CTID. Because your CT IP last octet value $(echo "$CT_IP" | awk  -F'.' -v OFS="." '{print $1, $2, $3, "\033[1;37m"$4"\033[0m"}')\nis outside the PVE range, 100 units will be added to the value ($(( $(echo $CT_IP | awk -F'.' '{print $4}') + 100 )))."
+      msg "Proxmox CTID numeric IDs must be greater than 100. Our PVE CTID numeric ID system uses the last octet or host section value of your CT IPv4 address to calculate a valid CTID. Because your CT IP last octet value $(echo "$CT_IP" | awk  -F'.' -v OFS="." '{print $1, $2, $3, "\033[1;37m"$4"\033[0m"}') is outside the PVE range, 100 units will be added to the value ($(( $(echo $CT_IP | awk -F'.' '{print $4}') + 100 )))."
       echo
       msg "Performing PVE PCT check on CTID $CTID_VAR..."
       if [ "$(pct_list | grep -w $CTID_VAR > /dev/null; echo $?)" != 0 ]; then
         CTID=$CTID_VAR
-        info "$SECTION_HEAD CTID is set: ${YELLOW}$CTID${NC}"
+        info "${CT_HOSTNAME_VAR^} CTID is set: ${YELLOW}$CTID${NC}"
         echo
         break
       else
-        warn "\nThere are problems with your input:\n1. PVE CTID numeric ID $CTID_VAR is in use by another CT labelled \"$(pct_list | grep -w $CTID_VAR | awk -F',' '{print $4}')\".\n\n   PVE will auto-generate a valid CTID.\n   (press ENTER to accept)."
+        warn "There are problems with your input:
+        
+        1. PVE CTID numeric ID $CTID_VAR is in use by another CT labelled \"$(pct_list | grep -w $CTID_VAR | awk -F',' '{print $4}')\".
+        
+        PVE will auto-generate a valid CTID (press ENTER to accept)."
         read -p "Accept the PVE generated CTID or type a new CTID numeric ID: " -e -i "$(pvesh get /cluster/nextid)" CTID_VAR
         if [ "$(pct_list | grep -w $CTID_VAR > /dev/null; echo $?)" != 0 ]; then
           CTID=$CTID_VAR
-          info "$SECTION_HEAD CTID is set: ${YELLOW}$CTID${NC}"
+          info "${CT_HOSTNAME_VAR^} CTID is set: ${YELLOW}$CTID${NC}"
           echo
           break
         else
-          warn "\nThere are problems with your input:\n1. PVE CTID numeric ID $CTID_VAR is also in use by another CT labelled \"$(pct_list | grep -w $CTID_VAR | awk -F',' '{print $4}')\".\n\n   Try again..."
+          warn "There are problems with your input:
+          
+          1. PVE CTID numeric ID $CTID_VAR is also in use by another CT labelled \"$(pct_list | grep -w $CTID_VAR | awk -F',' '{print $4}')\".
+          
+          Try again..."
           echo
         fi
       fi     
@@ -391,7 +425,7 @@ function set_bind_mount () {
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         cp pvesm_input_list_var01 pvesm_input_list
         PVESM_MANUAL_ASSIGN=1
-        info "PVE CT storage mount points are set."
+        info "${CT_HOSTNAME_VAR^} CT storage mount points are set."
         echo
       else
         PVESM_MANUAL_ASSIGN=0
@@ -451,7 +485,7 @@ function set_bind_mount () {
           cleanup
         else
           cp pvesm_input_list_var02 pvesm_input_list
-          info "PVE CT storage mount points are set."
+          info "${CT_HOSTNAME_VAR^} CT storage mount points are set."
           echo
         fi
       else
