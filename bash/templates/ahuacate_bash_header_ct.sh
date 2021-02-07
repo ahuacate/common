@@ -38,7 +38,7 @@ function info() {
   msg_nofmt "$FLAG $REASON"
 }
 function section() {
-  local REASON="- \e[97m$1\e[37m"
+  local REASON="-\e[97m$1\e[37m"
   printf -- '-%.0s' {1..84}; echo ""
   msg "$SECTION_HEAD $REASON"
   printf -- '-%.0s' {1..84}; echo ""
