@@ -39,9 +39,9 @@ function info() {
 }
 function section() {
   local REASON="  \e[97m$1\e[37m"
-  printf -- '-%.0s' {1..100}; echo ""
+  printf -- '-%.0s' {1..84}; echo ""
   msg "$REASON"
-  printf -- '-%.0s' {1..100}; echo ""
+  printf -- '-%.0s' {1..84}; echo ""
   echo
 }
 # Msg Box Function
