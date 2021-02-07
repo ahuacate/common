@@ -170,15 +170,15 @@ function set_ct_hostname() {
 }
 # Set PVE CT IP Function
 function set_ct_ip() {
-  msg "Setting CT \"$CT_HOSTNAME\" IPv4 address..."
+  msg "Setting CT IPv4 address..."
   while true; do
     read -p "Enter a CT IPv4 address: " -e -i $CT_IP_VAR CT_IP
     msg "Performing checks on your input (be patient, may take a while)..."
-    if [ $(valid_ip $CT_IP >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 "$CT_IP" > /dev/null; echo $?) != 0 ] && [ "$(echo "$CT_IP" | sed  's/\/.*//g' | awk -F"." '{print $3}')" = "$CT_TAG_VAR" ]; then
+    if [ $(valid_ip $CT_IP >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 "$CT_IP" > /dev/null; echo $?) != 0 ] && [ $(grep -R 'net[0-9]*' /etc/pve/lxc/ | grep -oP '(?<=ip=).+?(?=,)' | sed 's/\/.*//' | grep "$CT_IP"  > /dev/null; echo $?) != 0 ] && [ "$(echo "$CT_IP" | sed  's/\/.*//g' | awk -F"." '{print $3}')" = "$CT_TAG_VAR" ]; then
       read -p "Is your LAN network VLAN ready & enabled (L2/L3 switches) [y/n]?: " -n 1 -r
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        info "$SECTION_HEAD CT IPv4 address is set: ${YELLOW}$CT_IP${NC}"
+        info "${CT_HOSTNAME_VAR^} CT IPv4 address is set: ${YELLOW}$CT_IP${NC}"
         echo
         break
       else
@@ -186,26 +186,60 @@ function set_ct_ip() {
         echo
       fi
     elif [ $(valid_ip $CT_IP >/dev/null; echo $?) != 0 ]; then
-      warn "\nThere are problems with your input:\n1. The IP address is incorrectly formatted.\n   It must be in the IPv4 format, quad-dotted octet format (i.e xxx.xxx.xxx.xxx ).\n\n   Try again..."
+      warn "There are problems with your input:
+      
+      1. The IP address is incorrectly formatted. It must be in the IPv4 format, quad-dotted octet format (i.e xxx.xxx.xxx.xxx ).
+      
+      Try again..."
       echo
-    elif [ $(valid_ip $CT_IP >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 $CT_IP > /dev/null; echo $?) == 0 ]; then
-      warn "\nThere are problems with your input:\n1. The IP address meets the IPv4 standard, BUT\n2. The IP address $(echo "$CT_IP" | sed  's/\/.*//g') is already in-use by\n   another device on your your LAN.\n\n   Try again..."
+    elif [ $(valid_ip $CT_IP >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 $CT_IP > /dev/null; echo $?) == 0 ] && [ $(grep -R 'net[0-9]*' /etc/pve/lxc/ | grep -oP '(?<=ip=).+?(?=,)' | sed 's/\/.*//' | grep "$CT_IP"  > /dev/null; echo $?) = 1 ]; then
+      warn "There are problems with your input:
+      
+      1. The IP address meets the IPv4 standard,
+      2. The IP is not assigned to another PVE CT, BUT
+      3. The IP address $(echo "$CT_IP" | sed  's/\/.*//g') is already in-use by another device on your your LAN.
+      
+      Try again..."
       echo
-    elif [ $(valid_ip $CT_IP >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 $CT_IP > /dev/null; echo $?) != 0 ] && [ $(echo "$CT_IP" | awk -F'.' '{print $3}') == 1 ]; then
-      warn "\nThere maybe issues with your input:\n1. The IP address meets the IPv4 standard,\n2. The IP address $(echo "$CT_IP" | sed  's/\/.*//g') is not in use (available), BUT\n3. While we recommend VLAN$CT_TAG_VAR for your new CT with a\n   IPv4 address of $CT_IP_VAR your input of $CT_IP\n   is still valid if your LAN network is not VLAN ready (no VLAN support).\n   If you choose to proceed with $CT_IP you must set all your\n   $(echo $SECTION_HEAD | grep -Eo '^[^ ]+') CTs with the same VLAN$(echo "$CT_IP" | sed  's/\/.*//g' | awk -F"." '{print $3}') setting and assign a\n   valid VLAN$(echo "$CT_IP" | sed  's/\/.*//g' | awk -F"." '{print $3}') IPv4 address to avoid network issues.\n\n   Proceed with caution - you have been advised."
+    elif [ $(valid_ip $CT_IP >/dev/null; echo $?) == 0 ] && [ $(grep -R 'net[0-9]*' /etc/pve/lxc/ | grep -oP '(?<=ip=).+?(?=,)' | sed 's/\/.*//' | grep "$CT_IP"  > /dev/null; echo $?) = 0 ]; then
+      warn "There are problems with your input:
+      
+      1. The IP address meets the IPv4 standard, BUT
+      2. The IP is already assigned to another PVE CT.
+      
+      Try again..."
+      echo
+    elif [ $(valid_ip $CT_IP >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 $CT_IP > /dev/null; echo $?) != 0 ] && [ $(echo "$CT_IP" | awk -F'.' '{print $3}') == 1 ] && [ $(grep -R 'net[0-9]*' /etc/pve/lxc/ | grep -oP '(?<=ip=).+?(?=,)' | sed 's/\/.*//' | grep "$CT_IP"  > /dev/null; echo $?) = 1 ]; then
+      warn "There maybe issues with your input:
+      
+      1. The IP address meets the IPv4 standard,
+      2. The IP is not assigned to another PVE CT,
+      3. The IP address $(echo "$CT_IP" | sed  's/\/.*//g') is not in use (available), BUT
+      4. While we recommend VLAN$CT_TAG_VAR for your new ${CT_HOSTNAME_VAR^} CT with a IPv4 address of $CT_IP_VAR your input of $CT_IP is still workable if your LAN network is not VLAN ready (no VLAN support).
+      
+      If you choose to proceed with $CT_IP you must set all your $(echo $SECTION_HEAD | grep -Eo '^[^ ]+') CTs with the same VLAN$(echo "$CT_IP" | sed  's/\/.*//g' | awk -F"." '{print $3}') setting and assign a valid VLAN$(echo "$CT_IP" | sed  's/\/.*//g' | awk -F"." '{print $3}') IPv4 address to avoid network issues.
+      
+      Proceed with caution - you have been advised."
       echo
       read -p "Accept your IPv4 address ${WHITE}"$CT_IP"${NC} [y/n]?: " -n 1 -r
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        info "$SECTION_HEAD CT IPv4 address is set: ${YELLOW}$CT_IP${NC} (no VLAN)"
+        info "${CT_HOSTNAME_VAR^} CT IPv4 address is set: ${YELLOW}$CT_IP${NC} (no VLAN)"
         echo
         break
       else
         msg "Try again..."
         echo
       fi
-    elif [ $(valid_ip $CT_IP >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 $CT_IP > /dev/null; echo $?) != 0 ] && [ $(echo $CT_IP | awk -F'.' '{print $3}') != "$CT_TAG_VAR" ] || [ $(echo $CT_IP | awk -F'.' '{print $3}') != 1 ]; then
-      warn "\nThere are issues with your input:\n1. The IP address meets the IPv4 standard,\n2. The IP address $(echo "$CT_IP" | sed  's/\/.*//g') is not in use (available), BUT\n3. We recommend VLAN$CT_TAG_VAR for your new CT with a IPv4 address of $CT_IP_VAR.\n   Changing to a non-standard VLAN$(echo $CT_IP | sed  's/\/.*//g' | awk -F"." '{print $3}') may cause network issues with our suite of $(echo $SECTION_HEAD |grep -Eo '^[^ ]+') CTs.\n   For example, this setting may result in your CT having NO network or NAS access.\n\n   Proceed with caution - you have been advised."
+    elif [ $(valid_ip $CT_IP >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 $CT_IP > /dev/null; echo $?) != 0 ] && [ $(grep -R 'net[0-9]*' /etc/pve/lxc/ | grep -oP '(?<=ip=).+?(?=,)' | sed 's/\/.*//' | grep "$CT_IP"  > /dev/null; echo $?) = 1 ] && [ $(echo $CT_IP | awk -F'.' '{print $3}') != "$CT_TAG_VAR" ] || [ $(echo $CT_IP | awk -F'.' '{print $3}') != 1 ]; then
+      warn "There are serious issues with your input:
+      
+      1. The IP address meets the IPv4 standard,
+      2. The IP address $(echo "$CT_IP" | sed  's/\/.*//g') is not in use (available),
+      3. The IP is not assigned to another PVE CT, BUT
+      4. We recommend VLAN$CT_TAG_VAR for your new CT with a IPv4 address of $CT_IP_VAR. Changing to a non-standard VLAN$(echo $CT_IP | sed  's/\/.*//g' | awk -F"." '{print $3}') may cause network issues with our suite of $(echo $SECTION_HEAD |grep -Eo '^[^ ]+') CTs. For example, this setting may result in your CT having NO network or NAS access.
+      
+      Proceed with caution - you have been advised."
       echo
       read -p "Is your LAN network VLAN ready & enabled (L2/L3 switches) [y/n]?: " -n 1 -r
       echo
@@ -213,7 +247,7 @@ function set_ct_ip() {
         read -p "Accept your non-standard IPv4 address ${RED}"$CT_IP"${NC} [y/n]?: " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-          info "$SECTION_HEAD CT IPv4 address is set: ${YELLOW}$CT_IP${NC} (non-standard)"
+          info "${CT_HOSTNAME_VAR^} CT IPv4 address is set: ${YELLOW}$CT_IP${NC} (non-standard)"
           echo
           break
         else
@@ -221,49 +255,8 @@ function set_ct_ip() {
           echo
         fi
       else
-        msg "Then best use a VLAN1 IPv4 address.\nTry again..."
+        msg "Then best use a VLAN1 IPv4 address. Try again..."
         echo
-      fi
-    fi
-  done
-}
-# Set PVE CT VLAN Function
-function set_ct_vlan() {
-  msg "Setting CT \"$CT_HOSTNAME\" VLAN..."
-  while true; do
-    if [ $(echo $CT_IP | awk -F'.' '{print $3}') = 1 ]; then
-      CT_TAG=0
-      info "The CT VLAN is set: ${YELLOW}$CT_TAG${NC}."
-      echo
-      break
-    elif [ $(echo $CT_IP | awk -F'.' '{print $3}') = $CT_TAG_VAR ]; then
-      CT_TAG=$CT_TAG_VAR
-      info "The CT VLAN is set: ${YELLOW}$CT_TAG${NC}."
-      echo
-      break
-    elif [ $(echo $CT_IP | awk -F'.' '{print $3}') != 1 ] || [ $(echo $CT_IP | awk -F'.' '{print $3}') != $CT_TAG_VAR ]; then
-      warn "\nWe need you to confirm your VLAN because:\n1. The CT IP address is $CT_IP which is non-standard for our $(echo $SECTION_HEAD |grep -Eo '^[^ ]+') builds.\n2. A likely VLAN number is VLAN$(echo $CT_IP | sed  's/\/.*//g' | awk -F"." '{print $3}')."
-      echo
-      read -p "Is network ${WHITE}VLAN$(echo $CT_IP | awk -F'.' '{print $3}')${NC} correct for this CT [y/n]?: " -n 1 -r
-      echo
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
-        CT_TAG=$(echo $CT_IP | awk -F'.' '{print $3}')
-        info "The CT VLAN is set: ${YELLOW}$CT_TAG${NC}."
-        echo
-        break
-      else
-        read -p "Enter a new valid network CT VLAN tag number: " -e -i $(echo $CT_IP | awk -F'.' '{print $3}') CT_TAG
-        read -p "Is network ${WHITE}VLAN$CT_TAG${NC} correct for this CT [y/n]?: " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-          CT_TAG=$(echo $CT_IP | awk -F'.' '{print $3}')
-          info "The CT VLAN is set: ${YELLOW}$CT_TAG${NC}."
-          echo
-          break
-        else
-          msg "Try again..."
-          echo
-        fi
       fi
     fi
   done
