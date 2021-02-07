@@ -18,32 +18,7 @@ function error_exit() {
   [ ! -z ${CTID-} ] && cleanup_failed
   exit $EXIT
 }
-function msg() {
-  local TEXT="$1"
-  echo -e "$TEXT" | fmt -s -w 80 
-}
-function msg_nofmt() {
-  local TEXT="$1"
-  echo -e "$TEXT"
-}
-function warn() {
-  local REASON="${WHITE}$1${NC}"
-  local FLAG="${RED}[WARNING]${NC}"
-  msg "$FLAG"
-  msg "$REASON"
-}
-function info() {
-  local REASON="$1"
-  local FLAG="\e[36m[INFO]\e[39m"
-  msg_nofmt "$FLAG $REASON"
-}
-function section() {
-  local REASON="\e[97m$1\e[37m"
-  printf -- '-%.0s' {1..84}; echo ""
-  msg "  $SECTION_HEAD - $REASON"
-  printf -- '-%.0s' {1..84}; echo ""
-  echo
-}
+
 # Msg Box Function
 function msg_box () {
   echo -e "$1" | fmt -w 80 | boxes -d stone -p a1l3 -s 84
