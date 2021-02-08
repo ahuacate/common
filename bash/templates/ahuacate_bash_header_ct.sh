@@ -210,10 +210,10 @@ function set_es_auto () {
   if [ $ES_AUTO_HOSTNAME = 0 ] && [ $ES_AUTO_CT_IP = 0 ] && [ $ES_AUTO_CT_GW = 0 ] && [ $ES_AUTO_CT_CTID = 0 ] && [ $ES_AUTO_CT_BIND_MOUNTS = 0 ]; then
   msg "Easy Script has detected all our default build settings are available (recommended). Our settings for ${CT_HOSTNAME_VAR^} are:
 
-      1) CT hostname: ${YELLOW}$CT_HOSTNAME_VAR${NC}
-      2) CT IPv4 address: ${YELLOW}$CT_IP_VAR${NC}
-      3) CT Gateway address: ${YELLOW}$CT_GW_VAR${NC}
-      4) CT CTID: ${YELLOW}$CT_GW_VAR${NC}"
+    1) CT hostname: ${YELLOW}$CT_HOSTNAME_VAR${NC}
+    2) CT IPv4 address: ${YELLOW}$CT_IP_VAR${NC}
+    3) CT Gateway address: ${YELLOW}$CT_GW_VAR${NC}
+    4) CT CTID: ${YELLOW}$CT_GW_VAR${NC}"
     i=5
     while read -r line; do
       msg "    $i) Bind mount: $(pvesm status | grep -v 'local' | grep -wE "^.*\-.*\-$line" | awk '{print $1}') ${WHITE}--->${NC} /mnt/$line"
