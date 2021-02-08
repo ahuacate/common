@@ -118,10 +118,10 @@ function indent() {
 
 # Set PVE container storage location
 function set_ct_storage () {
-  msg "Select PVE CT storage location (where the CT file is created)..."
+  msg "Select the storage disk location where ${CT_HOSTNAME_VAR^} CT machine will be created..."
   STORAGE_LIST=( $(pvesm status -content rootdir | awk 'NR>1 {print $1}') )
   if [ ${#STORAGE_LIST[@]} -eq 0 ]; then
-    warn "\nPVE containers requires at least one storage location."
+    warn "PVE containers requires at least one storage location."
     die "Unable to detect a valid storage location on PVE host '${HOSTNAME^^}'."
   elif [ ${#STORAGE_LIST[@]} -eq 1 ]; then
     STORAGE=${STORAGE_LIST[0]}
@@ -244,7 +244,7 @@ function set_es_auto () {
   fi
 }
 # Set PVE CT Hostname Function
-function set_ct_hostname() {
+function set_ct_hostname () {
   msg "Setting ${CT_HOSTNAME_VAR^} CT hostname..."
   while true; do
     read -p "Enter a CT hostname: " -e -i $CT_HOSTNAME_VAR CT_HOSTNAME
@@ -281,7 +281,7 @@ function set_ct_hostname() {
   done
 }
 # Set PVE CT IP Function
-function set_ct_ip() {
+function set_ct_ip () {
   msg "Setting ${CT_HOSTNAME_VAR^} CT IPv4 address..."
   while true; do
     read -p "Enter a CT IPv4 address: " -e -i $CT_IP_VAR CT_IP
@@ -291,10 +291,11 @@ function set_ct_ip() {
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         info "${CT_HOSTNAME_VAR^} CT IPv4 address is set: ${YELLOW}$CT_IP${NC}"
+        CT_TAG=$CT_TAG_VAR
         echo
         break
       else
-        msg "Then best use a VLAN1 IPv4 address.\nTry again..."
+        msg "Then best use a VLAN1 IPv4 address. Try again..."
         echo
       fi
     elif [ $(valid_ip $CT_IP >/dev/null; echo $?) != 0 ]; then
@@ -337,6 +338,7 @@ function set_ct_ip() {
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         info "${CT_HOSTNAME_VAR^} CT IPv4 address is set: ${YELLOW}$CT_IP${NC} (no VLAN)"
+        CT_TAG=1
         echo
         break
       else
@@ -360,6 +362,11 @@ function set_ct_ip() {
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
           info "${CT_HOSTNAME_VAR^} CT IPv4 address is set: ${YELLOW}$CT_IP${NC} (non-standard)"
+          if [ $(echo $CT_IP | sed  's/\/.*//g' | awk -F"." '{print $3}') -gt 1 ]; then
+            CT_TAG=$(echo $CT_IP | sed  's/\/.*//g' | awk -F"." '{print $3}')
+          else
+            CT_TAG=1
+          fi
           echo
           break
         else
@@ -374,7 +381,7 @@ function set_ct_ip() {
   done
 }
 # Set PVE CT Gateway IPv4 Address
-function set_ct_gw() {
+function set_ct_gw () {
   msg "Setting ${CT_HOSTNAME_VAR^} CT Gateway IPv4 address..."
   while true; do
     if [ $CT_IP = $CT_IP_VAR ] && [ $(ping -s 1 -c 2 $CT_GW_VAR > /dev/null; echo $?) = 0 ]; then
@@ -417,7 +424,7 @@ function set_ct_gw() {
   done
 }
 # Set PVE CT ID
-function set_ctid() {
+function set_ctid () {
   msg "Setting ${CT_HOSTNAME_VAR^} CT container CTID..."
   while true; do
     if [ $(echo $CT_IP | awk -F'.' '{print $4}') -ge 100 ]; then
@@ -484,14 +491,14 @@ function set_ctid() {
 }
 # Set CT Disk Size
 function set_disk_size () {
-  read -p "Enter CT Disk Size (Gb): " -e -i $CT_DISK_SIZE_VAR CT_DISK_SIZE
-  info "CT virtual disk is set: ${YELLOW}$CT_DISK_SIZE Gb${NC}."
+  read -p "Enter CT Disk Size (GiB): " -e -i $CT_DISK_SIZE_VAR CT_DISK_SIZE
+  info "CT virtual disk is set: ${YELLOW}$CT_DISK_SIZE GiB${NC}."
   echo
 }
 # Set CT Memory (RAM)
 function set_ct_ram () {
-  read -p "Enter CT RAM memory to be allocated (Gb): " -e -i $CT_RAM_VAR CT_RAM
-  info "CT allocated memory is set: ${YELLOW}$CT_RAM Mb${NC}."
+  read -p "Enter CT RAM memory to be allocated (MiB): " -e -i $CT_RAM_VAR CT_RAM
+  info "CT allocated memory is set: ${YELLOW}$CT_RAM MiB${NC}."
   echo
 }
 # Set PVE CT Bind Mount Function
