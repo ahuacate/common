@@ -227,6 +227,9 @@ function set_es_auto () {
       CT_IP=$CT_IP_VAR
       CT_GW=$CT_GW_VAR
       CTID=$CTID_VAR
+      CT_TAG=$CT_TAG_VAR
+      CT_DISK_SIZE=$CT_DISK_SIZE_VAR
+      CT_RAM=$CT_RAM_VAR
       cp pvesm_input_list_default_var01 pvesm_input_list
       ES_AUTO=0
       info "${CT_HOSTNAME_VAR^} CT is set to use Easy Script defaults."
