@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-#Static Default Function VAR
+#### Static Default Function VARs ####
 FUNC_NAS_HOSTNAME=nas
+
+
+#### Bash Generic ####
 
 set -Eeuo pipefail
 shopt -s expand_aliases
@@ -9,6 +12,21 @@ alias die='EXIT=$? LINE=$LINENO error_exit'
 trap die ERR
 trap cleanup EXIT
 
+# Terminal Colours
+RED=$'\033[0;31m'
+YELLOW=$'\033[1;33m'
+GREEN=$'\033[0;32m'
+WHITE=$'\033[1;37m'
+NC=$'\033[0m'
+
+# Resize Terminal
+printf '\033[8;40;120t'
+
+# Detect modules and automatically load at boot
+load_module aufs
+load_module overlay
+
+# Bash Script Functions
 function error_exit() {
   trap - ERR
   local DEFAULT='Unknown failure occured.'
@@ -17,36 +35,6 @@ function error_exit() {
   msg "$FLAG $REASON"
   [ ! -z ${CTID-} ] && cleanup_failed
   exit $EXIT
-}
-function msg() {
-  local TEXT="$1"
-  echo -e "$TEXT" | fmt -s -w 80 
-}
-function msg_nofmt() {
-  local TEXT="$1"
-  echo -e "$TEXT"
-}
-function warn() {
-  local REASON="${WHITE}$1${NC}"
-  local FLAG="${RED}[WARNING]${NC}"
-  msg "$FLAG"
-  msg "$REASON"
-}
-function info() {
-  local REASON="$1"
-  local FLAG="\e[36m[INFO]\e[39m"
-  msg_nofmt "$FLAG $REASON"
-}
-function section() {
-  local REASON="\e[97m$1\e[37m"
-  printf -- '-%.0s' {1..84}; echo ""
-  msg "  $SECTION_HEAD - $REASON"
-  printf -- '-%.0s' {1..84}; echo ""
-  echo
-}
-# Msg Box Function
-function msg_box () {
-  echo -e "$1" | fmt -w 80 | boxes -d stone -p a1l3 -s 84
 }
 function cleanup_failed() {
   if [ ! -z ${MOUNT+x} ]; then
@@ -83,9 +71,53 @@ function load_module() {
       die "Failed to add '$1' module to load at boot."
   fi
 }
+
+
+#### Bash Messaging Functions ####
+
+if [ $(dpkg -s boxes >/dev/null 2>&1; echo $?) = 1 ]; then
+  apt-get install -y boxes >/dev/null
+fi
+function msg() {
+  local TEXT="$1"
+  echo -e "$TEXT" | fmt -s -w 80 
+}
+function msg_nofmt() {
+  local TEXT="$1"
+  echo -e "$TEXT"
+}
+function warn() {
+  local REASON="${WHITE}$1${NC}"
+  local FLAG="${RED}[WARNING]${NC}"
+  msg "$FLAG"
+  msg "$REASON"
+}
+function info() {
+  local REASON="$1"
+  local FLAG="\e[36m[INFO]\e[39m"
+  msg_nofmt "$FLAG $REASON"
+}
+function section() {
+  local REASON="\e[97m$1\e[37m"
+  printf -- '-%.0s' {1..84}; echo ""
+  msg "  $SECTION_HEAD - $REASON"
+  printf -- '-%.0s' {1..84}; echo ""
+  echo
+}
+function msg_box () {
+  echo -e "$1" | fmt -w 80 | boxes -d stone -p a1l3 -s 84
+}
+function indent() {
+    eval "$@" |& sed "s/^/\t/"
+    return "$PIPESTATUS"
+}
+
+
+#### Proxmox Functions ####
+
 # Set PVE container storage location
 function set_ct_storage () {
-  msg "Select PVE CT storage location..."
+  msg "Select PVE CT storage location (where the CT file is created)..."
   STORAGE_LIST=( $(pvesm status -content rootdir | awk 'NR>1 {print $1}') )
   if [ ${#STORAGE_LIST[@]} -eq 0 ]; then
     warn "\nPVE containers requires at least one storage location."
@@ -96,7 +128,7 @@ function set_ct_storage () {
     echo
   else
     msg "\n\nMore than one storage location has been detected.\n"
-    PS3=$'\n'"Which storage location would you like to use (Recommend local-zfs) ? "
+    PS3=$'\n'"Which storage location would you like to use (recommend local-zfs) ? "
     select s in "${STORAGE_LIST[@]}"; do
       if [[ " ${STORAGE_LIST[@]} " =~ " ${s} " ]]; then
         STORAGE=$s
@@ -135,10 +167,80 @@ function valid_ip() {
   fi
   return $stat
 }
-# Indent Tab Command
-function indent() {
-    eval "$@" |& sed "s/^/\t/"
-    return "$PIPESTATUS"
+# Set PVE ES Auto Function
+function set_es_auto () {
+  # Easy Script check Hostname
+  if [ $(pct_list | grep -w $CT_HOSTNAME_VAR >/dev/null; echo $?) != 0 ]; then
+    ES_AUTO_HOSTNAME=0
+  else
+    ES_AUTO_HOSTNAME=1
+  fi
+  # Easy Script check IP
+  if [ $(valid_ip $CT_IP_VAR >/dev/null; echo $?) == 0 ] && [ $(ping -s 1 -c 2 "$CT_IP_VAR" > /dev/null; echo $?) != 0 ] && [ $(grep -R 'net[0-9]*' /etc/pve/lxc/ | grep -oP '(?<=ip=).+?(?=,)' | sed 's/\/.*//' | grep "$CT_IP_VAR"  > /dev/null; echo $?) != 0 ]; then
+    ES_AUTO_CT_IP=0
+  else
+    ES_AUTO_CT_IP=1
+  fi
+  # Easy Script check Gateway
+  if [ $(ping -s 1 -c 2 $CT_GW_VAR > /dev/null; echo $?) = 0 ]; then
+    ES_AUTO_CT_GW=0
+  else
+    ES_AUTO_CT_GW=1
+  fi
+  # Easy Script check CTID
+  if [ $(pct_list | grep -w $CTID_VAR > /dev/null; echo $?) != 0 ]; then
+    ES_AUTO_CT_CTID=0
+  else
+    ES_AUTO_CT_CTID=1
+  fi
+  # Easy Script check bind mounts
+  while read -r line; do
+    if [[ $(pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line") ]]; then
+      pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_default_var01
+    fi
+  done <<< $(cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none')
+  if [[ ! $(comm -23 <(sort -u <<< $(cat pvesm_required_list | grep -vi 'none' | awk -F'|' '{print $1}')) <(sort -u <<< $(cat pvesm_input_list_default_var01 | awk '{print $2}' | sed 's/\/mnt\///'))) ]]; then
+    PVESM_INPUT=0
+    ES_AUTO_CT_BIND_MOUNTS=0
+  else
+    ES_AUTO_CT_BIND_MOUNTS=1
+    PVESM_INPUT=1
+    rm pvesm_input_list_default_var01
+  fi
+  # Validate Results
+  if [ $ES_AUTO_HOSTNAME = 0 ] && [ $ES_AUTO_CT_IP = 0 ] && [ $ES_AUTO_CT_GW = 0 ] && [ $ES_AUTO_CT_CTID = 0 ] && [ $ES_AUTO_CT_BIND_MOUNTS = 0 ]; then
+  msg "Easy Script has detected all our default build settings are available (recommended). Our settings for ${CT_HOSTNAME_VAR^} are:
+
+      1) CT hostname: ${YELLOW}$CT_HOSTNAME_VAR${NC}
+      2) CT IPv4 address: ${YELLOW}$CT_IP_VAR${NC}
+      3) CT Gateway address: ${YELLOW}$CT_GW_VAR${NC}
+      4) CT CTID: ${YELLOW}$CT_GW_VAR${NC}"
+    i=5
+    while read -r line; do
+      msg "    $i) Bind mount: $(pvesm status | grep -v 'local' | grep -wE "^.*\-.*\-$line" | awk '{print $1}') ${WHITE}--->${NC} /mnt/$line"
+      pvesm status | grep -v 'local' | grep -wEi "^.*\-.*\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_var01
+      ((i=i+1))
+    done <<< $(cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none')
+    echo
+    read -p "Proceed with our Easy Script defaults (recommended) [y/n]?: " -n 1 -r
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      CT_HOSTNAME=${$CT_HOSTNAME_VAR,,}
+      CT_IP=$CT_IP_VAR
+      CT_GW=$CT_GW_VAR
+      CTID=$CTID_VAR
+      cp pvesm_input_list_default_var01 pvesm_input_list
+      ES_AUTO=0
+      info "${CT_HOSTNAME_VAR^} CT is set to use Easy Script defaults."
+      echo
+    else
+      rm pvesm_input_list_default_var01
+      ES_AUTO=1
+      info "Proceeding with standard installation."
+      echo
+    fi
+  else
+    ES_AUTO=1
+  fi
 }
 # Set PVE CT Hostname Function
 function set_ct_hostname() {
@@ -275,7 +377,7 @@ function set_ct_gw() {
   msg "Setting ${CT_HOSTNAME_VAR^} CT Gateway IPv4 address..."
   while true; do
     if [ $CT_IP = $CT_IP_VAR ] && [ $(ping -s 1 -c 2 $CT_GW_VAR > /dev/null; echo $?) = 0 ]; then
-      CT_GW=CT_GW_VAR
+      CT_GW=$CT_GW_VAR
       info "${CT_HOSTNAME_VAR^} CT Gateway IP is set: ${YELLOW}$CT_GW${NC}"
       echo
       break
@@ -379,6 +481,18 @@ function set_ctid() {
     fi
   done
 }
+# Set CT Disk Size
+function set_disk_size () {
+  read -p "Enter CT Disk Size (Gb): " -e -i $CT_DISK_SIZE_VAR CT_DISK_SIZE
+  info "CT virtual disk is set: ${YELLOW}$CT_DISK_SIZE Gb${NC}."
+  echo
+}
+# Set CT Memory (RAM)
+function set_ct_ram () {
+  read -p "Enter CT RAM memory to be allocated (Gb): " -e -i $CT_RAM_VAR CT_RAM
+  info "CT allocated memory is set: ${YELLOW}$CT_RAM Mb${NC}."
+  echo
+}
 # Set PVE CT Bind Mount Function
 function set_bind_mount () {
   # PVE default scan
@@ -402,7 +516,6 @@ function set_bind_mount () {
   else
     PVESM_INPUT=1
   fi
-
   if [ $PVESM_INPUT = 1 ]; then
     # PVE host scan
     msg "Performing PVE host storage mount scan..."
@@ -496,7 +609,9 @@ function set_bind_mount () {
       fi
     fi
   fi
-  # Create CT Bind Mount Points
+}
+# Create CT Bind Mount Points
+function create_bind_mount () {
   if [[ -f pvesm_input_list ]]; then
     msg "Creating ${CT_HOSTNAME_VAR^} CT bind mounts..."
     IFS=' '
@@ -510,26 +625,8 @@ function set_bind_mount () {
   fi
 }
 
-# Terminal Colours
-RED=$'\033[0;31m'
-YELLOW=$'\033[1;33m'
-GREEN=$'\033[0;32m'
-WHITE=$'\033[1;37m'
-NC=$'\033[0m'
 
-# Bash Package Prerequisites
-if [ $(dpkg -s boxes >/dev/null 2>&1; echo $?) = 1 ]; then
-  apt-get install -y boxes >/dev/null
-fi
-
-# Resize Terminal
-printf '\033[8;40;120t'
-
-# Detect modules and automatically load at boot
-load_module aufs
-load_module overlay
-
-# Set Temp Folder
+#### Set Bash Temp Folder ####
 if [ -z "${TEMP_DIR+x}" ]; then
     TEMP_DIR=$(mktemp -d)
     pushd $TEMP_DIR >/dev/null
