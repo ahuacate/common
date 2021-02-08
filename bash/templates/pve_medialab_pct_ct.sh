@@ -5,10 +5,10 @@
 # Download latest PVE CT OS template
 OS_TYPE=${OS_TYPE,,}
 pveam update >/dev/null
-if [ ! -f /var/lib/vz/template/cache/$OSTYPE-$OSVERSION* ]; then
-  msg "Downloading Proxmox CT/LXC '${OSTYPE^} $OSVERSION' template..."
+if [ ! -f /var/lib/vz/template/cache/$OS_TYPE-$OS_VERSION* ]; then
+  msg "Downloading Proxmox CT/LXC '${OS_TYPE^} $OS_VERSION' template..."
 fi
-mapfile -t TEMPLATES < <(pveam available -section system | sed -n "s/.*\($OSTYPE-$OSVERSION.*\)/\1/p" | sort -t - -k 2 -V)
+mapfile -t TEMPLATES < <(pveam available -section system | sed -n "s/.*\($OS_TYPE-$OS_VERSION.*\)/\1/p" | sort -t - -k 2 -V)
 TEMPLATE="${TEMPLATES[-1]}"
 pveam download local $TEMPLATE >/dev/null || die "A problem occurred while downloading the LXC template."
 
