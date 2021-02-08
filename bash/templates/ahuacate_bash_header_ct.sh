@@ -216,7 +216,7 @@ function set_es_auto () {
       4) CT CTID: ${YELLOW}$CT_GW_VAR${NC}"
     i=5
     while read -r line; do
-      msg "    $i) Bind mount: $(pvesm status | grep -v 'local' | grep -wE "^.*\-.*\-$line" | awk '{print $1}') ${WHITE}--->${NC} /mnt/$line"
+      msg "   $i) Bind mount: $(pvesm status | grep -v 'local' | grep -wE "^.*\-.*\-$line" | awk '{print $1}') ${WHITE}--->${NC} /mnt/$line"
       pvesm status | grep -v 'local' | grep -wEi "^.*\-.*\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_var01
       ((i=i+1))
     done <<< $(cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none')
