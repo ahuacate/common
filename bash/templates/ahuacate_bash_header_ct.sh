@@ -222,6 +222,7 @@ function set_es_auto () {
     done <<< $(cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none')
     echo
     read -p "Proceed with our Easy Script defaults (recommended) [y/n]?: " -n 1 -r
+    echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       CT_HOSTNAME=${CT_HOSTNAME_VAR,,}
       CT_IP=$CT_IP_VAR
