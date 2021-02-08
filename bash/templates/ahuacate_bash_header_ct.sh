@@ -1,33 +1,10 @@
 #!/usr/bin/env bash
 
-#### Static Default Function VARs ####
-
-FUNC_NAS_HOSTNAME=nas
-
-
-#### Bash Generic ####
-
 set -Eeuo pipefail
 shopt -s expand_aliases
 alias die='EXIT=$? LINE=$LINENO error_exit'
 trap die ERR
 trap cleanup EXIT
-
-# Terminal Colours
-RED=$'\033[0;31m'
-YELLOW=$'\033[1;33m'
-GREEN=$'\033[0;32m'
-WHITE=$'\033[1;37m'
-NC=$'\033[0m'
-
-# Resize Terminal
-printf '\033[8;40;120t'
-
-# Detect modules and automatically load at boot
-load_module aufs
-load_module overlay
-
-# Bash Script Functions
 function error_exit() {
   trap - ERR
   local DEFAULT='Unknown failure occured.'
@@ -72,6 +49,22 @@ function load_module() {
       die "Failed to add '$1' module to load at boot."
   fi
 }
+# Detect modules and automatically load at boot
+load_module aufs
+load_module overlay
+
+
+#### Bash Generic ####
+
+# Terminal Colours
+RED=$'\033[0;31m'
+YELLOW=$'\033[1;33m'
+GREEN=$'\033[0;32m'
+WHITE=$'\033[1;37m'
+NC=$'\033[0m'
+
+# Resize Terminal
+printf '\033[8;40;120t'
 
 
 #### Bash Messaging Functions ####
@@ -116,6 +109,8 @@ function indent() {
 
 #### Proxmox Functions ####
 
+# Default Function VARs
+FUNC_NAS_HOSTNAME=nas
 # Set PVE container storage location
 function set_ct_storage () {
   msg "Select the storage disk location where ${CT_HOSTNAME_VAR^} CT machine will be created..."
