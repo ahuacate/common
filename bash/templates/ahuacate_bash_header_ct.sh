@@ -223,7 +223,7 @@ function set_es_auto () {
     echo
     read -p "Proceed with our Easy Script defaults (recommended) [y/n]?: " -n 1 -r
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-      CT_HOSTNAME=${$CT_HOSTNAME_VAR,,}
+      CT_HOSTNAME=${CT_HOSTNAME_VAR,,}
       CT_IP=$CT_IP_VAR
       CT_GW=$CT_GW_VAR
       CTID=$CTID_VAR
