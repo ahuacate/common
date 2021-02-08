@@ -3,8 +3,9 @@
 #### Default MediaLab PCT Template ####
 
 # Download latest PVE CT OS template
+OS_TYPE=${OS_TYPE,,}
 pveam update >/dev/null
-if [ ! -f /var/lib/vz/template/cache/$OSTYPE-$OSVERSION.* ]; then
+if [ ! -f /var/lib/vz/template/cache/$OSTYPE-$OSVERSION* ]; then
   msg "Downloading Proxmox CT/LXC '${OSTYPE^} $OSVERSION' template..."
 fi
 mapfile -t TEMPLATES < <(pveam available -section system | sed -n "s/.*\($OSTYPE-$OSVERSION.*\)/\1/p" | sort -t - -k 2 -V)
