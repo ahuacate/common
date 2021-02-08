@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 #### Static Default Function VARs ####
+
 FUNC_NAS_HOSTNAME=nas
 
 
