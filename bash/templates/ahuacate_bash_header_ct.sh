@@ -110,7 +110,7 @@ function indent() {
 #### Proxmox Functions ####
 
 # Default Function VARs
-FUNC_NAS_HOSTNAME=cyclone
+FUNC_NAS_HOSTNAME=nas
 # Set PVE container storage location
 function set_ct_storage () {
   msg "Select the storage disk location where ${CT_HOSTNAME_VAR^} CT machine will be created..."
