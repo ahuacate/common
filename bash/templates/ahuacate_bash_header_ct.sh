@@ -190,6 +190,7 @@ function set_es_auto () {
     ES_AUTO_CT_CTID=1
   fi
   # Easy Script check bind mounts
+  touch pvesm_input_list_default_var01
   while read -r line; do
     if [[ $(pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line") ]]; then
       pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_default_var01
@@ -201,7 +202,9 @@ function set_es_auto () {
   else
     ES_AUTO_CT_BIND_MOUNTS=1
     PVESM_INPUT=1
-    rm pvesm_input_list_default_var01
+    if [ -f pvesm_input_list_default_var01 ]; then
+      rm pvesm_input_list_default_var01
+    fi
   fi
   # Validate Results
   if [ $ES_AUTO_HOSTNAME = 0 ] && [ $ES_AUTO_CT_IP = 0 ] && [ $ES_AUTO_CT_GW = 0 ] && [ $ES_AUTO_CT_CTID = 0 ] && [ $ES_AUTO_CT_BIND_MOUNTS = 0 ]; then
