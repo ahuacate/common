@@ -49,13 +49,13 @@ SSMTP is a simple Mail Transfer Agent (MTA). SSMTP is not a mail server. While e
   --  SMTP SERVER
       You require a SMTP server that can receive the emails from your machine and send them to your designated administrator. If you use GMail SMTP server its best to enable 'App Passwords'. An 'App Password' is a 16-digit GMail passcode that gives an app or device permission to access your GMail Account. Or you can use a mailgun.com flex account relay server (Recommended).
       
-  --  REQUIRED SMTP SERVER CREDENTIALS
-      1. Designated administrator email address
-         (i.e your working admin email address)
-      2. SMTP server address
+  --  REQUIRED SMTP SERVER CREDENTIALS ( In order of input )
+      1. SMTP server address
          (i.e smtp.gmail.com or smtp.mailgun.org)
-      3. SMTP server port
+      2. SMTP server port
          (i.e gmail port is 587 and mailgun port is 587)
+      3. Designated administrator email address
+         (i.e your working admin email address)
       4. SMTP server username
          (i.e MyEmailAddress@gmail.com or postmaster@sandboxa6ac6.mailgun.org)
       5. SMTP server default password
