@@ -104,7 +104,8 @@ fi
 if [[ ! $(comm -23 <(sort -u <<< $(cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none')) <(sort -u <<< $(cat pvesm_input_list_default_var01 | awk '{print $2}' | sed 's/\/mnt\///'))) ]]; then
   PVESM_INPUT=0
   ES_AUTO_CT_BIND_MOUNTS=0
-  if [ $dev_git_mount = 0 ] && [ $DEV_GIT_MOUNT_ENABLE = 0 ]; then
+  # if [ $dev_git_mount = 0 ] && [ $DEV_GIT_MOUNT_ENABLE = 0 ]; then
+  if [ $DEV_GIT_MOUNT_ENABLE = 0 ]; then
     pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git" | awk '{print $1,"/mnt/pve/"$1}' >> pvesm_input_list_default_var01
   fi
 else
