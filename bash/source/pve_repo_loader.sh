@@ -9,6 +9,7 @@ cd /tmp
 
 #---- Clean old copies
 echo "${REPO_TEMP} ...................................."
+exit 0
 #rm -R /tmp/common &> /dev/null
 #rm -R /tmp/${GIT_REPO} &> /dev/null
 #rm /tmp/common.tar.gz &> /dev/null
