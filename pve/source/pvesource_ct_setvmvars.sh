@@ -518,6 +518,7 @@ if [ $ES_AUTO = 1 ]; then
 
   # Set PVE CT Bind Mount Function
   # PVE default scan
+  touch pvesm_input_list # create a empty input file 
   if [ $(cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none' | wc -l) -ge 1 ]; then
     cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none' > pvesm_required_list_input
     if [ -f pvesm_input_list_default_var01 ]; then rm pvesm_input_list_default_var01; fi
