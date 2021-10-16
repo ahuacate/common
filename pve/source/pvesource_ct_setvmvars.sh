@@ -641,7 +641,7 @@ if [ $ES_AUTO = 1 ]; then
             msg "After you have created the above PVE storage mounts run this Easy Script installation again. Aborting in 2 seconds..."
             echo
             sleep 2
-            cleanup
+            trap cleanup EXIT
             exit 1
           else
             cp pvesm_input_list_var02 pvesm_input_list
