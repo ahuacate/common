@@ -655,7 +655,7 @@ if [ $ES_AUTO = 1 ]; then
         msg "Good choice. Fix the issue and try again..."
         echo
         sleep 2
-        cleanup
+        trap cleanup EXIT
         exit 1
       fi
     fi
