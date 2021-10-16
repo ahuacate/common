@@ -8,10 +8,10 @@
 cd /tmp
 
 #---- Clean old copies
-rm -R /tmp/common &> /dev/null
-rm -R /tmp/${GIT_REPO} &> /dev/null
-rm /tmp/common.tar.gz &> /dev/null
-rm /tmp/${GIT_REPO}.tar.gz &> /dev/null
+#rm -R /tmp/common &> /dev/null
+#rm -R /tmp/${GIT_REPO} &> /dev/null
+#rm /tmp/common.tar.gz &> /dev/null
+#rm /tmp/${GIT_REPO}.tar.gz &> /dev/null
 
 #---- Developer Options
 if [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ]; then
