@@ -30,7 +30,9 @@ section "Create ${OSTYPE^} CT"
 # Download latest PVE CT OS template
 pveam update >/dev/null
 mapfile -t TEMPLATES < <(pveam available -section system | sed -n "s/.*\($OSTYPE-$OSVERSION.*\)/\1/p" | sort -t - -k 2 -V)
-TEMPLATE="${TEMPLATES[-1]}"
+if [ $(printf '%s\n' "${vmid_LIST[@]}" | wc -l) > 1 ]; then
+  TEMPLATE="${TEMPLATES[-1]}"
+fi
 if [ ! -f /var/lib/vz/template/cache/${TEMPLATE} ]; then
   msg "Updating Proxmox '${OSTYPE^} $OSVERSION' CT/LXC template (be patient, might take a while)..."
   pveam download local ${TEMPLATE} 2>&1
