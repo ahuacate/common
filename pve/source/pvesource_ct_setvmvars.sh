@@ -531,135 +531,135 @@ if [ $ES_AUTO = 1 ]; then
         #   echo
         fi
     done < pvesm_required_list_input
-  fi
-  if [[ ! $(comm -23 <(sort -u <<< $(cat pvesm_required_list | grep -vi 'none' | awk -F'|' '{print $1}')) <(sort -u <<< $(cat pvesm_input_list_default_var01 | awk '{print $2}' | sed 's/\/mnt\///'))) ]]; then
-    msg "Performing PVE host storage mount scan..."
-    PVESM_INPUT=0
-    cp pvesm_input_list_default_var01 pvesm_input_list
-    msg "Easy Script has detected a default set of PVE storage folders. Proceeding with the following CT bind mounts:"
-    echo
-    i=1
-    while read -r var1 var2; do
-      msg "    $i) Auto assigned and set: $var1 ${WHITE}--->${NC} $var2"
-      ((i=i+1))
-    done < pvesm_input_list_default_var01
-    echo
-  else
-    PVESM_INPUT=1
-  fi
-  if [ $PVESM_INPUT = 1 ]; then
-    # PVE host scan
-    msg "Performing PVE host storage mount scan..."
-    msg "Easy Script is scanning your PVE host. Your PVE storage mounts are listed below:"
-    echo
-    i=1
-    while read -r line; do
-      if [[ $(pvesm status | grep -v 'local' | grep -wEi "^.*\-.*\-$line") ]]; then
-        msg "    $i) Auto assigned and set: $(pvesm status | grep -v 'local' | grep -wE "^.*\-.*\-$line" | awk '{print $1}') ${WHITE}--->${NC} /mnt/$line"
-        pvesm status | grep -v 'local' | grep -wEi "^.*\-.*\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_var01
-      else
-        msg "    $i) PVE storage mount '$line' is: ${RED}missing${NC}"
-      fi
-      ((i=i+1))
-    done < pvesm_required_list_input
-    echo
-    if [[ ! $(comm -23 <(sort -u < pvesm_required_list_input) <(sort -u <<< $(cat pvesm_input_list_var01 | awk '{print $2}' | sed 's/\/mnt\///'))) ]]; then
-      read -p "Confirm if the PVE storage mount assignments are correct [y/n]?: " -n 1 -r
+    if [[ ! $(comm -23 <(sort -u <<< $(cat pvesm_required_list | grep -vi 'none' | awk -F'|' '{print $1}')) <(sort -u <<< $(cat pvesm_input_list_default_var01 | awk '{print $2}' | sed 's/\/mnt\///'))) ]]; then
+      msg "Performing PVE host storage mount scan..."
+      PVESM_INPUT=0
+      cp pvesm_input_list_default_var01 pvesm_input_list
+      msg "Easy Script has detected a default set of PVE storage folders. Proceeding with the following CT bind mounts:"
       echo
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
-        cp pvesm_input_list_var01 pvesm_input_list
-        PVESM_MANUAL_ASSIGN=1
-        info "${CT_HOSTNAME^} CT storage mount points are set."
-        echo
-      else
-        PVESM_MANUAL_ASSIGN=0
-      fi
+      i=1
+      while read -r var1 var2; do
+        msg "    $i) Auto assigned and set: $var1 ${WHITE}--->${NC} $var2"
+        ((i=i+1))
+      done < pvesm_input_list_default_var01
+      echo
+    else
+      PVESM_INPUT=1
     fi
-    if [[ $(comm -23 <(sort -u < pvesm_required_list_input) <(sort -u <<< $(cat pvesm_input_list_var01 | awk '{print $2}' | sed 's/\/mnt\///'))) ]] || [ $PVESM_MANUAL_ASSIGN = 0 ]; then
-      msg "We cannot identify and assign all of the required PVE storage mounts. You have two options:\n\n1)  Proceed and manually assign a media type for each available PVESM storage mount. This works when your PVE host storage mounts exist but they have non-standard label names causing our Easy Script to fail. Note - you MUST have all $(cat pvesm_required_list | wc -l)x media types available $(cat pvesm_required_list_input | tr '\n' ',' | sed 's/,$//' | sed -e 's/^/(/g' -e 's/$/)/g') on your PVE host to create a $SECTION_HEAD CT.\n\n2)  Abort this installation by entering 'n' at the next prompt.\n\nIf you choose to abort then use the PVE Web Management interface storage manager setup tool to create the missing PVE storage mounts: ${WHITE}https://$(hostname -i):8006${NC}"
+    if [ $PVESM_INPUT = 1 ]; then
+      # PVE host scan
+      msg "Performing PVE host storage mount scan..."
+      msg "Easy Script is scanning your PVE host. Your PVE storage mounts are listed below:"
       echo
-      read -p "Manually assign a media type to your PVE storage mounts [y/n]?: " -n 1 -r
+      i=1
+      while read -r line; do
+        if [[ $(pvesm status | grep -v 'local' | grep -wEi "^.*\-.*\-$line") ]]; then
+          msg "    $i) Auto assigned and set: $(pvesm status | grep -v 'local' | grep -wE "^.*\-.*\-$line" | awk '{print $1}') ${WHITE}--->${NC} /mnt/$line"
+          pvesm status | grep -v 'local' | grep -wEi "^.*\-.*\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_var01
+        else
+          msg "    $i) PVE storage mount '$line' is: ${RED}missing${NC}"
+        fi
+        ((i=i+1))
+      done < pvesm_required_list_input
       echo
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
+      if [[ ! $(comm -23 <(sort -u < pvesm_required_list_input) <(sort -u <<< $(cat pvesm_input_list_var01 | awk '{print $2}' | sed 's/\/mnt\///'))) ]]; then
+        read -p "Confirm if the PVE storage mount assignments are correct [y/n]?: " -n 1 -r
         echo
-        # Manual Assign PVE host storage mounts
-        mapfile -t options <<< $(cat pvesm_required_list | grep -v 'none' | sed -e '1i\'"$PVESM_NONE"'' | sed -e '$a\'"$PVESM_EXIT"'' | awk -F'|' '{print "\033[1;33m"toupper($1)"\033[0m","-",$2}')
-        while IFS= read -r line
-        do
-          PS3="Select the media type for PVE storage mount ${WHITE}$line${NC} (entering numeric) : "
-          select media_type in "${options[@]}"; do
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+          cp pvesm_input_list_var01 pvesm_input_list
+          PVESM_MANUAL_ASSIGN=1
+          info "${CT_HOSTNAME^} CT storage mount points are set."
           echo
-          if [[ "$(echo $media_type| awk '{print $1}' | tr [:upper:] [:lower:])" == *"$(echo $PVESM_EXIT | awk -F'|' '{print $1}' | tr [:upper:] [:lower:])"* ]]; then
-            info "You have chosen to finish and exit this task. No more mount points to add."
-            read -p "Are you sure: [y/n]?: " -n 1 -r
+        else
+          PVESM_MANUAL_ASSIGN=0
+        fi
+      fi
+      if [[ $(comm -23 <(sort -u < pvesm_required_list_input) <(sort -u <<< $(cat pvesm_input_list_var01 | awk '{print $2}' | sed 's/\/mnt\///'))) ]] || [ $PVESM_MANUAL_ASSIGN = 0 ]; then
+        msg "We cannot identify and assign all of the required PVE storage mounts. You have two options:\n\n1)  Proceed and manually assign a media type for each available PVESM storage mount. This works when your PVE host storage mounts exist but they have non-standard label names causing our Easy Script to fail. Note - you MUST have all $(cat pvesm_required_list | wc -l)x media types available $(cat pvesm_required_list_input | tr '\n' ',' | sed 's/,$//' | sed -e 's/^/(/g' -e 's/$/)/g') on your PVE host to create a $SECTION_HEAD CT.\n\n2)  Abort this installation by entering 'n' at the next prompt.\n\nIf you choose to abort then use the PVE Web Management interface storage manager setup tool to create the missing PVE storage mounts: ${WHITE}https://$(hostname -i):8006${NC}"
+        echo
+        read -p "Manually assign a media type to your PVE storage mounts [y/n]?: " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+          echo
+          # Manual Assign PVE host storage mounts
+          mapfile -t options <<< $(cat pvesm_required_list | grep -v 'none' | sed -e '1i\'"$PVESM_NONE"'' | sed -e '$a\'"$PVESM_EXIT"'' | awk -F'|' '{print "\033[1;33m"toupper($1)"\033[0m","-",$2}')
+          while IFS= read -r line
+          do
+            PS3="Select the media type for PVE storage mount ${WHITE}$line${NC} (entering numeric) : "
+            select media_type in "${options[@]}"; do
+            echo
+            if [[ "$(echo $media_type| awk '{print $1}' | tr [:upper:] [:lower:])" == *"$(echo $PVESM_EXIT | awk -F'|' '{print $1}' | tr [:upper:] [:lower:])"* ]]; then
+              info "You have chosen to finish and exit this task. No more mount points to add."
+              read -p "Are you sure: [y/n]?: " -n 1 -r
+              echo
+              if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo
+                break
+              fi
+            else
+              msg "You have assigned and set: '$line' ${WHITE}--->${NC} '$(echo ${media_type,,} | awk -F' - ' '{print $1}' | sed 's/\x1b\[[^\x1b]*m//g')'"
+            fi
+            read -p "Confirm your setting is correct: [y/n]?: " -n 1 -r
             echo
             if [[ $REPLY =~ ^[Yy]$ ]]; then
+              echo $line /mnt/$(echo ${media_type,,} | awk '{print $1}' | sed "s/\x1B\[\([0-9]\{1,2\}\(;[0-9]\{1,2\}\)\?\)\?[mGK]//g") >> pvesm_input_list_var02
               echo
               break
+            elif [[ $REPLY =~ ^[Nn]$ ]]; then
+              echo
+              msg "No problem. Try again..."
+              sleep 2
+              echo
             fi
-          else
-            msg "You have assigned and set: '$line' ${WHITE}--->${NC} '$(echo ${media_type,,} | awk -F' - ' '{print $1}' | sed 's/\x1b\[[^\x1b]*m//g')'"
-          fi
-          read -p "Confirm your setting is correct: [y/n]?: " -n 1 -r
-          echo
-          if [[ $REPLY =~ ^[Yy]$ ]]; then
-            echo $line /mnt/$(echo ${media_type,,} | awk '{print $1}' | sed "s/\x1B\[\([0-9]\{1,2\}\(;[0-9]\{1,2\}\)\?\)\?[mGK]//g") >> pvesm_input_list_var02
+            done < /dev/tty
+            if [[ "$(echo $media_type | awk '{print $1}' | tr [:upper:] [:lower:])" == *"$(echo $PVESM_EXIT | awk -F'|' '{print $1}' | tr [:upper:] [:lower:])"* ]]; then
+              break
+            fi
+          done <<< $(pvesm status | grep -v 'local' | awk 'NR>1 {print $1}')
+          # Remove none
+          sed -i "/$(echo $PVESM_NONE | awk -F'|' '{print $1}')/d" pvesm_input_list_var02
+          # Check if manual inputs are correct
+          if [[ $(comm -23 <(sort -u < pvesm_required_list_input) <(sort -u <<< $(cat pvesm_input_list_var02 | awk '{print $2}' | sed 's/\/mnt\///'))) ]]; then
+            # List missing PVE Storage mounts
+            msg "There are problems with your input:"
             echo
-            break
-          elif [[ $REPLY =~ ^[Nn]$ ]]; then
+            i=1
+            while IFS= read -r line; do
+              msg "     $i) PVE storage mount '$line' is: ${RED}missing${NC}"
+              ((i=i+1))
+            done <<< $(comm -23 <(sort -u < pvesm_required_list_input) <(sort -u <<< $(cat pvesm_input_list_var02 | awk '{print $2}' | sed 's/\/mnt\///')))
             echo
-            msg "No problem. Try again..."
+            msg "The PVE host is missing some required storage mounts. We cannot continue. Go to your Proxmox Web Management interface storage manager (${WHITE}https://$(hostname -i):8006${NC}) and create all of the following PVE storage mounts (be smart, label them exactly as shown below - replacing NAS appliance identifier, nas-0X, with for example nas-01):"
+            echo
+            i=1
+            while IFS= read -r line; do
+              msg "    $i) 'nas-0X-$(echo $line | awk -F'|' '{print $1}')' <---  $(echo $line | awk -F'|' '{print $2}')"
+              ((i=i+1))
+            done < pvesm_required_list_input
+            echo
+            msg "After you have created the above PVE storage mounts run this Easy Script installation again. Aborting in 2 seconds..."
+            echo
             sleep 2
+            cleanup
+            exit 1
+          else
+            cp pvesm_input_list_var02 pvesm_input_list
+            msg "Proceeding with the following CT bind mounts:"
+            echo
+            i=1
+            while read -r var1 var2; do
+              msg "    $i) Assigned and set: $var1 ${WHITE}--->${NC} $var2"
+              ((i=i+1))
+            done < pvesm_input_list
             echo
           fi
-          done < /dev/tty
-          if [[ "$(echo $media_type | awk '{print $1}' | tr [:upper:] [:lower:])" == *"$(echo $PVESM_EXIT | awk -F'|' '{print $1}' | tr [:upper:] [:lower:])"* ]]; then
-            break
-          fi
-        done <<< $(pvesm status | grep -v 'local' | awk 'NR>1 {print $1}')
-        # Remove none
-        sed -i "/$(echo $PVESM_NONE | awk -F'|' '{print $1}')/d" pvesm_input_list_var02
-        # Check if manual inputs are correct
-        if [[ $(comm -23 <(sort -u < pvesm_required_list_input) <(sort -u <<< $(cat pvesm_input_list_var02 | awk '{print $2}' | sed 's/\/mnt\///'))) ]]; then
-          # List missing PVE Storage mounts
-          msg "There are problems with your input:"
-          echo
-          i=1
-          while IFS= read -r line; do
-            msg "     $i) PVE storage mount '$line' is: ${RED}missing${NC}"
-            ((i=i+1))
-          done <<< $(comm -23 <(sort -u < pvesm_required_list_input) <(sort -u <<< $(cat pvesm_input_list_var02 | awk '{print $2}' | sed 's/\/mnt\///')))
-          echo
-          msg "The PVE host is missing some required storage mounts. We cannot continue. Go to your Proxmox Web Management interface storage manager (${WHITE}https://$(hostname -i):8006${NC}) and create all of the following PVE storage mounts (be smart, label them exactly as shown below - replacing NAS appliance identifier, nas-0X, with for example nas-01):"
-          echo
-          i=1
-          while IFS= read -r line; do
-            msg "    $i) 'nas-0X-$(echo $line | awk -F'|' '{print $1}')' <---  $(echo $line | awk -F'|' '{print $2}')"
-            ((i=i+1))
-          done < pvesm_required_list_input
-          echo
-          msg "After you have created the above PVE storage mounts run this Easy Script installation again. Aborting in 2 seconds..."
+        else
+          msg "Good choice. Fix the issue and try again..."
           echo
           sleep 2
-          cleanup
+          trap cleanup EXIT
           exit 1
-        else
-          cp pvesm_input_list_var02 pvesm_input_list
-          msg "Proceeding with the following CT bind mounts:"
-          echo
-          i=1
-          while read -r var1 var2; do
-            msg "    $i) Assigned and set: $var1 ${WHITE}--->${NC} $var2"
-            ((i=i+1))
-          done < pvesm_input_list
-          echo
         fi
-      else
-        msg "Good choice. Fix the issue and try again..."
-        echo
-        sleep 2
-        trap cleanup EXIT
-        exit 1
       fi
     fi
   fi
