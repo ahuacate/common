@@ -28,12 +28,12 @@ fi
 #---- Download Github repo
 if [ ! -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ]; then
   # Download packages
-  wget -qL - ${GIT_SERVER}/${GIT_USER}/${GIT_REPO}/archive/${GIT_BRANCH}.tar.gz -O /tmp/${GIT_REPO}.tar.gz
+  wget -qL ${GIT_SERVER}/${GIT_USER}/${GIT_REPO}/archive/${GIT_BRANCH}.tar.gz -O /tmp/${GIT_REPO}.tar.gz
   tar -zxf /tmp/${GIT_REPO}.tar.gz -C /tmp
   mv /tmp/${GIT_REPO}-${GIT_BRANCH} /tmp/${GIT_REPO}
   # Download Git common
   if [ ${GIT_COMMON} = 0 ]; then
-    wget -qL - ${GIT_SERVER}/${GIT_USER}/common/archive/${GIT_BRANCH}.tar.gz -O /tmp/common.tar.gz
+    wget -qL ${GIT_SERVER}/${GIT_USER}/common/archive/${GIT_BRANCH}.tar.gz -O /tmp/common.tar.gz
     tar -zxf /tmp/common.tar.gz -C /tmp
     mv /tmp/common-master /tmp/common
   fi
