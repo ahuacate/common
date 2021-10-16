@@ -517,18 +517,20 @@ if [ $ES_AUTO = 1 ]; then
 
   # Set PVE CT Bind Mount Function
   # PVE default scan
-  cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none' > pvesm_required_list_input
-  if [ -f pvesm_input_list_default_var01 ]; then rm pvesm_input_list_default_var01; fi
-  while read -r line; do
-      #echo $(pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/")
-      # pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_default_var01
-      if [[ $(pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line") ]]; then
-        pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_default_var01
-      # else
-      #   warn "Cannot locate PVESM host storage mount : ${YELLOW}"$FUNC_NAS_HOSTNAME\-[0-9]\-$line"${NC}"
-      #   echo
-      fi
-  done < pvesm_required_list_input
+  if [ $(cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none' | wc -l) -ge 1 ]; then
+    cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none' > pvesm_required_list_input
+    if [ -f pvesm_input_list_default_var01 ]; then rm pvesm_input_list_default_var01; fi
+    while read -r line; do
+        #echo $(pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/")
+        # pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_default_var01
+        if [[ $(pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line") ]]; then
+          pvesm status | grep -v 'local' | grep -wEi "^$FUNC_NAS_HOSTNAME\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/ \/mnt\/$line/" >> pvesm_input_list_default_var01
+        # else
+        #   warn "Cannot locate PVESM host storage mount : ${YELLOW}"$FUNC_NAS_HOSTNAME\-[0-9]\-$line"${NC}"
+        #   echo
+        fi
+    done < pvesm_required_list_input
+  fi
   if [[ ! $(comm -23 <(sort -u <<< $(cat pvesm_required_list | grep -vi 'none' | awk -F'|' '{print $1}')) <(sort -u <<< $(cat pvesm_input_list_default_var01 | awk '{print $2}' | sed 's/\/mnt\///'))) ]]; then
     msg "Performing PVE host storage mount scan..."
     PVESM_INPUT=0
