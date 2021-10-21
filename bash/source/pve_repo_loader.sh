@@ -4,6 +4,18 @@
 # Description:  Repo loader for PVE installer
 # ----------------------------------------------------------------------------------
 
+#---- Dependencies -----------------------------------------------------------------
+
+# Installer cleanup
+function installer_cleanup () {
+rm -R ${REPO_TEMP}/common &> /dev/null
+rm -R ${REPO_TEMP}/${GIT_REPO} &> /dev/null
+rm ${REPO_TEMP}/common.tar.gz &> /dev/null
+rm ${REPO_TEMP}/${GIT_REPO}.tar.gz &> /dev/null
+}
+
+#---- Body -------------------------------------------------------------------------
+
 #---- Clean old copies
 rm -R ${REPO_TEMP}/common &> /dev/null
 rm -R ${REPO_TEMP}/${GIT_REPO} &> /dev/null
