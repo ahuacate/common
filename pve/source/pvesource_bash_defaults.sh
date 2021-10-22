@@ -114,7 +114,7 @@ function make_userpwd() {
   fi
   msg "Creating a 13 character password..."
   USER_PWD=$(makepasswd --chars 13)
-  info "If you have configured Postfix your credentials will be emailed to\nyour administrator. Your password is set : ${YELLOW}${USER_PWD}${NC}"
+  info "Your password is set : ${YELLOW}${USER_PWD}${NC}"
   echo
 }
 
