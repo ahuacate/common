@@ -39,7 +39,7 @@ In the next step we will display all available USB devices connected to your PVE
 In the next step choose $(hostname) USB device ID to passthrough to the PVE CT."
 echo
 while true; do
-  read -p "Do you want to configure $(hostname) USB pass through to your PVE CT [y/n]? " -n 1 -r YN
+  read -p "Do you want to configure $(hostname) USB pass (Not Recommended) [y/n]? " -n 1 -r YN
   echo
   case $YN in
     [Yy]*)
