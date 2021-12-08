@@ -42,7 +42,7 @@ while true; do
       ;;
     [Nn]*)
       INSTALL_PROFTPD=1 >/dev/null
-      msg "You have chosen not to proceed. Aborting. Bye..."
+      msg "You have chosen not to proceed. Moving on..."
       echo
       break
       ;;
