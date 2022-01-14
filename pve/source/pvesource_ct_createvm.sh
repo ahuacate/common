@@ -27,15 +27,50 @@ function pct_list() {
 
 section "Create ${OSTYPE^} CT"
 
-# Download latest PVE CT OS template
+# Update PVE CT OS template list
 pveam update >/dev/null
+
+# Check for latest CT OS template release file
+unset TEMPLATES
 mapfile -t TEMPLATES < <(pveam available -section system | sed -n "s/.*\($OSTYPE-$OSVERSION.*\)/\1/p" | sort -t - -k 2 -V)
-if [ $(printf '%s\n' "${vmid_LIST[@]}" | wc -l) > 1 ]; then
-  TEMPLATE="${TEMPLATES[-1]}"
+TEMPLATE="${TEMPLATES[-1]}"
+
+# Set Template storage location
+unset TMPL_STORAGE_LIST
+unset TMPL_STORAGE
+TMPL_STORAGE_LIST+=( $(pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}') )
+if [ ${#TMPL_STORAGE_LIST[@]} -eq 0 ]; then
+  warn "A problem has occurred:\n  - Cannot determine PVE host CT template storage location (i.e vztmpl content ).\n  - Cannot proceed until the User creates a template location.\nAborting installation in 3 seconds..."
+  echo
+  exit 0
+elif [ ${#TMPL_STORAGE_LIST[@]} -eq 1 ]; then
+  TMPL_STORAGE=${TMPL_STORAGE_LIST[0]}
+  info "Template location is set: ${YELLOW}${TMPL_STORAGE}${NC}"
+  echo
+else
+  echo
+  msg "More than one PVE template location has been detected. The User must make a selection."
+  PS3="Which template location would you like to use (entering numeric) ?"
+  select s in "${TMPL_STORAGE_LIST[@]}"; do
+    case $s in
+      $TMPL_STORAGE_LIST)
+        TMPL_STORAGE=$s
+        echo
+        break
+        ;;
+      *) warn "Invalid entry. Try again.." >&2
+    esac
+  done
+  info "Template location is set: ${YELLOW}${TMPL_STORAGE}${NC}"
+  echo
 fi
-if [ ! -f /var/lib/vz/template/cache/${TEMPLATE} ]; then
+
+# Download CT template
+if [ -f "/var/lib/vz/template/cache/${TEMPLATE}" ] || [ -f "/var/lib/pve/${TMPL_STORAGE}/template/cache/${TEMPLATE}" ]; then
+  msg "Proxmox '${OSTYPE^} $OSVERSION' CT/LXC template exists..."
+else
   msg "Updating Proxmox '${OSTYPE^} $OSVERSION' CT/LXC template (be patient, might take a while)..."
-  pveam download local ${TEMPLATE} 2>&1
+  pveam download ${TMPL_STORAGE} ${TEMPLATE} 2>&1
   if [ $? -ne 0 ]; then
     warn "A problem occurred while downloading the LXC template version: $OSTYPE-$OSVERSION\nCheck your internet connection and try again. Aborting installation in 3 seconds..."
     sleep 2
@@ -45,7 +80,7 @@ fi
 
 # Set Variables
 ARCH=$(dpkg --print-architecture)
-TEMPLATE_STRING="local:vztmpl/${TEMPLATE}"
+TEMPLATE_STRING="${TMPL_STORAGE}:vztmpl/${TEMPLATE}"
 STORAGE_LIST=( $(pvesm status -content rootdir | awk 'NR>1 {print $1}') )
 
 if [ ${#STORAGE_LIST[@]} -eq 0 ]; then

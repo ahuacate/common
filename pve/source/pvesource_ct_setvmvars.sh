@@ -763,6 +763,7 @@ if [ $ES_AUTO = 1 ]; then
                 echo
                 sleep 1
                 trap cleanup EXIT
+                exit 1
               else
                 cp pvesm_input_list_var02 pvesm_input_list
                 msg "Proceeding with the following CT bind mounts:"
@@ -781,7 +782,7 @@ if [ $ES_AUTO = 1 ]; then
               echo
               sleep 1
               trap cleanup EXIT
-              break
+              exit 1
               ;;
             *)
               warn "Error! Entry must be 'y' or 'n'. Try again..."

@@ -5,8 +5,11 @@
 # ----------------------------------------------------------------------------------
 
 #---- Bash command to run script ---------------------------------------------------
+#---- Source Github
+# bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/common/master/pve/tool/pve_tester888_ct_ubuntu.sh)"
 
-#bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/common/master/pve/tool/pve_tester888_ct_ubuntu.sh)"
+#---- Source local Git
+# /mnt/pve/nas-01-git/ahuacate/common/pve/tool/pve_tester888_ct_ubuntu.sh
 
 #---- Source -----------------------------------------------------------------------
 
@@ -170,20 +173,20 @@ if [ $CT_NEW == 0 ] && [ "$(pct_list | awk -F',' '{ print $1 }' | grep -w $CTID 
   info "Default user created: ${YELLOW}private${NC} of groups medialab, homelab and privatelab"
   echo
 
-  #---- Webmin
-  section "Installing Webmin."
-  # Install Webmin Prerequisites
-  msg "Installing Webmin prerequisites (be patient, might take a while)..."
+  # #---- Webmin
+  # section "Installing Webmin."
+  # # Install Webmin Prerequisites
+  # msg "Installing Webmin prerequisites (be patient, might take a while)..."
 
-  pct exec $CTID -- bash -c "echo 'deb http://download.webmin.com/download/repository sarge contrib' | sudo tee -a /etc/apt/sources.list"
-  pct exec $CTID -- bash -c 'wget -qL http://www.webmin.com/jcameron-key.asc'
-  pct exec $CTID -- bash -c 'apt-key add jcameron-key.asc 2>/dev/null'
-  pct exec $CTID -- apt-get update
-  pct exec $CTID -- apt-get install -y webmin
+  # pct exec $CTID -- bash -c "echo 'deb http://download.webmin.com/download/repository sarge contrib' | sudo tee -a /etc/apt/sources.list"
+  # pct exec $CTID -- bash -c 'wget -qL http://www.webmin.com/jcameron-key.asc'
+  # pct exec $CTID -- bash -c 'apt-key add jcameron-key.asc 2>/dev/null'
+  # pct exec $CTID -- apt-get update
+  # pct exec $CTID -- apt-get install -y webmin
 
-  #---- Finish Up
-  msg "Creating snapshot to local-zfs..."
-  vzdump 888 --dumpdir /var/lib/vz/dump/ --mode snapshot --compress zstd
+  # #---- Finish Up
+  # msg "Creating snapshot to local-zfs..."
+  # vzdump 888 --dumpdir /var/lib/vz/dump/ --mode snapshot --compress zstd
 fi
 
 #---- Finish Line ------------------------------------------------------------------
