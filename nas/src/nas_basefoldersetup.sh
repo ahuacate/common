@@ -17,15 +17,8 @@ if [ ! $(chattr --help &> /dev/null; echo $?) == 1 ]; then
   apt-get -y install e2fsprogs > /dev/null
 fi
 
-# Copy source files
-if [ -f ${DIR}/source/pve_nas_basefolderlist ]; then
-  cp ${DIR}/source/pve_nas_basefolderlist .
-  cp ${DIR}/source/pve_nas_basefoldersubfolderlist .
-fi
-
 #---- Static Variables -------------------------------------------------------------
 #---- Other Variables --------------------------------------------------------------
-
 
 # Set DIR Schema ( PVE host or CT mkdir )
 if [ $(uname -a | grep -Ei --color=never '.*linux*|.*pve*' &> /dev/null; echo $?) == 0 ]; then
