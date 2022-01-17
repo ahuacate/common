@@ -518,7 +518,7 @@ function indent2() { sed 's/^/  /'; } # Use with pipe echo 'sample' | indent2
 #load_module aufs
 #load_module overlay
 
-#---- IP Tools
+#---- IP validate Tools
 # IP validate
 function valid_ip() {
   local  ip=$1
