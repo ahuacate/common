@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------------------------------
-# Filename:     pve_nas_basefoldersetup.sh
+# Filename:     nas_basefoldersetup.sh
 # Description:  Source script for creating NAS base and sub folders
 # ----------------------------------------------------------------------------------
 

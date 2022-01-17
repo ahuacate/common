@@ -33,7 +33,7 @@ ${DIR_SCHEMA}/books/ebooks,65605,0750,65605:rwx,65607:rwx,65606:000,65608:r-x
 ${DIR_SCHEMA}/books/magazines,65605,0750,65605:rwx,65607:rwx,65606:000,65608:r-x
 
 # Proxmox Folders
-${DIR_SCHEMA}/proxmox/backup,root 1750,65605:rwx,65607:rwx,65606:rwx,65608:000
+${DIR_SCHEMA}/proxmox/backup,root,1750,65605:rwx,65607:rwx,65606:rwx,65608:000
 
 # Public Folders
 ${DIR_SCHEMA}/public/autoadd,65605,0750,65605:r--,65607:r--,65606:000,65608:r--

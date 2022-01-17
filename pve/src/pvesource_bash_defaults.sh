@@ -323,7 +323,11 @@ function multiselect () {
     fi
   done
   echo "User has selected:"
-  printf '    %s\n' ${YELLOW}"${PRINT_RESULTS[@]}"${NC}
+  if [[ -z ${RESULTS} ]]; then
+    echo "  ${YELLOW}None. The User has selected nothing.${NC}"
+  else
+    printf '    %s\n' ${YELLOW}"${PRINT_RESULTS[@]}"${NC}
+  fi
   echo
 }
 # Multiple item selection with confirmation loop
@@ -513,6 +517,23 @@ function indent2() { sed 's/^/  /'; } # Use with pipe echo 'sample' | indent2
 #----  Detect modules and automatically load at boot
 #load_module aufs
 #load_module overlay
+
+#---- IP Tools
+# IP validate
+function valid_ip() {
+  local  ip=$1
+  local  stat=1
+  if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+      OIFS=$IFS
+      IFS='.'
+      ip=($ip)
+      IFS=$OIFS
+      [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+          && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+      stat=$?
+  fi
+  return $stat
+}
 
 #---- Terminal settings
 RED=$'\033[0;31m'
