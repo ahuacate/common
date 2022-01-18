@@ -96,7 +96,7 @@ if [ ${INSTALL_PROFTPD} == 0 ]; then
 fi
 
 #---- Finish Line ------------------------------------------------------------------
-if [ ${INSTALL_PROFTPD} == 0 ]; then
+if [ ! ${INSTALL_PROFTPD} == 1 ]; then
   section "Completion Status."
 
   info "${WHITE}Success.${NC} ProFTPd has been installed and configured."
