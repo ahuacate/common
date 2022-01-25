@@ -474,6 +474,32 @@ function singleselect () {
   printf '    %s\n' ${YELLOW}"${PRINT_RESULTS[@]}"${NC}
   echo
 }
+# Single item selection with confirmation loop
+function singleselect_confirm () {
+  # Modded version of this persons work: https://stackoverflow.com/a/54261882/317605 (by https://stackoverflow.com/users/8207842/dols3m)
+  # To run: singleselect_confirm SELECTED "$OPTIONS_STRING"
+  # To get output results: printf '%s\n' "${RESULTS[@]}"
+  while true; do
+    singleselect "$1" "$2"
+    read -p "User accepts the final selection: [y/n]?" -n 1 -r YN
+    echo
+    case $YN in
+      [Yy]*)
+        info "Selection status: ${YELLOW}accepted${NC}"
+        echo
+        break
+        ;;
+      [Nn]*)
+        info "No problem. Try again..."
+        echo
+        ;;
+      *)
+        warn "Error! Entry must be 'y' or 'n'. Try again..."
+        echo
+        ;;
+    esac
+  done
+}
 
 #---- Bash Messaging Functions
 if [ $(dpkg -s boxes > /dev/null 2>&1; echo $?) = 1 ]; then
