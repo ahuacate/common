@@ -538,7 +538,7 @@ function indent() {
     eval "$@" |& sed "s/^/\t/"
     return "$PIPESTATUS"
 }
-function indent2() { sed 's/^/  /'; } # Use with pipe echo 'sample' | indent2
+function indent2() { sed "s/^/\t/"; } # Use with pipe echo 'sample' | indent2
 
 #----  Detect modules and automatically load at boot
 #load_module aufs
