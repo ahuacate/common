@@ -532,13 +532,15 @@ function section() {
   echo
 }
 function msg_box () {
-  echo -e "$1" | sed 's/^ *//g' | fmt -w 80 -s | boxes -d stone -p a1l3 -s 84
+  echo -e "$1" | fmt -w 80 -s | boxes -d stone -p a1l3 -s 84
 }
 function indent() {
     eval "$@" |& sed "s/^/\t/"
     return "$PIPESTATUS"
 }
-function indent2() { sed "s/^/\t/"; } # Use with pipe echo 'sample' | indent2
+function indent2() {
+  sed "s/^/  /"
+} # Use with pipe echo 'sample' | indent2
 
 #----  Detect modules and automatically load at boot
 #load_module aufs
