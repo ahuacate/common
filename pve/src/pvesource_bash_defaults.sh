@@ -324,7 +324,7 @@ function multiselect () {
   done
   echo "User has selected:"
   if [[ -z ${RESULTS} ]]; then
-    echo "  ${YELLOW}None. The User has selected nothing.${NC}"
+    echo "  ${YELLOW}None. The User has selected nothing.\n  (Remember to use the 'space bar' to select or deselect a option.)${NC}"
   else
     printf '    %s\n' ${YELLOW}"${PRINT_RESULTS[@]}"${NC}
   fi
@@ -532,7 +532,7 @@ function section() {
   echo
 }
 function msg_box () {
-  echo -e "$1" | fmt -w 80 -s | boxes -d stone -p a1l3 -s 84
+  echo -e "$1" | sed 's/^ *//g' | fmt -w 80 -s | boxes -d stone -p a1l3 -s 84
 }
 function indent() {
     eval "$@" |& sed "s/^/\t/"
