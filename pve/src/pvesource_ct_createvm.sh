@@ -6,144 +6,209 @@
 
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
-
-# PCT list
-function pct_list() {
-  pct list | perl -lne '
-  if ($. == 1) {
-      @head = ( /(\S+\s*)/g );
-      pop @head;
-      $patt = "^";
-      $patt .= "(.{" . length($_) . "})" for @head;
-      $patt .= "(.*)\$";
-  }
-  print join ",", map {s/"/""/g; s/\s+$//; qq($_)} (/$patt/o);'
-}
-
 #---- Static Variables -------------------------------------------------------------
+
+# Regex for functions
+ip4_regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
+
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
-#---- Body -------------------------------------------------------------------------
 
-section "Create ${OSTYPE^} CT"
+# List of variables
+VAR_FILELIST=${COMMON_PVE_SRC}/pvesource_set_allvmvarslist.conf
+COMMON_PVE_SRC='/mnt/pve/nas-01-git/ahuacate/common/pve/src'
+#---- Functions --------------------------------------------------------------------
+
+# Read variable file list
+printsection() {
+  # Example: $(printSection SECTION_NAME | sed -n 's/^name//p/' < /etc/applications.conf)
+  section="$1"
+  found=false
+  # Run function
+  while read line
+  do
+    [[ $found == false && "$line" != "#----[${section}]" ]] && continue
+    [[ $found == true && "${line:0:6}" == '#----[' ]] && break
+    found=true
+    echo "$line" | sed '/^#/d' | sed -r '/^\s*$/d'
+  done
+}
+
+#---- Body -------------------------------------------------------------------------
+CT_OSVERSION=''
+CT_OSTYPE='ubuntu'
+
+#---- Prerequisites
+section "PVE CT Prerequisites"
 
 # Update PVE CT OS template list
 pveam update >/dev/null
 
-# Check for latest CT OS template release file
-unset TEMPLATES
-mapfile -t TEMPLATES < <(pveam available -section system | sed -n "s/.*\($OSTYPE-$OSVERSION.*\)/\1/p" | sort -t - -k 2 -V)
-TEMPLATE="${TEMPLATES[-1]}"
+# Check on latest CT OS version release template file
+unset os_LIST
+mapfile -t os_LIST < <(pveam available -section system | sed -n "s/.*\($CT_OSTYPE-$CT_OSVERSION.*\)/\1/p" | sort -t - -k 2 -V)
+OS_TMPL="${os_LIST[-1]}"
 
-# Set Template storage location
-unset TMPL_STORAGE_LIST
-unset TMPL_STORAGE
-TMPL_STORAGE_LIST+=( $(pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}') )
-if [ ${#TMPL_STORAGE_LIST[@]} -eq 0 ]; then
+# Set OS template storage location
+unset tmpl_dir_LIST
+tmpl_dir_LIST+=( "$(pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}')" )
+if [ ${#tmpl_dir_LIST[@]} -eq '0' ]; then
   warn "A problem has occurred:\n  - Cannot determine PVE host CT template storage location (i.e vztmpl content ).\n  - Cannot proceed until the User creates a template location.\nAborting installation in 3 seconds..."
   echo
   exit 0
-elif [ ${#TMPL_STORAGE_LIST[@]} -eq 1 ]; then
-  TMPL_STORAGE=${TMPL_STORAGE_LIST[0]}
-  info "Template location is set: ${YELLOW}${TMPL_STORAGE}${NC}"
-  echo
-else
-  echo
-  msg "More than one PVE template location has been detected. The User must make a selection."
-  PS3="Which template location would you like to use (entering numeric) ?"
-  select s in "${TMPL_STORAGE_LIST[@]}"; do
-    case $s in
-      $TMPL_STORAGE_LIST)
-        TMPL_STORAGE=$s
-        echo
-        break
-        ;;
-      *) warn "Invalid entry. Try again.." >&2
-    esac
-  done
-  info "Template location is set: ${YELLOW}${TMPL_STORAGE}${NC}"
+elif [ ${#tmpl_dir_LIST[@]} -eq '1' ]; then
+  OS_TMPL_DIR=${tmpl_dir_LIST[0]}
+elif [ ${#tmpl_dir_LIST[@]} -gt '1' ]; then
+  msg "More than one PVE template location has been detected.\n\n$(pvesm status -content vztmpl -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection..."
+  OPTIONS_VALUES_INPUT=$(printf '%s\n' "${tmpl_dir_LIST[@]}")
+  OPTIONS_LABELS_INPUT=$(printf '%s\n' "${tmpl_dir_LIST[@]}")
+  makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
+  singleselect SELECTED "$OPTIONS_STRING"
+  OS_TMPL_DIR=${RESULTS}
   echo
 fi
 
 # Download CT template
-if [ -f "/var/lib/vz/template/cache/${TEMPLATE}" ] || [ -f "/var/lib/pve/${TMPL_STORAGE}/template/cache/${TEMPLATE}" ]; then
-  msg "Proxmox '${OSTYPE^} $OSVERSION' CT/LXC template exists..."
-else
-  msg "Updating Proxmox '${OSTYPE^} $OSVERSION' CT/LXC template (be patient, might take a while)..."
-  pveam download ${TMPL_STORAGE} ${TEMPLATE} 2>&1
+if [ ! -f "/var/lib/vz/template/cache/${OS_TMPL}" ] || [ ! -f "/var/lib/pve/${OS_TMPL_DIR}/template/cache/${OS_TMPL}" ]; then
+  msg "Downloading latest release of '${CT_OSTYPE^} ${CT_OSVERSION}' CT/LXC OS template ( be patient, might take a while )..."
+  pveam download ${OS_TMPL_DIR} ${OS_TMPL} 2>&1
   if [ $? -ne 0 ]; then
-    warn "A problem occurred while downloading the LXC template version: $OSTYPE-$OSVERSION\nCheck your internet connection and try again. Aborting installation in 3 seconds..."
+    warn "A problem occurred while downloading the CT/LXC OS version: ${CT_OSTYPE}-${CT_OSVERSION}\nCheck your internet connection and try again. Aborting installation in 3 seconds..."
     sleep 2
     exit 0
   fi
 fi
 
-# Set Variables
-ARCH=$(dpkg --print-architecture)
-TEMPLATE_STRING="${TMPL_STORAGE}:vztmpl/${TEMPLATE}"
-STORAGE_LIST=( $(pvesm status -content rootdir | awk 'NR>1 {print $1}') )
-
-if [ ${#STORAGE_LIST[@]} -eq 0 ]; then
-  warn "A problem has occurred:\n  - To create a new '${OSTYPE^} $OSVERSION' Ct/LXC PVE requires a\n    valid storage location.\n  - Cannot proceed until the User creates a storage location (i.e local-zfs).\nAborting installation in 3 seconds..."
+# CT Install dir location
+rootdir_LIST=( $(pvesm status -content rootdir -enabled | awk 'NR>1 {print $1}') )
+if [ ${#rootdir_LIST[@]} -eq '0' ]; then
+  warn "A problem has occurred:\n  - To create a new '${CT_OSTYPE^} ${CT_OSVERSION}' CT/LXC PVE requires a\n    valid storage location for a CT/LXC root volume.\n  - Cannot proceed until the User creates a storage location (i.e local-zfs).\nAborting installation in 3 seconds..."
   echo
   exit 0
-elif [ ${#STORAGE_LIST[@]} -eq 1 ]; then
-  STORAGE=${STORAGE_LIST[0]}
-  info "Storage location is set: ${YELLOW}${STORAGE}${NC}"
-  echo
-else
-  echo
-  msg "More than one PVE storage location has been detected. The User must make a selection."
-  PS3="Which storage location would you like to use (entering numeric) ?"
-  select s in "${STORAGE_LIST[@]}"; do
-    case $s in
-      $STORAGE_LIST)
-        STORAGE=$s
-        echo
-        break
-        ;;
-      *) warn "Invalid entry. Try again.." >&2
-    esac
-  done
-  info "Storage location is set: ${YELLOW}${STORAGE}${NC}"
+elif [ ${#rootdir_LIST[@]} -eq '1' ]; then
+  VOLUME=${rootdir_LIST[0]}
+elif [ ${#rootdir_LIST[@]} -gt '1' ]; then
+  msg "More than one PVE storage location has been detected to use as a CT/LXC root volume.\n\n$(pvesm status -content rootdir -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection."
+  OPTIONS_VALUES_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
+  OPTIONS_LABELS_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
+  makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
+  singleselect SELECTED "$OPTIONS_STRING"
+  VOLUME=${RESULTS}
+  info "CT root volume is set: ${YELLOW}${VOLUME}${NC}"
   echo
 fi
 
 
-# Create CT
-msg "Creating ${CT_HOSTNAME^} CT..."
-pct create $CTID $TEMPLATE_STRING \
---arch $ARCH \
---cores $CT_CPU_CORES \
---hostname $CT_HOSTNAME \
---cpulimit 1 \
---cpuunits 1024 \
---memory $CT_RAM \
---nameserver $CT_DNS_SERVER \
---features fuse=${CT_FUSE},keyctl=${CT_KEYCTL},$(if [ ${CT_MOUNT} == 'cifs' ] || [ ${CT_MOUNT} == 'nfs' ] || [ ${CT_MOUNT} == 'nfs;cifs' ]|| [ ${CT_MOUNT} == 'cifs;nfs' ]; then echo "mount=${CT_MOUNT},"; fi)nesting=${CT_NESTING} \
---net0 name=eth0,bridge=vmbr0,$(if [ ${CT_TAG} -gt 1 ]; then echo "tag=$CT_TAG,"; fi)firewall=1,gw=$CT_GW,ip=$CT_IP/$CT_IP_SUBNET,type=veth \
---ostype $OSTYPE \
---rootfs $STORAGE:$CT_DISK_SIZE,acl=1 \
---swap $CT_SWAP \
---unprivileged $CT_UNPRIVILEGED \
---onboot 1 \
-$(if ! [[ ${CT_PASSWORD} =~ ^[0-9]+$ ]]; then echo "--password ${CT_PASSWORD}"; fi) \
---startup order=$CT_STARTUP >/dev/null
+#---- Validate & set architecture dependent variables
+ARCH=$(dpkg --print-architecture)
+TEMPLATE_STRING="${OS_TMPL_DIR}:vztmpl/${OS_TMPL}"
+
+
+#---- Create CT input arrays
+# general_LIST array
+unset general_LIST
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    general_LIST+=( "$(echo "--${var,,} ${i}")" )
+  fi
+done <<< $(printsection COMMON_GENERAL_OPTIONS < ${VAR_FILELIST})
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    j=$(echo ${var} | sed 's/^CT_//')
+    general_LIST+=( "$(echo "--${j,,} ${i}")" )
+  fi
+done <<< $(printsection CT_GENERAL_OPTIONS < ${VAR_FILELIST})
+
+# rootfs_LIST
+unset rootfs_LIST
+rootfs_LIST+=$(echo "--rootfs")
+rootfs_LIST+=( "$(echo "${VOLUME}:${CT_SIZE}")" )
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    j=$(echo ${var} | sed 's/^CT_//')
+    rootfs_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection CT_ROOTFS_OPTIONS < ${VAR_FILELIST} | grep -v '^CT_SIZE.*')
+
+# net_LIST
+unset net_LIST
+net_LIST+=$(echo "--net")
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    net_LIST+=( "$(echo "${var,,}=${i}")" )
+  fi
+done <<< $(printsection COMMON_NET_OPTIONS < ${VAR_FILELIST})
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    j=$(echo ${var} | sed 's/^CT_//')
+    net_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection CT_NET_OPTIONS < ${VAR_FILELIST})
+
+# features_LIST
+unset features_LIST
+features_LIST+=$(echo "--features")
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    j=$(echo ${var} | sed 's/^CT_//')
+    features_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection CT_FEATURES_OPTIONS < ${VAR_FILELIST})
+
+# startup_LIST
+unset startup_LIST
+startup_LIST+=$(echo "--startup")
+while IFS== read var value
+do
+  eval i='$'$var
+  echo $i
+  if [ -n "${i}" ]; then
+    j=$(echo ${var} | sed 's/^CT_//')
+    startup_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection CT_STARTUP_OPTIONS < ${VAR_FILELIST})
+
+
+#---- Create CT
+msg "Creating ${HOSTNAME^} CT..."
+pct create ${CTID} ${TEMPLATE_STRING} \
+# general_LIST vars
+if [ ${#general_LIST[@]} -ge '1' ]; then
+  printf '%s\n' "${general_LIST[@]}" | sed 's/$/ \\/'
+fi
+# rootfs_LIST vars
+printf '%s\n' "${rootfs_LIST[@]}" | xargs | sed 's/ /,/2g' | sed 's/$/ \\/'
+# net_LIST vars
+printf '%s\n' "${net_LIST[@]}" | xargs | sed 's/ /,/2g' | sed 's/$/ \\/'
+# features_LIST vars
+if [ ${#features_LIST[@]} -ge '2' ]; then
+  printf '%s\n' "${features_LIST[@]}" | xargs | sed 's/ /,/2g' | sed 's/$/ \\/'
+fi
+>/dev/null
+
 
 # Check CT Status
 sleep 2
-if [ "$(pct_list | grep -w $CTID > /dev/null; echo $?)" = 0 ]; then
-  if [ "$(pct status $CTID)" == "status: stopped" ]; then
-    info "${CT_HOSTNAME^} CT has been created. Current status: ${YELLOW}$(pct status $CTID | awk '{print $2}')${NC}"
+if [ $(pct list | grep -w "^${CTID}" > /dev/null; echo $?) == '0' ]; then
+    info "${HOSTNAME^} CT has been created. Current status: ${YELLOW}$(pct status ${CTID} | awk '{print $2}')${NC}"
     echo
-  elif [ "$(pct status $CTID)" == "status: running" ]; then
-    info "${CT_HOSTNAME^} CT has been created. Current status: ${YELLOW}$(pct status $CTID | awk '{print $2}')${NC}"
-    echo
-  fi
-elif [ "$(pct_list | grep -w $CTID > /dev/null; echo $?)" != 0 ]; then
-  warn "Something went wrong. ${CT_HOSTNAME^} CT has NOT been created. Aborting this installation."
+elif [ ! $(pct list | grep -w "^${CTID}" > /dev/null; echo $?) == '0' ]; then
+  warn "Something went wrong. ${HOSTNAME^} CT has NOT been created. Aborting this installation."
   echo
-  exit 0
+  trap cleanup EXIT
 fi
 
 #---- Finish Line ------------------------------------------------------------------

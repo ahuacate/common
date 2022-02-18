@@ -6,6 +6,14 @@
 
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
+
+# Proxmox Version Check
+CurrV="$(pveversion -v | grep '^proxmox-ve:.*' | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9]\).*/\1/p')"
+MinV="7.0"
+if [ "$(printf '%s\n' "$MinV" "$CurrV" | sort -V | head -n1)" != "$MinV" ]; then 
+  echo "Proxmox version is not supported. Update Proxmox to version ${ExpecV} or later."
+fi
+
 #---- Static Variables -------------------------------------------------------------
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
@@ -324,7 +332,7 @@ function multiselect () {
   done
   echo "User has selected:"
   if [[ -z ${RESULTS} ]]; then
-    echo "  ${YELLOW}None. The User has selected nothing.\n  (Remember to use the 'space bar' to select or deselect a option.)${NC}"
+    echo -e "  ${YELLOW}None. The User has selected nothing.\n  ( Remember to use the 'space bar' to select or deselect a option. )${NC}"
   else
     printf '    %s\n' ${YELLOW}"${PRINT_RESULTS[@]}"${NC}
   fi
