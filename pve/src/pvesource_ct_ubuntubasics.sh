@@ -75,10 +75,10 @@ pct exec $CTID -- gpg -k &> /dev/null
 # Installing curl
 msg "Installing curl..."
 pct exec $CTID -- apt-get -qqy install curl > /dev/null
-echo
 
 # msg "Installing ACL..."
-# msg "Installing ACL ( (Access Control Lists)..."
-# pct exec $CTID -- sudo apt-get install -y acl > /dev/null
+msg "Installing ACL ( (Access Control Lists)..."
+pct exec $CTID -- apt-get install -y acl > /dev/null
+echo
 
 #---- Finish Line ------------------------------------------------------------------

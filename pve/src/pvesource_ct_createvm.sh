@@ -8,16 +8,16 @@
 #---- Dependencies -----------------------------------------------------------------
 #---- Static Variables -------------------------------------------------------------
 
-# Regex for functions
-ip4_regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
-ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
+# Set OS version
+OSVERSION=${CT_OSVERSION}
+OSTYPE=${CT_OSTYPE}
 
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
 
 # List of variables
 VAR_FILELIST=${COMMON_PVE_SRC}/pvesource_set_allvmvarslist.conf
-COMMON_PVE_SRC='/mnt/pve/nas-01-git/ahuacate/common/pve/src'
+
 #---- Functions --------------------------------------------------------------------
 
 # Read variable file list
@@ -36,8 +36,6 @@ printsection() {
 }
 
 #---- Body -------------------------------------------------------------------------
-CT_OSVERSION=''
-CT_OSTYPE='ubuntu'
 
 #---- Prerequisites
 section "PVE CT Prerequisites"
@@ -47,7 +45,7 @@ pveam update >/dev/null
 
 # Check on latest CT OS version release template file
 unset os_LIST
-mapfile -t os_LIST < <(pveam available -section system | sed -n "s/.*\($CT_OSTYPE-$CT_OSVERSION.*\)/\1/p" | sort -t - -k 2 -V)
+mapfile -t os_LIST < <(pveam available -section system | sed -n "s/.*\($OSTYPE-$OSVERSION.*\)/\1/p" | sort -t - -k 2 -V)
 OS_TMPL="${os_LIST[-1]}"
 
 # Set OS template storage location
@@ -71,10 +69,10 @@ fi
 
 # Download CT template
 if [ ! -f "/var/lib/vz/template/cache/${OS_TMPL}" ] || [ ! -f "/var/lib/pve/${OS_TMPL_DIR}/template/cache/${OS_TMPL}" ]; then
-  msg "Downloading latest release of '${CT_OSTYPE^} ${CT_OSVERSION}' CT/LXC OS template ( be patient, might take a while )..."
+  msg "Downloading latest release of '${OSTYPE^} ${OSVERSION}' CT/LXC OS template ( be patient, might take a while )..."
   pveam download ${OS_TMPL_DIR} ${OS_TMPL} 2>&1
   if [ $? -ne 0 ]; then
-    warn "A problem occurred while downloading the CT/LXC OS version: ${CT_OSTYPE}-${CT_OSVERSION}\nCheck your internet connection and try again. Aborting installation in 3 seconds..."
+    warn "A problem occurred while downloading the CT/LXC OS version: ${OSTYPE}-${OSVERSION}\nCheck your internet connection and try again. Aborting installation in 3 seconds..."
     sleep 2
     exit 0
   fi
@@ -83,11 +81,11 @@ fi
 # CT Install dir location
 rootdir_LIST=( $(pvesm status -content rootdir -enabled | awk 'NR>1 {print $1}') )
 if [ ${#rootdir_LIST[@]} -eq '0' ]; then
-  warn "A problem has occurred:\n  - To create a new '${CT_OSTYPE^} ${CT_OSVERSION}' CT/LXC PVE requires a\n    valid storage location for a CT/LXC root volume.\n  - Cannot proceed until the User creates a storage location (i.e local-zfs).\nAborting installation in 3 seconds..."
+  warn "A problem has occurred:\n  - To create a new '${OSTYPE^} ${OSVERSION}' CT/LXC PVE requires a\n    valid storage location for a CT/LXC root volume.\n  - Cannot proceed until the User creates a storage location (i.e local-zfs).\nAborting installation in 3 seconds..."
   echo
   exit 0
 elif [ ${#rootdir_LIST[@]} -eq '1' ]; then
-  VOLUME=${rootdir_LIST[0]}
+  VOLUME="${rootdir_LIST[0]}"
 elif [ ${#rootdir_LIST[@]} -gt '1' ]; then
   msg "More than one PVE storage location has been detected to use as a CT/LXC root volume.\n\n$(pvesm status -content rootdir -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection."
   OPTIONS_VALUES_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
@@ -102,7 +100,7 @@ fi
 
 #---- Validate & set architecture dependent variables
 ARCH=$(dpkg --print-architecture)
-TEMPLATE_STRING="${OS_TMPL_DIR}:vztmpl/${OS_TMPL}"
+OS_TEMPLATE="${OS_TMPL_DIR}:vztmpl/${OS_TMPL}"
 
 
 #---- Create CT input arrays
@@ -112,6 +110,10 @@ while IFS== read var value
 do
   eval i='$'$var
   if [ -n "${i}" ]; then
+    # Wrap Description var in quotes
+    if [ $var == 'DESCRIPTION' ]; then
+      i=\"${i}\"
+    fi
     general_LIST+=( "$(echo "--${var,,} ${i}")" )
   fi
 done <<< $(printsection COMMON_GENERAL_OPTIONS < ${VAR_FILELIST})
@@ -139,11 +141,21 @@ done <<< $(printsection CT_ROOTFS_OPTIONS < ${VAR_FILELIST} | grep -v '^CT_SIZE.
 
 # net_LIST
 unset net_LIST
-net_LIST+=$(echo "--net")
+net_LIST+=$(echo "--net0")
 while IFS== read var value
 do
   eval i='$'$var
   if [ -n "${i}" ]; then
+    # Add CIDR value to IP/IP6
+    if [ $var == 'IP' ]; then
+      i=$(echo ${i} | sed "s/$/\/${CIDR}/")
+    elif [ $var == 'IP6' ]; then
+      i=$(echo ${i} | sed "s/$/\/${CIDR6}/")
+    fi
+    # Ignore of tag=(0|1)
+    if [ $var == 'TAG' ] && [[ ${i} =~ (0|1) ]]; then 
+      continue
+    fi
     net_LIST+=( "$(echo "${var,,}=${i}")" )
   fi
 done <<< $(printsection COMMON_NET_OPTIONS < ${VAR_FILELIST})
@@ -174,7 +186,6 @@ startup_LIST+=$(echo "--startup")
 while IFS== read var value
 do
   eval i='$'$var
-  echo $i
   if [ -n "${i}" ]; then
     j=$(echo ${var} | sed 's/^CT_//')
     startup_LIST+=( "$(echo "${j,,}=${i}")" )
@@ -183,22 +194,31 @@ done <<< $(printsection CT_STARTUP_OPTIONS < ${VAR_FILELIST})
 
 
 #---- Create CT
-msg "Creating ${HOSTNAME^} CT..."
-pct create ${CTID} ${TEMPLATE_STRING} \
+# Create CT variables
+unset pct_create_LIST
+pct_create_LIST=()
+# OS installer template
+pct_create_LIST+=( "$(echo "${CTID} ${OS_TEMPLATE}")" )
 # general_LIST vars
 if [ ${#general_LIST[@]} -ge '1' ]; then
-  printf '%s\n' "${general_LIST[@]}" | sed 's/$/ \\/'
+  pct_create_LIST+=( "$(printf '%s\n' "${general_LIST[@]}" | sed 's/$//')" )
 fi
 # rootfs_LIST vars
-printf '%s\n' "${rootfs_LIST[@]}" | xargs | sed 's/ /,/2g' | sed 's/$/ \\/'
+pct_create_LIST+=( "$(printf '%s\n' "${rootfs_LIST[@]}" | xargs | sed 's/ /,/2g')" )
 # net_LIST vars
-printf '%s\n' "${net_LIST[@]}" | xargs | sed 's/ /,/2g' | sed 's/$/ \\/'
+pct_create_LIST+=( "$(printf '%s\n' "${net_LIST[@]}" | xargs | sed 's/ /,/2g')" )
 # features_LIST vars
 if [ ${#features_LIST[@]} -ge '2' ]; then
-  printf '%s\n' "${features_LIST[@]}" | xargs | sed 's/ /,/2g' | sed 's/$/ \\/'
+  pct_create_LIST+=( "$(printf '%s\n' "${features_LIST[@]}" | xargs | sed 's/ /,/2g')" )
 fi
->/dev/null
-
+# startup_LIST vars
+if [ ${#startup_LIST[@]} -ge '2' ]; then
+  pct_create_LIST+=( "$(printf '%s\n' "${startup_LIST[@]}" | xargs | sed 's/ /,/2g')" )
+fi
+# Create CT
+msg "Creating ${HOSTNAME^} CT..."
+pct create $(printf '%s ' "${pct_create_LIST[@]}" | sed 's/$//')
+echo
 
 # Check CT Status
 sleep 2

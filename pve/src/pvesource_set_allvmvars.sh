@@ -28,6 +28,10 @@ PVESM_EXIT='exit:Perform a full exit ( kill ) of the installer'
 # Host reserved RAM (MiB)
 MEMORY_HOST_RESERVE='2000'
 
+# Network rate limit ( % of NIC maximum in MB/s)
+unset net_ratelimit_LIST
+net_ratelimit_LIST=( "100%" "75%" "50%" "25%" "10%" )
+
 #---- Other Variables --------------------------------------------------------------
 
 # Developer Options
@@ -38,28 +42,6 @@ if [ -f /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git ]; then
 fi
 
 #---- Other Files ------------------------------------------------------------------
-
-# Common Default IP Addresses ( i.e OEM routers )
-# unset common_ip_LIST
-# read -r -d '' common_ip_LIST << EOF
-# 192.168.1.0
-# 192.168.0.0
-# 192.166.0.0
-# 10.0.1.0
-# 10.1.1.0
-# 10.0.0.0
-# EOF
-
-# Network rate limit ( % of NIC maximum in MB/s)
-unset net_ratelimit_LIST
-read -r -d '' net_ratelimit_LIST << EOF
-100%
-75%
-50%
-25%
-10%
-EOF
-
 #---- Functions --------------------------------------------------------------------
 
 #---- Arrays
@@ -327,7 +309,7 @@ function cpu_core_set() {
 #---- Prerequisites
 section "Installer Prerequisites"
 # Set VM type ( CT or VM )
-if [ -n "${VM_TYPE}" ]; then
+if [ ! -n "${VM_TYPE}" ]; then
   warn "Cannot proceed. No VM type set (CT or VM)."
   echo
   trap cleanup EXIT
@@ -383,16 +365,16 @@ if [[ $(hostname -i) =~ $ip4_regex ]] && [ ${NET_DHCP} == '0' ]; then
       elif [[ ${GW} =~ $k ]] && [ 'GW' == $j ]; then
         type="${VM_TYPE^^} Gateway address"
         displayVARS+=( "$type:$k:$(hostname -i | awk -F'.' -v octet3="${octet3}" -v octet4="$(echo $k | awk -F'.' '{ print $4 }')" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')" )
-        GW=$(hostname -i | awk -F'.' -v octet3="${octet3}"-v octet4="${gw_octet4}" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
+        GW=$(hostname -i | awk -F'.' -v octet3="${octet3}" -v octet4="${gw_octet4}" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
       elif [[ ${NAMESERVER} =~ $k ]] && [ 'NAMESERVER' == $j ]; then
         type="${VM_TYPE^^} DNS address"
         displayVARS+=( "$type:$k:$(hostname -i | awk -F'.' -v octet3="${octet3}" -v octet4="$(echo $k | awk -F'.' '{ print $4 }')" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')" )
-        NAMESERVER=$(hostname -i | awk -F'.' -v octet3="${octet3}"-v octet4="${nameserver_octet4}" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
+        NAMESERVER=$(hostname -i | awk -F'.' -v octet3="${octet3}" -v octet4="${nameserver_octet4}" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
       fi
     fi
   done <<< $(printf '%s\n' "${ipVARS[@]}")
 
-  msg_box "#### MODIFYING EASY SCRIPT IPv4 PRESETS ####\n\nOur Easy Scripts (ES) settings for your IPv4 ${VM_TYPE^^} addresses have been modified where required to match your PVE hosts IPv4 range, nameserver and gateway addresses and VLAN status ( $(if ${TAG} == '0' ]; then echo "disabled"; else echo "enabled"; fi) ).\n\n$(printf '%s\n' "${displayVARS[@]}" | column -s ":" -t -N "IP DESCRIPTION,DEFAULT ES PRESET,NEW ES PRESET" | indent2)\n\nThe new ES presets will be checked and validated in the next steps."
+  msg_box "#### MODIFYING EASY SCRIPT IPv4 PRESETS ####\n\nOur Easy Scripts (ES) settings for your IPv4 ${VM_TYPE^^} addresses have been modified where required to match your PVE hosts IPv4 range, nameserver and gateway addresses and VLAN status ( $(if [ ${TAG} == '0' ]; then echo "disabled"; else echo "enabled"; fi) ).\n\n$(printf '%s\n' "${displayVARS[@]}" | column -s ":" -t -N "IP DESCRIPTION,DEFAULT ES PRESET,NEW ES PRESET" | indent2)\n\nThe new ES presets will be checked and validated in the next steps."
   echo
 fi
 
@@ -515,8 +497,9 @@ while true; do
   fi
 
   # PVESM Storage validation
-  if [[ ${#pvesm_required_LIST[@]} -ge 1 ]]; then
-    unset pvesm_input_LIST
+  unset pvesm_input_LIST
+  pvesm_input_LIST=()
+  if [[ ${#pvesm_required_LIST[@]} -ge '1' ]]; then
     while read -r line; do
       if [[ $(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-$line") ]]; then
         pvesm_input_LIST+=( "$(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/,\/mnt\/$line/")" )
@@ -527,10 +510,10 @@ while true; do
         break -2 > /dev/null 2>&1
       fi 
     done <<< $(printf '%s\n' "${pvesm_required_LIST[@]}" | awk -F':' '{ print $1 }' | grep -v 'none')
-    # Add developer git mount
-    if [ ${DEV_GIT_MOUNT_ENABLE} == 0 ] && [[ $(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git") ]]; then
-      pvesm_input_LIST+=( "$(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git" | awk 'BEGIN {OFS = ","}{print $1,"/mnt/pve/"$1}')" )
-    fi
+  fi
+  # Add developer git mount
+  if [ ${DEV_GIT_MOUNT_ENABLE} == '0' ] && [[ $(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git") ]]; then
+    pvesm_input_LIST+=( "$(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git" | awk 'BEGIN {OFS = ","}{print $1,"/mnt/pve/"$1}')" )
   fi
 
   # Check CTID/VMID
@@ -601,46 +584,48 @@ while true; do
   while IFS= read j
   do
     eval k='$'$j
-    if [ ${HOSTNAME} == $k ]; then
+    if [ 'HOSTNAME' == $j ]; then
       msg "\t$i. Hostname : ${YELLOW}${HOSTNAME}${NC}"
       (( i=i+1 ))
-    elif [ ${DESCRIPTION} == $k ]; then
+    elif [ 'DESCRIPTION' == $j ]; then
       msg "\t$i. Description : ${YELLOW}${DESCRIPTION}${NC}"
       (( i=i+1 ))
-    elif [ ${CTID} == $k ]; then
+    elif [ 'CTID' == $j ]; then
       msg "\t$i. CTID : ${YELLOW}${CTID}${NC}"
       (( i=i+1 ))
-    elif [ ${VMID} == $k ]; then
+    elif [ 'VMID' == $j ]; then
       msg "\t$i. VMID : ${YELLOW}${VMID}${NC}"
       (( i=i+1 ))
-    elif [ ${IP} == $k ]; then
+    elif [ 'IP' == $j ]; then
       msg "\t$i. IPv4 address : ${YELLOW}${IP}${NC}"
       (( i=i+1 ))
-    elif [ ${GW} == $k ]; then
+    elif [ 'GW' == $j ]; then
       msg "\t$i. Gateway IPv4 address : ${YELLOW}${GW}${NC}"
       (( i=i+1 ))
-    elif [ ${IP6} == $k ]; then
-      msg "\t$i. IPv6 address : ${YELLOW}${IP}${NC}"
+    elif [ 'IP6' == $j ]; then
+      msg "\t$i. IPv6 address : ${YELLOW}${IP6}${NC}"
       (( i=i+1 ))
-    elif [ ${GW6} == $k ]; then
-      msg "\t$i. Gateway IPv6 address : ${YELLOW}${GW}${NC}"
+    elif [ 'GW6' == $j ]; then
+      msg "\t$i. Gateway IPv6 address : ${YELLOW}${GW6}${NC}"
       (( i=i+1 ))
-    elif [ ${NAMESERVER} == $k ]; then
+    elif [ 'NAMESERVER' == $j ]; then
       msg "\t$i. Name server : ${YELLOW}${NAMESERVER}${NC}"
       (( i=i+1 ))
-    elif [ ${TAG} == $k ]; then
+    elif [ 'TAG' == $j ]; then
       msg "\t$i. VLAN : ${YELLOW}${TAG}${NC}"
       (( i=i+1 ))
-    elif [ ${RATE} == $k ]; then
+    elif [ 'RATE' == $j ]; then
       msg "\t$i. Speed Limit : ${YELLOW}${RATE}${NC}"
       (( i=i+1 ))
     fi
   done <<< $(printf '%s\n' "${displayVARS[@]}")
   # Print list of bind mounts
-  while IFS=, read -r var1 var2; do
-    msg "\t$i. Bind mount: ${var1} ${WHITE}--->${NC} ${var2}"
-    (( i=i+1 ))
-  done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}")
+  if [ ${#pvesm_input_LIST[@]} -ge '1' ]; then
+    while IFS=, read -r var1 var2; do
+      msg "\t$i. Bind mount: ${var1} ${WHITE}--->${NC} ${var2}"
+      (( i=i+1 ))
+    done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}")
+  fi
   echo
 
   while true; do
@@ -649,11 +634,11 @@ while true; do
     case $YN in
       [Yy]*)
         if [ ! ${SSH_ENABLE} = 0 ]; then
-          SSH_PORT_VAR=""
+          SSH_PORT=""
         fi
         info "'${HOSTNAME^}' ${VM_TYPE^^} build is set to use Easy Script defaults."
         echo
-        continue
+        return
         ;;
       [Nn]*)
         info "Proceeding with manual installation."

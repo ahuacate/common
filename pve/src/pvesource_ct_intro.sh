@@ -14,8 +14,7 @@
 # Introduction
 clear
 section "Introduction"
-msg_box "#### PLEASE READ CAREFULLY ####\n
-This Easy Script will create a $SECTION_HEAD Proxmox container (CT). Installer input is required. The Easy Script will create, edit and/or change system files on your Proxmox host. When an optional default setting is provided you may accept the default by pressing ENTER on your keyboard or change it to your preferred value.$(if [ -f pvesm_required_list ] && [ $(cat pvesm_required_list | grep -v 'none' | wc -l) -gt 0 ]; then echo -e "\n\nYour new ${CT_HOSTNAME_VAR^} uses bind mounts to access arbitrary directories (PVESM storage mounts) from your Proxmox VE host to the container. Your PVE host must have all $(cat pvesm_required_list | awk -F'|' '{print $1}' | grep -v 'none' | wc -l) of the required storage mounts $(cat pvesm_required_list | grep -vi 'none' | awk -F'|' '{print $1}' | tr '\n' ',' | sed 's/,$//' | sed -e 's/^/(/g' -e 's/$/)/g') for this Easy Script installation to be successful.";fi)"
+msg_box "#### PLEASE READ CAREFULLY ####\n\nThis Easy Script will create a Proxmox container (CT). Installer input is required. The Easy Script will create, edit and/or change system files on your Proxmox host. When an optional default setting is provided you may accept the default by pressing ENTER on your keyboard or change it to your preferred value.$(if [ ${#pvesm_required_LIST[@]} -gt 0 ]; then echo -e "\n\nYour new '${HOSTNAME^}' CT uses bind mounts to access arbitrary directories (PVESM storage mounts) from your Proxmox VE host to the container.\n\n$(printf '%s\n' "${pvesm_required_LIST[@]}" | column -s ":" -t -N "MEDIA CATEGORY,DESCRIPTION" | indent2)\n\nYour PVE host must have all ${#pvesm_required_LIST[@]} of the required storage mounts to complete this installation.";fi)"
 sleep 1
 
 echo
