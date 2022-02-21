@@ -21,5 +21,6 @@ if [ ${#pvesm_input_LIST[@]} -ge '1' ]; then
   done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}")
   echo
 else
-  info "No storage bind mount inputs are available or have been configured. Skipping this step."
+  info "No storage bind mount inputs are available or have been configured.\nSkipping this step."
+  echo
 fi
