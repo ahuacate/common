@@ -22,7 +22,7 @@ fi
 
 # Set DIR Schema ( PVE host or CT mkdir )
 if [ $(uname -a | grep -Ei --color=never '.*linux*|.*pve*' &> /dev/null; echo $?) == 0 ]; then
-  DIR_SCHEMA="/${POOL}/${CT_HOSTNAME}"
+  DIR_SCHEMA="/${POOL}/${HOSTNAME}"
 else
   # Select or input a storage path ( set DIR_SCHEMA )
   section "Select a Storage Location"
@@ -105,7 +105,7 @@ section "Create and Set Folder Permissions."
 msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n
 Shared folders are the basic directories where you can store files and folders on your NAS. Below is a list of default NAS shared folders. You can create additional custom shared folders in the coming steps.
 
-$(while IFS=',' read -r var1 var2; do msg "  --  /srv/${CT_HOSTNAME}/'${var1}'\n"; done <<< $( cat nas_basefolderlist | sed 's/^#.*//' | sed '/^$/d' ))"
+$(while IFS=',' read -r var1 var2; do msg "  --  /srv/${HOSTNAME}/'${var1}'\n"; done <<< $( cat nas_basefolderlist | sed 's/^#.*//' | sed '/^$/d' ))"
 echo
 
 while true; do
