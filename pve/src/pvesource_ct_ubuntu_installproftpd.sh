@@ -31,7 +31,7 @@ ProFTPd is a highly feature rich FTP server, exposing a large amount of configur
 ProFTPd management can be done using the Webmin management frontend. ProFTPd is installed by default."
 echo
 while true; do
-  read -p "Install ProFTPd (Recommended) [y/n]?: " -n 1 -r YN
+  read -p "Install ProFTPd [y/n]?: " -n 1 -r YN
   echo
   case $YN in
     [Yy]*)

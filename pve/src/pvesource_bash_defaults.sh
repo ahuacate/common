@@ -7,12 +7,15 @@
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
 
-# # Proxmox Version Check
-# CurrV="$(pveversion -v | grep '^proxmox-ve:.*' | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9]\).*/\1/p')"
-# MinV="7.0"
-# if [ "$(printf '%s\n' "$MinV" "$CurrV" | sort -V | head -n1)" != "$MinV" ]; then 
-#   echo "Proxmox version is not supported. Update Proxmox to version ${ExpecV} or later."
-# fi
+# Proxmox Version Check
+if command -v pveversion -v &> /dev/null; then
+  CurrV="$(pveversion -v | grep '^proxmox-ve:.*' | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9]\).*/\1/p')"
+  MinV="7.0"
+  if [ "$(printf '%s\n' "$MinV" "$CurrV" | sort -V | head -n1)" != "$MinV" ]; then 
+    echo "Proxmox version is not supported. Update Proxmox to version ${MinV} or later.\nBye..."
+    exit 0
+  fi
+fi
 
 #---- Static Variables -------------------------------------------------------------
 #---- Other Variables --------------------------------------------------------------
