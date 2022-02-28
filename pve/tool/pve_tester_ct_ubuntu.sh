@@ -53,9 +53,9 @@ DEV_GIT_MOUNT_ENABLE=0
 # VM Type ( 'ct' or 'vm' only lowercase )
 VM_TYPE='ct'
 # Use DHCP. '0' to disable, '1' to enable.
-NET_DHCP='0'
+NET_DHCP='1'
 #  Set address type 'dhcp4'/'dhcp6' or '0' to disable.
-NET_DHCP_TYPE='0'
+NET_DHCP_TYPE='dhcp4'
 # CIDR IPv4
 CIDR='24'
 # CIDR IPv6
@@ -68,20 +68,14 @@ SSH_PORT='22'
 HOSTNAME='tester'
 # Description for the Container (one word only, no spaces). Shown in the web-interface CT’s summary. 
 DESCRIPTION=''
-# Virtual OS/processor architecture.
-ARCH='amd64'
 # Allocated memory or RAM (MiB).
-MEMORY='1024'
-# Root credentials
-PASSWORD='ahuacate'
+MEMORY='512'
 # Limit number of CPU sockets to use.  Value 0 indicates no CPU limit.
 CPULIMIT='0'
 # CPU weight for a VM. Argument is used in the kernel fair scheduler. The larger the number is, the more CPU time this VM gets.
 CPUUNITS='1024'
 # The number of cores assigned to the vm/ct. Do not edit - its auto set.
 CORES='1'
-# Nameserver server IP (IPv4 or IPv6) (value "" for none).
-NAMESERVER='192.168.1.5'
 
 #----[COMMON_NET_OPTIONS]
 # Bridge to attach the network device to.
@@ -90,14 +84,6 @@ BRIDGE='vmbr0'
 HWADDR=""
 # Controls whether this interface’s firewall rules should be used.
 FIREWALL='1'
-# IP address (IPv4). Set either IPv4 or IPv6, not both.
-IP='192.168.1.188'
-# IP address (IPv6).
-IP6=""
-# Default gateway for traffic (IPv4). Set either IPv4 or IPv6, not both, but corresposndfing with IP type setting.
-GW='192.168.1.5'
-# Default gateway for traffic (IPv6).
-GW6=""
 # VLAN tag for this interface (value 0 for none, or VLAN[2-N] to enable).
 TAG='0'
 # VLAN ids to pass through the interface
@@ -106,6 +92,22 @@ TRUNKS=""
 RATE=""
 # MTU - Maximum transfer unit of the interface.
 MTU=""
+
+#----[COMMON_NET_DNS_OPTIONS]
+# Nameserver server IP (IPv4 or IPv6) (value "" for none).
+NAMESERVER=''
+# Search domain name (local domain)
+SEARCHDOMAIN=''
+
+#----[COMMON_NET_STATIC_OPTIONS]
+# IP address (IPv4). Only works with static IP (DHCP=0).
+IP='192.168.1.10'
+# IP address (IPv6). Only works with static IP (DHCP=0).
+IP6=''
+# Default gateway for traffic (IPv4). Only works with static IP (DHCP=0).
+GW='192.168.1.5'
+# Default gateway for traffic (IPv6). Only works with static IP (DHCP=0).
+GW6=''
 
 
 #---- PVE CT
@@ -120,6 +122,10 @@ CT_OSTYPE='ubuntu'
 CT_ONBOOT='1'
 # Timezone
 CT_TIMEZONE='host'
+# Root credentials
+CT_PASSWORD='ahuacate'
+# Virtual OS/processor architecture.
+CT_ARCH='amd64'
 
 #----[CT_FEATURES_OPTIONS]
 # Allow using fuse file systems in a container.
@@ -192,10 +198,10 @@ source ${COMMON_PVE_SRC}/pvesource_set_allvmvars.sh
 source ${COMMON_PVE_SRC}/pvesource_ct_createvm.sh
 
 # #---- Create CT Bind Mounts
-source ${COMMON_PVE_SRC}/pvesource_ct_createbindmounts.sh
+# source ${COMMON_PVE_SRC}/pvesource_ct_createbindmounts.sh
 
 # #---- Configure New CT OS
-source ${COMMON_PVE_SRC}/pvesource_ct_ubuntubasics.sh
+# source ${COMMON_PVE_SRC}/pvesource_ct_ubuntubasics.sh
 
 
 
@@ -276,7 +282,7 @@ source ${COMMON_PVE_SRC}/pvesource_ct_ubuntubasics.sh
   # #---- Finish Up
   # msg "Creating snapshot to local-zfs..."
   # vzdump 888 --dumpdir /var/lib/vz/dump/ --mode snapshot --compress zstd
-fi
+# fi
 
 #---- Finish Line ------------------------------------------------------------------
 section "Completion Status."
@@ -285,3 +291,20 @@ section "Completion Status."
 
 # Cleanup
 # trap cleanup EXIT
+
+# pct create 101 local:vztmpl/ubuntu-21.04-standard_21.04-1_amd64.tar.gz --hostname nas-01 \
+# --memory 512 \
+# --cpulimit 0 \
+# --cpuunits 1024 \
+# --cores 1 \
+# --unprivileged 1 \
+# --swap 512 \
+# --ostype ubuntu \
+# --onboot 1 \
+# --timezone host \
+# --password ahuacate \
+# --arch amd64 \
+# --rootfs local-zfs:5,acl=1 \
+# --net0 name=eth0,bridge=vmbr0,firewall=1,ip=dhcp \
+# --features fuse=0,keyctl=0,nesting=0 \
+# --startup order=1,up=2,down=2

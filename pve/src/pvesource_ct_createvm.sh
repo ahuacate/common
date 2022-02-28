@@ -12,11 +12,18 @@
 OSVERSION=${CT_OSVERSION}
 OSTYPE=${CT_OSTYPE}
 
+# Regex for Ipv4 and IPv6
+ip4_regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
+
+# Parent Script to get setting variables
+VAR_FILELIST="$0"
+
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
 
 # List of variables
-VAR_FILELIST=${COMMON_PVE_SRC}/pvesource_set_allvmvarslist.conf
+# VAR_FILELIST=${COMMON_PVE_SRC}/pvesource_set_allvmvarslist.conf
 
 #---- Functions --------------------------------------------------------------------
 
@@ -34,6 +41,7 @@ printsection() {
     echo "$line" | sed '/^#/d' | sed -r '/^\s*$/d'
   done
 }
+
 
 #---- Body -------------------------------------------------------------------------
 
@@ -121,6 +129,13 @@ while IFS== read var value
 do
   eval i='$'$var
   if [ -n "${i}" ]; then
+    general_LIST+=( "$(echo "--${var,,} ${i,,}")" )
+  fi
+done <<< $(printsection COMMON_NET_DNS_OPTIONS < ${VAR_FILELIST})
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
     j=$(echo ${var} | sed 's/^CT_//')
     general_LIST+=( "$(echo "--${j,,} ${i}")" )
   fi
@@ -146,14 +161,8 @@ while IFS== read var value
 do
   eval i='$'$var
   if [ -n "${i}" ]; then
-    # Add CIDR value to IP/IP6
-    if [ $var == 'IP' ]; then
-      i=$(echo ${i} | sed "s/$/\/${CIDR}/")
-    elif [ $var == 'IP6' ]; then
-      i=$(echo ${i} | sed "s/$/\/${CIDR6}/")
-    fi
     # Ignore of tag=(0|1)
-    if [ $var == 'TAG' ] && [[ ${i} =~ (0|1) ]]; then 
+    if [ $var == 'TAG' ] && [[ ${i} =~ ^(0|1)$ ]]; then 
       continue
     fi
     net_LIST+=( "$(echo "${var,,}=${i}")" )
@@ -167,6 +176,21 @@ do
     net_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
 done <<< $(printsection CT_NET_OPTIONS < ${VAR_FILELIST})
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    # Add CIDR value to IP/IP6
+    if [ $var == 'IP' ] && [[ $i =~ ${ip4_regex} ]]; then
+      i=$(echo ${i} | sed "s/$/\/${CIDR}/")
+    elif [ $var == 'IP' ] || [ $var == 'IP6' ] && [[ $i =~ 'dhcp' ]]; then
+      i=$(echo ${i})
+    elif [ $var == 'IP6' ] && [[ $i =~ ${ip6_regex} ]]; then
+      i=$(echo ${i} | sed "s/$/\/${CIDR6}/")
+    fi
+    net_LIST+=( "$(echo "${var,,}=${i}")" )
+  fi
+done <<< $(printsection COMMON_NET_STATIC_OPTIONS < ${VAR_FILELIST})
 
 # features_LIST
 unset features_LIST
@@ -215,6 +239,7 @@ fi
 if [ ${#startup_LIST[@]} -ge '2' ]; then
   pct_create_LIST+=( "$(printf '%s\n' "${startup_LIST[@]}" | xargs | sed 's/ /,/2g')" )
 fi
+
 # Create CT
 msg "Creating ${HOSTNAME^} CT..."
 pct create $(printf '%s ' "${pct_create_LIST[@]}" | sed 's/$//')

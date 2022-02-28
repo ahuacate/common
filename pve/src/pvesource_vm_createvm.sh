@@ -7,48 +7,268 @@
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
 #---- Static Variables -------------------------------------------------------------
+
+# Set OS version
+OSTYPE=${VM_OSTYPE}
+OS_DIST=${VM_OS_DIST}
+OSVERSION=$(echo ${VM_OSVERSION} | sed 's/[.|_]//') # Remove and '. or '_' from version number
+OTHER_OS_URL=${VM_OTHER_OS_URL}
+
+# Regex for Ipv4 and IPv6
+ip4_regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
+
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
+
+# List of variables
+VAR_FILELIST=${COMMON_PVE_SRC}/pvesource_set_allvmvarslist.conf
+
+# Generic OS URLS - Available compatible cloud-init images to download
+DEBIAN_10_URL="https://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.raw"
+DEBIAN_9_URL="https://cdimage.debian.org/cdimage/openstack/current-9/debian-9-openstack-amd64.raw"
+UBUNTU_1804_URL="https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img"
+UBUNTU_2004_URL="https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img"
+UBUNTU_2110_URL="https://cloud-images.ubuntu.com/impish/current/impish-server-cloudimg-amd64.img"
+UBUNTU_2204_URL="https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
+
+#---- Functions --------------------------------------------------------------------
+
+# Read variable file list
+printsection() {
+  # Example: $(printSection SECTION_NAME | sed -n 's/^name//p/' < /etc/applications.conf)
+  section="$1"
+  found=false
+  # Run function
+  while read line
+  do
+    [[ $found == false && "$line" != "#----[${section}]" ]] && continue
+    [[ $found == true && "${line:0:6}" == '#----[' ]] && break
+    found=true
+    echo "$line" | sed '/^#/d' | sed -r '/^\s*$/d'
+  done
+}
+
 #---- Body -------------------------------------------------------------------------
 
-section "Create ${VM_OSTYPE^} VM"
+#---- Prerequisites
+section "PVE VM Prerequisites"
 
-# Check for latest PVE VM ISO template
+# Update PVE VM OS template list
 pveam update >/dev/null
-msg "Checking VM '$VM_ISO' installation iso (be patient, might take a while)..."
-wget -qNLc --show-progress - ${SRC_ISO_URL} -P /var/lib/vz/template/iso
 
+# Image path
+OS_TMPL_PATH="${TEMP_DIR}/images"
+# Check if imgs path exist
+if [ ! -d ${OS_TMPL_PATH} ]; then
+	mkdir -p ${OS_TMPL_PATH}
+fi
 
-# Set Variables
-ARCH=$(dpkg --print-architecture)
-TEMPLATE_STRING="local:iso/${VM_ISO}"
-STORAGE_LIST=( $(pvesm status -content rootdir | awk 'NR>1 {print $1}') )
+# Download VM template
+if [ -n ${OS_DIST} ] && [ -n ${OSVERSION} ]; then
+  echo hello
+  # Match download SRC for standard Ubuntu or debian compatible cloud-init images
+  eval OS_TMPL_SRC='$'${OS_DIST^^}_${OSVERSION}_URL
+  OS_TMPL="${OS_TMPL_PATH}/${OS_TMPL_SRC##*/}"
+  if [ ! -n ${OS_TMPL} ]; then
+    warn "A problem has occurred:\n  - Cannot determine a download URL for ${OS_DIST^} ${OSVERSION} template.\n  - Cannot proceed until the User correctly sets the OS distribution and version.\nAborting installation in 3 seconds..."
+    echo
+    exit 0
+	fi
+  # Download SRC
+  msg "Downloading installation iso/img ( be patient, might take a while )..."
+  wget -qNLc --show-progress - ${OS_TMPL_SRC} -O ${OS_TMPL}
+elif [ -n ${OTHER_OS_URL} ]; then
+  # Download SRC custom iso/img
+  OS_TMPL_SRC=${OTHER_OS_URL}
+  msg "Downloading installation iso/img ( be patient, might take a while )..."
+  wget -qNL --show-progress --content-disposition -c ${OS_TMPL_SRC} -P ${OS_TMPL_PATH}
+  OS_TMPL="$(find ${OS_TMPL_PATH} -type f)"
+fi
 
-if [ ${#STORAGE_LIST[@]} -eq 0 ]; then
-  warn "A problem has occurred:\n  - To create a new '${OSTYPE^} $OSVERSION' Ct/LXC PVE requires a\n    valid storage location.\n  - Cannot proceed until the User creates a storage location (i.e local-zfs).\nAborting installation in 3 seconds..."
+# VM Install dir location
+rootdir_LIST=( $(pvesm status -content rootdir -enabled | awk 'NR>1 {print $1}') )
+if [ ${#rootdir_LIST[@]} -eq '0' ]; then
+  warn "A problem has occurred:\n  - To create a new VM machine PVE requires a\n    valid storage location for to a root volume.\n  - Cannot proceed until the User creates a storage location (i.e local-zfs).\nAborting installation in 3 seconds..."
   echo
   exit 0
-elif [ ${#STORAGE_LIST[@]} -eq 1 ]; then
-  STORAGE=${STORAGE_LIST[0]}
-  info "Storage location is set: ${YELLOW}${STORAGE}${NC}"
-  echo
-else
-  echo
-  msg "More than one PVE storage location has been detected. The User must make a selection."
-  PS3="Which storage location would you like to use (entering numeric) ?"
-  select s in "${STORAGE_LIST[@]}"; do
-    case $s in
-      $STORAGE_LIST)
-        STORAGE=$s
-        echo
-        break
-        ;;
-      *) warn "Invalid entry. Try again.." >&2
-    esac
-  done
-  info "Storage location is set: ${YELLOW}${STORAGE}${NC}"
+elif [ ${#rootdir_LIST[@]} -eq '1' ]; then
+  VOLUME="${rootdir_LIST[0]}"
+elif [ ${#rootdir_LIST[@]} -gt '1' ]; then
+  msg "More than one PVE storage location has been detected to use as a VM root volume.\n\n$(pvesm status -content rootdir -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection."
+  OPTIONS_VALUES_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
+  OPTIONS_LABELS_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
+  makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
+  singleselect SELECTED "$OPTIONS_STRING"
+  VOLUME=${RESULTS}
+  info "VM root volume is set: ${YELLOW}${VOLUME}${NC}"
   echo
 fi
+
+#---- Validate & set architecture dependent variables
+ARCH=$(dpkg --print-architecture)
+
+#---- Create CT input arrays
+# general_LIST array
+unset general_LIST
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    # Wrap Description var in quotes
+    if [ $var == 'DESCRIPTION' ]; then
+      i=\"${i}\"
+    fi
+    general_LIST+=( "$(echo "--${var,,} ${i}")" )
+  fi
+done <<< $(printsection COMMON_GENERAL_OPTIONS < ${VAR_FILELIST})
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    j=$(echo ${var} | sed 's/^CT_//')
+    general_LIST+=( "$(echo "--${j,,} ${i}")" )
+  fi
+done <<< $(printsection VM_GENERAL_OPTIONS < ${VAR_FILELIST})
+
+# scsi0_LIST
+unset scsi0_LIST
+scsi0_LIST+=$(echo "--scsi0")
+scsi0_LIST+=( "$(echo "${VOLUME}:${VM_SCSI0_SIZE}")" )
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    # Ignore VM_SCSI0_SIZE
+    if [ $var == 'VM_SCSI0_SIZE' ]; then 
+      continue
+    fi
+    j=$(echo ${var} | sed 's/^VM_SCSI0_//')
+    scsi0_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection VM_SCSI0_OPTIONS < ${VAR_FILELIST} | grep -v '^VM_SCSI0_SIZE.*')
+
+# scsi1_LIST
+unset scsi1_LIST
+scsi0_LIST+=$(echo "--scsi1")
+scsi0_LIST+=( "$(echo "${VOLUME}:${VM_SCSI1_SIZE}")" )
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    # Ignore VM_SCSI1_SIZE
+    if [ $var == 'VM_SCSI1_SIZE' ]; then 
+      continue
+    fi
+    j=$(echo ${var} | sed 's/^VM_SCSI1_//')
+    scsi1_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection VM_SCSI1_OPTIONS < ${VAR_FILELIST} | grep -v '^VM_SCSI1_SIZE.*')
+
+# net_LIST
+unset net_LIST
+net_LIST+=$(echo "--net0")
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    # Ignore of tag=(0|1)
+    if [ $var == 'TAG' ] && [[ ${i} =~ (0|1) ]]; then 
+      continue
+    fi
+    net_LIST+=( "$(echo "${var,,}=${i}")" )
+  fi
+done <<< $(printsection COMMON_NET_OPTIONS < ${VAR_FILELIST})
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    j=$(echo ${var} | sed 's/^VM_//')
+    net_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection VM_NET_OPTIONS < ${VAR_FILELIST})
+
+# startup_LIST
+unset startup_LIST
+startup_LIST+=$(echo "--startup")
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    j=$(echo ${var} | sed 's/^VM_//')
+    startup_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection VM_STARTUP_OPTIONS < ${VAR_FILELIST})
+
+# cloudinit_LIST
+unset cloudinit_LIST
+cloudinit_LIST=()
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    j=$(echo ${var} | sed 's/^CT_//')
+    cloudinit_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection VM_CLOUD_INIT < ${VAR_FILELIST})
+
+# cloudinit_ipconfig_LIST
+unset cloudinit_ipconfig_LIST
+cloudinit_ipconfig_LIST+=$(echo "--ipconfig0")
+while IFS== read var value
+do
+  eval i='$'$var
+  if [ -n "${i}" ]; then
+    # Add CIDR value to IP/IP6
+    if [ $var == 'IP' ] && [[ $i =~ ${ip4_regex} ]]; then
+      i=$(echo ${i} | sed "s/$/\/${CIDR}/")
+    elif [ $var == 'IP' ] || [ $var == 'IP6' ] && [[ $i =~ 'dhcp' ]]; then
+      i=$(echo ${i})
+    elif [ $var == 'IP6' ] && [[ $i =~ ${ip6_regex} ]]; then
+      i=$(echo ${i} | sed "s/$/\/${CIDR6}/")
+    fi
+    j=$(echo ${var} | sed 's/^CT_//')
+    cloudinit_ipconfig_LIST+=( "$(echo "${j,,}=${i}")" )
+  fi
+done <<< $(printsection VM_CLOUD_INIT_IPCONFIG < ${VAR_FILELIST})
+
+
+#---- Create VM
+# Create VM variables
+unset qm_create_LIST
+qm_create_LIST=()
+# Set VMID
+qm_create_LIST+=( "$(echo "${VMID}")" )
+# general_LIST vars
+if [ ${#general_LIST[@]} -ge '1' ]; then
+  qm_create_LIST+=( "$(printf '%s\n' "${general_LIST[@]}" | sed 's/$//')" )
+fi
+# net_LIST vars
+qm_create_LIST+=( "$(printf '%s\n' "${net_LIST[@]}" | xargs | sed 's/ /,/2g')" )
+# startup_LIST vars
+if [ ${#startup_LIST[@]} -ge '2' ]; then
+  qm_create_LIST+=( "$(printf '%s\n' "${startup_LIST[@]}" | xargs | sed 's/ /,/2g')" )
+fi
+# scsi0_LIST vars
+if [ ${#scsi0_LIST[@]} -ge '2' ]; then
+  qm_create_LIST+=( "$(printf '%s\n' "${scsi0_LIST[@]}" | xargs | sed 's/ /,/2g')" )
+fi
+# scsi1_LIST vars
+if [ ${#scsi1_LIST[@]} -ge '2' ]; then
+  qm_create_LIST+=( "$(printf '%s\n' "${scsi1_LIST[@]}" | xargs | sed 's/ /,/2g')" )
+fi
+# Set IDE/CDROM
+qm_create_LIST+=( "$(echo "--ide2 ${OS_TMPL},media=cdrom")" )
+# Create VM
+msg "Creating ${HOSTNAME^} VM..."
+qm create $(printf '%s ' "${pct_create_LIST[@]}" | sed 's/$//')
+echo
+
+
+
+
+
+
 
 
 # Create VM
@@ -66,7 +286,8 @@ qm create ${VMID} \
 --balloon ${VM_RAM_BALLOON} \
 --nameserver ${VM_DNS_SERVER} \
 --net0 ${VM_NET_MODEL},bridge=${VM_NET_BRIDGE},firewall=${VM_NET_FIREWALL}$(if [ ${VM_NET_MAC_ADDRESS} != 'auto' ]; then echo ",macaddr=${VM_NET_MAC_ADDRESS}"; fi)$(if [ ${VM_TAG} -gt 1 ]; then echo ",tag=${VM_TAG}"; fi) \
---scsihw virtio-scsi-single --scsi0 ${STORAGE}:${VM_DISK_SIZE} \
+--scsihw virtio-scsi-single \
+--scsi0 ${STORAGE}:${VM_DISK_SIZE} \
 --ide2 ${TEMPLATE_STRING},media=cdrom \
 --autostart ${VM_AUTOSTART} \
 --onboot ${VM_ONBOOT} \

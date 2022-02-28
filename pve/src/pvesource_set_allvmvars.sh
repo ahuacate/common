@@ -32,6 +32,22 @@ MEMORY_HOST_RESERVE='2000'
 unset net_ratelimit_LIST
 net_ratelimit_LIST=( "100%" "75%" "50%" "25%" "10%" )
 
+# Search domain (local domain)
+unset searchdomain_LIST
+searchdomain_LIST=()
+while IFS= read -r line; do
+  [[ "$line" =~ ^\#.*$ ]] && continue
+  searchdomain_LIST+=( "$line" )
+done << EOF
+# Example
+# local:Special use domain for LAN. Supports mDNS, zero-config devices.
+local:Special use domain for LAN. Supports mDNS (Recommended)
+home.arpa:Special use domain for home networks (Recommended)
+lan:Common domain name for small networks
+localdomain:Common domain name for small networks
+other:Input your own registered or made-up domain name
+EOF
+
 #---- Other Variables --------------------------------------------------------------
 
 # Developer Options
@@ -75,6 +91,7 @@ function qm_list() {
 ip4_regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
 ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
 hostname_regex='^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$'
+domain_regex='^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$'
 R_NUM='^[0-9]+$' # Check numerals only
 
 # Check IP validity
@@ -259,52 +276,6 @@ function cpu_core_set() {
 
 
 #---- Body -------------------------------------------------------------------------
-# VM_TYPE='ct'
-# SECTION_HEAD='test'
-# HOSTNAME='nas-06'
-# IP='10.1.50.150'
-# GW='10.1.50.5'
-# NAMESERVER='10.1.50.5'
-# TAG='0'
-
-# # Required PVESM Storage Mounts for CT
-# read -r -d '' PVESM_REQUIRED_LIST << EOF
-# backup:CT settings backup storage
-# downloads:General downloads storage
-# public:General public storage
-# video:All video libraries
-# EOF
-# unset pvesm_required_LIST
-# mapfile -t pvesm_required_LIST < <( echo -e "${PVESM_REQUIRED_LIST}" | sed '/^$/d' )
-# printf '%s\n' "${pvesm_required_LIST[@]}"
-
-# read -r -d '' PVESM_INPUT_LIST << EOF
-# nas-04-backup,/mnt/backup
-# nas-04-downloads,/mnt/backup
-# nas-04-public,/mnt/public
-# nas-04-video,/mnt/video
-# EOF
-# unset pvesm_input_LIST
-# mapfile -t pvesm_input_LIST < <( echo -e "${PVESM_INPUT_LIST}" | sed '/^$/d' )
-# printf '%s\n' "${pvesm_input_LIST[@]}"
-
-# read -r -d '' PVESM_MISSING_LIST << EOF
-# public:General public storage
-# video:All video libraries
-# EOF
-# unset pvesm_missing_LIST
-# mapfile -t pvesm_missing_LIST < <( echo -e "${PVESM_MISSING_LIST}" | sed '/^$/d' )
-# printf '%s\n' "${pvesm_missing_LIST[@]}"
-
-
-
-
-
-
-
-
-
-
 
 #---- Prerequisites
 section "Installer Prerequisites"
@@ -336,8 +307,53 @@ if [ ${RESULTS} == 'TYPE02' ]; then
 fi
 
 
-# Query and match to PVE host IP format ( for IPv4 only )
-if [[ $(hostname -i) =~ $ip4_regex ]] && [ ${NET_DHCP} == '0' ]; then
+# Confirm search domain (local domain name)
+if [[ $(printf '%s\n' "${searchdomain_LIST[@]}" | awk -F':' '{ print $1 }' | grep "^$(hostname -d)$" >/dev/null 2>&1; echo $?) == '0' ]]; then
+  # Set search domain to use host settings
+  SEARCHDOMAIN=''
+else
+  msg_box "#### SEARCH DOMAIN SERVER - Local Domain Name ####\n\nThe User must set a 'search domain' or 'local domain' name.
+  The search name the User selects or inputs must match the setting used in your router configuration setting labelled as 'Local Domain' or 'Search Domain' depending on the device manufacturer. We recommend you change search domain setting '$(hostname -d)' on your router and all devices to avoid potential problems. Search domain or local domain is NOT your DNS server IP address.
+  We recommend only top-level domain (spTLD) names for residential and small networks names because they cannot be resolved across the internet. Routers and DNS servers know, in theory, not to forward ARPA requests they do not understand onto the public internet. It is best to choose one of our listed names.\n\n$(printf '%s\n' "${searchdomain_LIST[@]}" | column -s ":" -t -N "LOCAL DOMAIN NAME,DESCRIPTION" | indent2)\n\nIf you insist on using a made-up search domain name, then DNS requests may go unfulfilled by your router and forwarded onto global internet DNS root servers. This leaks information about your network such as device names. Alternatively, you can use a registered domain name or subdomain if you know what you are doing by selecting the 'Other' option."
+  unset OPTIONS_VALUES_INPUT
+  unset OPTIONS_LABELS_INPUT
+  OPTIONS_VALUES_INPUT=$(printf '%s\n' "${searchdomain_LIST[@]}" | awk -F':' '{ print $1 }')
+  OPTIONS_LABELS_INPUT=$(printf '%s\n' "${searchdomain_LIST[@]}" | awk -F':' '{ print $1 "  --  " $2 }')
+  makeselect_input2
+  singleselect SELECTED "$OPTIONS_STRING"
+  # Set Searchdomain
+  FAIL_MSG="The search domain name is not valid. A valid search domain name is when all of the following constraints are satisfied:\n
+    Valid Registered Domain Name
+    --  its construct meets the domain naming convention.
+    --  it contains only lowercase characters.
+    --  it doesn't contain any white space.
+    Custom User Made-up Name
+    --  it does not exist on the network.
+    --  it contains only lowercase characters.
+    --  it may include numerics, hyphens (-) and periods (.) but not start or end with them.
+    --  it doesn't contain any other special characters [!#$&%*+_].
+    --  it doesn't contain any white space.
+    --  a name that begins with 'pve' is not allowed.\n
+    Try again..."
+
+  if [ ! ${RESULTS} == 'other' ]; then
+    SEARCHDOMAIN=${RESULTS}
+  elif [ ${RESULTS} == 'other' ]; then
+    while true; do
+      read -p "Input a search domain name ( registered or made-up ): " -e SEARCHDOMAIN
+      if [[ ${SEARCHDOMAIN} =~ ${domain_regex} ]] || [[ ${SEARCHDOMAIN} =~ ${hostname_regex} ]]; then
+        echo
+        break
+      else
+        warn "$FAIL_MSG"
+      fi
+    done
+  fi
+fi
+
+
+# Query and match to PVE host IP format ( for IPv4 only ) and DHCP check
+if [[ $(hostname -i) =~ ${ip4_regex} ]] && [ ${NET_DHCP} == '0' ]; then
   # Create & display list of variable changes
   unset ipVARS
   unset displayVARS
@@ -376,6 +392,24 @@ if [[ $(hostname -i) =~ $ip4_regex ]] && [ ${NET_DHCP} == '0' ]; then
 
   msg_box "#### MODIFYING EASY SCRIPT IPv4 PRESETS ####\n\nOur Easy Scripts (ES) settings for your IPv4 ${VM_TYPE^^} addresses have been modified where required to match your PVE hosts IPv4 range, nameserver and gateway addresses and VLAN status ( $(if [ ${TAG} == '0' ]; then echo "disabled"; else echo "enabled"; fi) ).\n\n$(printf '%s\n' "${displayVARS[@]}" | column -s ":" -t -N "IP DESCRIPTION,DEFAULT ES PRESET,NEW ES PRESET" | indent2)\n\nThe new ES presets will be checked and validated in the next steps."
   echo
+elif [ ${NET_DHCP} == '1' ]; then
+  if [[ $(hostname -i) =~ ${ip4_regex} ]]; then
+    # Null/void any IP conflict settings when dhcp is enabled
+    IP='dhcp'
+    IP6=''
+    GW=''
+    GW6=''
+    NAMESERVER=''
+    NET_DHCP_TYPE='dhcp4'
+  elif [[ $(hostname -i) =~ ${ip6_regex} ]]; then
+    # Null/void any IP conflict settings when dhcp is enabled
+    IP=''
+    IP6='dhcp'
+    GW=''
+    GW6=''
+    NAMESERVER=''
+    NET_DHCP_TYPE='dhcp6'
+  fi
 fi
 
 # Auto set CPU Core Cnt
@@ -392,6 +426,7 @@ section "Easy Script Validation"
 FAIL_MSG="Cannot perform a 'Easy Script' installation.\nProceeding to User input based installation."
 while true; do
   msg "Performing 'Easy Script' installation..."
+
   # Hostname validation
   result=$(valid_hostname ${HOSTNAME} > /dev/null 2>&1)
   if [ $? -ne 0 ]; then
@@ -441,6 +476,7 @@ while true; do
         break
       fi
     fi
+
     # GW validation
     if [ -n "${GW}" ]; then
       result=$(valid_gw ${GW} > /dev/null 2>&1)
@@ -457,6 +493,30 @@ while true; do
         break
       fi
     fi
+
+    # DNS validation
+    if [ -n "${NAMESERVER}" ]; then
+      result=$(valid_dns ${NAMESERVER} > /dev/null 2>&1)
+      if [ $? -ne 0 ]; then
+        info "$FAIL_MSG"
+        echo
+        break
+      fi
+    fi
+
+    # Check CTID/VMID
+    if [ ${VM_TYPE} == 'ct' ]; then
+      ID_NUM=${CTID}
+    elif [ ${VM_TYPE} == 'vm' ]; then
+      ID_NUM=${VMID}
+    fi
+    result=$(valid_machineid ${ID_NUM} > /dev/null 2>&1)
+    if [ $? -ne 0 ]; then
+      info "$FAIL_MSG"
+      echo
+      break
+    fi
+
   elif [ ${NET_DHCP} == '1' ]; then
     # DHCP validation
     if [ ${NET_DHCP_TYPE} == 'dhcp4' ]; then
@@ -474,19 +534,16 @@ while true; do
         break
       fi
     fi
-  fi
 
-  # DNS validation
-  if [ -n "${NAMESERVER}" ]; then
-    result=$(valid_dns ${NAMESERVER} > /dev/null 2>&1)
-    if [ $? -ne 0 ]; then
-      info "$FAIL_MSG"
-      echo
-      break
+    # Set CTID/VMID
+    if [ ${VM_TYPE} == 'ct' ]; then
+      CTID=$(pvesh get /cluster/nextid)
+    elif [ ${VM_TYPE} == 'vm' ]; then
+      VMID=$(pvesh get /cluster/nextid)
     fi
   fi
 
-  # DNS validation
+  # Rate validation
   if [ -n "${RATE}" ]; then
     result=$(valid_netspeedlimit ${RATE} > /dev/null 2>&1)
     if [ $? -ne 0 ]; then
@@ -516,18 +573,6 @@ while true; do
     pvesm_input_LIST+=( "$(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git" | awk 'BEGIN {OFS = ","}{print $1,"/mnt/pve/"$1}')" )
   fi
 
-  # Check CTID/VMID
-  if [ ${VM_TYPE} == 'ct' ]; then
-    ID_NUM=${CTID}
-  elif [ ${VM_TYPE} == 'vm' ]; then
-    ID_NUM=${VMID}
-  fi
-  result=$(valid_machineid ${ID_NUM} > /dev/null 2>&1)
-  if [ $? -ne 0 ]; then
-		info "$FAIL_MSG"
-    echo
-		break
-	fi
 
   # Confirm ES settings
   msg "Easy Script has confirmed all default variable settings are valid (Recommended). The settings for '${HOSTNAME^}' ${VM_TYPE^^} are:"
@@ -551,24 +596,18 @@ while true; do
     elif [ -n "${IP6}" ] && [ -n "${GW6}" ]; then
       displayVARS+=( 'HOSTNAME' 'IP6' 'GW6' )
     fi
-  elif [ ${NET_DHCP} == '1' ] && [ ${NET_DHCP_TYPE} == 'dhcp' ]; then
-    IP='dhcp'
-    GW=""
-    IP6=""
-    GW6=""
-    NAMESERVER=""
-    displayVARS+=( 'HOSTNAME' 'IP' 'GW' )
+  elif [ ${NET_DHCP} == '1' ] && [ ${NET_DHCP_TYPE} == 'dhcp4' ]; then
+    displayVARS+=( 'HOSTNAME' 'IP' )
   elif [ ${NET_DHCP} == '1' ] && [ ${NET_DHCP_TYPE} == 'dhcp6' ]; then
-    IP=""
-    GW=""
-    IP6='dhcp'
-    GW6=""
-    NAMESERVER=""
-    displayVARS+=( 'HOSTNAME' 'IP6' 'GW6' )
+    displayVARS+=( 'HOSTNAME' 'IP6' )
   fi
   # Display Nameserver
   if [ -n "${NAMESERVER}" ]; then
     displayVARS+=( 'NAMESERVER' )
+  fi
+  # Display Search Domain
+  if [ -n "${SEARCHDOMAIN}" ]; then
+    displayVARS+=( 'SEARCHDOMAIN' )
   fi
   # Display VLAN
   if [ -n "${TAG}" ] && [[ ! ${TAG} =~ ^(0|1)$ ]]; then
@@ -611,6 +650,9 @@ while true; do
     elif [ 'NAMESERVER' == $j ]; then
       msg "\t$i. Name server : ${YELLOW}${NAMESERVER}${NC}"
       (( i=i+1 ))
+    elif [ 'SEARCHDOMAIN' == $j ]; then
+      msg "\t$i. Search domain ( local domain ) : ${YELLOW}${SEARCHDOMAIN}${NC}"
+      (( i=i+1 ))
     elif [ 'TAG' == $j ]; then
       msg "\t$i. VLAN : ${YELLOW}${TAG}${NC}"
       (( i=i+1 ))
@@ -634,7 +676,7 @@ while true; do
     case $YN in
       [Yy]*)
         if [ ! ${SSH_ENABLE} = 0 ]; then
-          SSH_PORT=""
+          SSH_PORT=''
         fi
         info "'${HOSTNAME^}' ${VM_TYPE^^} build is set to use Easy Script defaults."
         echo
@@ -674,7 +716,7 @@ while true; do
   result=$(valid_hostname ${HOSTNAME} > /dev/null 2>&1)
   if [ $? == 0 ]; then
 		info "$PASS_MSG"
-    HOSTNAME=${HOSTNAME}
+    # HOSTNAME=${HOSTNAME}
     echo
     break
   elif [ $? != 0 ]; then
@@ -698,7 +740,7 @@ if [ "${#vmbr_LIST[@]}" -gt '1' ]; then
   BRIDGE=${RESULTS}
 fi
 
-#---- Apply rate limiting to interface (MB/s). Value "" for unlimited.
+#---- Apply rate limiting to interface (MB/s). Value '' for unlimited.
 iface=$(brctl show ${BRIDGE} | awk 'NF>1 && NR>1 {print $4}')
 iface_speed=$(ethtool ${iface} | grep -i -Po '^\s?\Speed:\s?\K[^/][0-9]+')
 msg "Apply a network speed limit to ${VM_TYPE^^} interface ( ${BRIDGE,,} )..."
@@ -706,8 +748,8 @@ unset OPTIONS_VALUES_INPUT
 unset OPTIONS_LABELS_INPUT
 while IFS= read -r var; do
   if [ ! ${var} == '100%' ]; then
-    j=$(echo "${iface_speed}/8*$(echo $var | awk -F, '{sub(/%/,""); printf("%.2f"), $1/100}')" | bc | awk '{print int($1+0.5)}')
-    k=$(echo "${iface_speed}*$(echo $var | awk -F, '{sub(/%/,""); printf("%.2f"), $1/100}')" | bc | awk '{print int($1+0.5)}')
+    j=$(echo "${iface_speed}/8*$(echo $var | awk -F, '{sub(/%/,''); printf("%.2f"), $1/100}')" | bc | awk '{print int($1+0.5)}')
+    k=$(echo "${iface_speed}*$(echo $var | awk -F, '{sub(/%/,''); printf("%.2f"), $1/100}')" | bc | awk '{print int($1+0.5)}')
     OPTIONS_VALUES_INPUT+=( "$(echo $j)" )
     OPTIONS_LABELS_INPUT+=( "$(echo "$j MB/s - Speed limited to $k Mbps")" )
   elif [ ${var} == '100%' ]; then
@@ -719,7 +761,7 @@ makeselect_input2 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
 singleselect SELECTED "$OPTIONS_STRING"
 # Set speed limit
 if [ ${RESULTS} == '0' ]; then
-  RATE=""
+  RATE=''
 elif [ ! ${RESULTS} == '0' ]; then
   RATE=${RESULTS}
 fi
@@ -727,7 +769,7 @@ fi
 #---- Set IP Method
 msg "Select static IP or DHCP address assignment..."
 OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" "TYPE03" )
-OPTIONS_LABELS_INPUT=( "Static - Create a IPv4 or IPv6 static address (Recommended)" \
+OPTIONS_LABELS_INPUT=( "Static - Create a IPv4 or IPv6 static address" \
 "DHCP - Use DHCP IPv4 format address assignment" \
 "DHCP6 - Use DHCP IPv6 format address assignment" )
 makeselect_input2
@@ -740,18 +782,18 @@ elif [ ${RESULTS} == 'TYPE02' ]; then
   NET_DHCP='1'
   NET_DHCP_TYPE='dhcp'
   IP='dhcp'
-  GW=""
-  IP6=""
-  GW6=""
-  NAMESERVER=""
+  GW=''
+  IP6=''
+  GW6=''
+  NAMESERVER=''
 elif [ ${RESULTS} == 'TYPE03' ]; then
   NET_DHCP='1'
   NET_DHCP_TYPE='dhcp6'
   IP6='dhcp'
-  GW6=""
-  IP=""
-  GW=""
-  NAMESERVER=""
+  GW6=''
+  IP=''
+  GW=''
+  NAMESERVER=''
 fi
 
 #---- Set VLAN
@@ -814,10 +856,10 @@ if [ ${NET_DHCP} == '0' ]; then
       info "$PASS_MSG"
       if [[ ${IP_VAR} =~ ${ip4_regex} ]]; then
         IP=${IP_VAR}
-        IP6=""
+        IP6=''
       elif [[ ${IP_VAR} =~ ${ip6_regex} ]]; then
         IP6=${IP_VAR}
-        IP=""
+        IP=''
       fi
       echo
       break 2
@@ -849,10 +891,10 @@ if [ ${NET_DHCP} == '0' ]; then
       info "$PASS_MSG"
       if [[ ${GW_VAR} =~ ${ip4_regex} ]]; then
         GW=${GW_VAR}
-        GW6=""
+        GW6=''
       elif [[ ${GW_VAR} =~ ${ip6_regex} ]]; then
         GW6=${GW_VAR}
-        GW=""
+        GW=''
       fi
       echo
       break
@@ -888,7 +930,7 @@ if [ ${NET_DHCP} == '0' ]; then
       result=$(valid_dns ${NAMESERVER} > /dev/null 2>&1)
       if [ $? == 0 ]; then
         info "$PASS_MSG"
-        NAMESERVER=${NAMESERVER}
+        # NAMESERVER=${NAMESERVER}
         echo
         break
       elif [ $? != 0 ]; then
@@ -897,7 +939,7 @@ if [ ${NET_DHCP} == '0' ]; then
       fi
     done
   elif [ ${RESULTS} == 'TYPE02' ]; then
-    NAMESERVER=""
+    NAMESERVER=''
   fi
 fi
 
@@ -990,7 +1032,7 @@ while true; do
   result=$([[ ${MEMORY} =~ ${R_NUM} ]] && [[ ${MEMORY} -lt $(max_ram_allocation) ]] > /dev/null 2>&1)
   if [ $? == 0 ]; then
 		info "$PASS_MSG"
-    MEMORY_VAR=${MEMORY}
+    # MEMORY_VAR=${MEMORY}
     echo
     break
   elif [ $? != 0 ]; then
