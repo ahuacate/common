@@ -414,10 +414,9 @@ fi
 
 # Auto set CPU Core Cnt
 cpu_core_set "${CPULIMIT}"
-if [ ${VM_TYPE} = 'ct' ]; then
+if [ $VM_TYPE == 'ct' ]; then
   CORES=${CPU_CORE_CNT}
 fi
-
 
 #---- Easy Script automatic VAR validation
 section "Easy Script Validation"
