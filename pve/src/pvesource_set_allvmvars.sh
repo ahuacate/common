@@ -414,7 +414,7 @@ fi
 
 # Auto set CPU Core Cnt
 cpu_core_set "${CPULIMIT}"
-if [ ${VM_TYPE} == 'ct' ]; then
+if [ ${VM_TYPE} = 'ct' ]; then
   CORES=${CPU_CORE_CNT}
 fi
 
@@ -505,9 +505,9 @@ while true; do
     fi
 
     # Check CTID/VMID
-    if [ ${VM_TYPE} == 'ct' ]; then
+    if [ ${VM_TYPE} = 'ct' ]; then
       ID_NUM=${CTID}
-    elif [ ${VM_TYPE} == 'vm' ]; then
+    elif [ ${VM_TYPE} = 'vm' ]; then
       ID_NUM=${VMID}
     fi
     result=$(valid_machineid ${ID_NUM} > /dev/null 2>&1)
