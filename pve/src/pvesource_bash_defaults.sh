@@ -18,6 +18,14 @@ if command -v pveversion -v &> /dev/null; then
 fi
 
 #---- Static Variables -------------------------------------------------------------
+
+# Regex for functions
+ip4_regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
+hostname_regex='^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$'
+domain_regex='^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$'
+R_NUM='^[0-9]+$' # Check numerals only
+
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
@@ -559,17 +567,27 @@ function indent2() {
 
 #---- IP validate Tools
 # IP validate
+# function valid_ip() {
+#   local  ip=$1
+#   local  stat=1
+#   if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+#       OIFS=$IFS
+#       IFS='.'
+#       ip=($ip)
+#       IFS=$OIFS
+#       [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+#           && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+#       stat=$?
+#   fi
+#   return $stat
+# }
 function valid_ip() {
   local  ip=$1
   local  stat=1
-  if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-      OIFS=$IFS
-      IFS='.'
-      ip=($ip)
-      IFS=$OIFS
-      [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
-          && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
-      stat=$?
+  if [[ $ip =~ ${ip4_regex} ]]; then
+    stat=$?
+  elif [[ $ip =~ ${ip6_regex} ]]; then
+    stat=$?
   fi
   return $stat
 }
