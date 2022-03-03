@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------------------------------
 # Filename:     pvesource_identify_pvehosts.sh
-# Description:  Identify and set Proxmox PVE host IP and Hostnames
+# Description:  Identify and set Proxmox PVE host IP(s) and Hostname(s)
 # ----------------------------------------------------------------------------------
 
 #---- Bash command to run script ---------------------------------------------------
