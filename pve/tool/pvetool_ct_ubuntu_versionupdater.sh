@@ -15,9 +15,11 @@
 # COMMON_PVE_SRC="${DIR}/../../common/pve/src"
 # SHARED_DIR="${DIR}/../../shared"
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-COMMON_DIR="${DIR}/../common"
-COMMON_PVE_SRC="${DIR}/../common/pve/src"
-SHARED_DIR="${DIR}/../shared"
+COMMON_DIR="${DIR}/../../common"
+COMMON_PVE_SRC="${DIR}/../src"
+# SHARED_DIR="${DIR}/../shared"
+
+# /tmp/pve-nas/common/pve/tool/../common/pve/src/pvesource_bash_defaults.sh
 
 #---- Dependencies -----------------------------------------------------------------
 
