@@ -62,9 +62,10 @@ while true; do
       ;;
     [Nn]*)
       OS_UPDATE=1
-      info "You have chosen to skip this step. Aborting the NAS upgrade. Existing in 3 seconds..."
-      sleep 2
-      exit 0
+      info "You have chosen to skip this step. Aborting the NAS upgrade."
+      sleep 1
+      return
+      # exit 0
       ;;
     *)
       warn "Error! Entry must be 'y' or 'n'. Try again..."
