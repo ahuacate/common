@@ -294,7 +294,7 @@ msg "Does your LAN network support VLANs ( L2/L3 switches )..."
 unset OPTIONS_VALUES_INPUT
 unset OPTIONS_LABELS_INPUT
 OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" )
-OPTIONS_LABELS_INPUT=( "VLAN enabled - LAN switches & devices are VLAN L2/3 ready" \
+OPTIONS_LABELS_INPUT=( "VLAN enabled - LAN supports VLAN L2/3" \
 "VLAN disabled - LAN does NOT support VLANs ( basic home LAN )" )
 makeselect_input2
 singleselect SELECTED "$OPTIONS_STRING"
