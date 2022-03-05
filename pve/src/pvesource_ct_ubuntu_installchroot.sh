@@ -182,7 +182,8 @@ else
         SSHD_STATUS=0
         systemctl stop ssh 2>/dev/null
         ufw allow $SSH_PORT 2>/dev/null
-        systemctl restart ssh 2>/dev/null
+        systemctl enable ssh 2>/dev/null
+        systemctl start ssh 2>/dev/null
         systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - ${YELLOW}port $SSH_PORT${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port $SSH_PORT"
         echo
         break
