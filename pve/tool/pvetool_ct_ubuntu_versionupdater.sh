@@ -10,16 +10,9 @@
 
 #---- Source -----------------------------------------------------------------------
 
-# DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-# COMMON_DIR="${DIR}/../../common"
-# COMMON_PVE_SRC="${DIR}/../../common/pve/src"
-# SHARED_DIR="${DIR}/../../shared"
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 COMMON_DIR="${DIR}/../../common"
 COMMON_PVE_SRC="${DIR}/../src"
-# SHARED_DIR="${DIR}/../shared"
-
-# /tmp/pve-nas/common/pve/tool/../common/pve/src/pvesource_bash_defaults.sh
 
 #---- Dependencies -----------------------------------------------------------------
 
@@ -64,8 +57,7 @@ while true; do
       OS_UPDATE=1
       info "You have chosen to skip this step. Aborting the NAS upgrade."
       sleep 1
-      return
-      # exit 0
+      exit 0
       ;;
     *)
       warn "Error! Entry must be 'y' or 'n'. Try again..."
