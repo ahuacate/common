@@ -768,16 +768,13 @@ fi
 #---- Set IP Method
 msg "Select static IP or DHCP address assignment..."
 OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" "TYPE03" )
-OPTIONS_LABELS_INPUT=( "Static - Create a IPv4 or IPv6 static address" \
-"DHCP - Use DHCP IPv4 format address assignment" \
-"DHCP6 - Use DHCP IPv6 format address assignment" )
+OPTIONS_LABELS_INPUT=( "DHCP - Use DHCP IPv4 format address assignment" \
+"DHCP6 - Use DHCP IPv6 format address assignment" \
+"Static - Create a IPv4 or IPv6 static address" )
 makeselect_input2
 singleselect SELECTED "$OPTIONS_STRING"
 # Set IP method type
 if [ ${RESULTS} == 'TYPE01' ]; then
-  NET_DHCP='0'
-  NET_DHCP_TYPE='0'
-elif [ ${RESULTS} == 'TYPE02' ]; then
   NET_DHCP='1'
   NET_DHCP_TYPE='dhcp'
   IP='dhcp'
@@ -785,7 +782,7 @@ elif [ ${RESULTS} == 'TYPE02' ]; then
   IP6=''
   GW6=''
   NAMESERVER=''
-elif [ ${RESULTS} == 'TYPE03' ]; then
+elif [ ${RESULTS} == 'TYPE02' ]; then
   NET_DHCP='1'
   NET_DHCP_TYPE='dhcp6'
   IP6='dhcp'
@@ -793,7 +790,11 @@ elif [ ${RESULTS} == 'TYPE03' ]; then
   IP=''
   GW=''
   NAMESERVER=''
+elif [ ${RESULTS} == 'TYPE03' ]; then
+  NET_DHCP='0'
+  NET_DHCP_TYPE='0'
 fi
+
 
 #---- Set VLAN
 if [ ! ${TAG} == '0' ]; then
