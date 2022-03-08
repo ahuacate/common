@@ -953,7 +953,7 @@ elif [ ${VM_TYPE} == 'vm' ]; then
 fi
 msg "Setting ${HOSTNAME^} ${ID_NUM_TYPE}..."
 # Set temporary ID number if script CTID/VMID preset is not available
-if [ -n "${IP}" ] && [ ! $(valid_machineid ${ID_NUM_TMP} > /dev/null 2>&1; echo $?) == 0 ]; then
+if [ -n "${IP}" ] && [[ ${IP} =~ ${ip4_regex} ]] && [ ! $(valid_machineid ${ID_NUM_TMP} > /dev/null 2>&1; echo $?) == 0 ]; then
   if [ $(valid_machineid "$(echo ${IP} | awk -F'.' '{print $4}')" > /dev/null 2>&1; echo $?) == 0 ]; then
     # Last octet of IPv4
     ID_NUM_TMP=$(echo ${IP} | awk -F'.' '{print $4}')
@@ -961,34 +961,60 @@ if [ -n "${IP}" ] && [ ! $(valid_machineid ${ID_NUM_TMP} > /dev/null 2>&1; echo 
     # Auto generated CTID
     ID_NUM_TMP=$(pvesh get /cluster/nextid)
   fi
+elif [ -n "${IP}" ] && [ ${IP} == 'dhcp' ]; then
+  # Auto generated VMID
+  ID_NUM=$(pvesh get /cluster/nextid)
+  PASS_MSG="${ID_NUM_TYPE} is set: ${YELLOW}${ID_NUM}${NC}"
+  if [ ${VM_TYPE} == 'ct' ]; then
+    CTID=${ID_NUM}
+    info "$PASS_MSG"
+    echo
+  elif [ ${VM_TYPE} == 'vm' ]; then
+    VMID=${ID_NUM}
+    info "$PASS_MSG"
+    echo
+  fi
 elif [ -n "${IP6}" ] && [ ! $(valid_machineid ${ID_NUM_TMP} > /dev/null 2>&1; echo $?) == 0 ]; then
   # Auto generated VMID
-  ID_NUM_TMP=$(pvesh get /cluster/nextid)
-fi
-msg "Proxmox ${ID_NUM_TMP} numeric IDs must be greater than 100. $(if [ -n "${IP}" ] && [ $(echo ${IP} | awk -F'.' '{print $4}') >= '100' ]; then echo -e "We recommend the User uses the last octet or host section value of your ${HOSTNAME^} IPv4 address to set a valid ${ID_NUM_TYPE}. If this ${ID_NUM_TYPE} is not available then PVE will auto-generate a valid ${ID_NUM_TYPE} for the User to accept or reject."; fi)"
-while true; do
-  read -p "Enter ${ID_NUM_TYPE} : " -e -i ${ID_NUM_TMP} ID_NUM
-  FAIL_MSG="The ${ID_NUM_TYPE} is not valid. A valid ${ID_NUM_TYPE} is when all of the following constraints are satisfied:\n
-    --  it is not assigned to any other PVE CT or VM machine.
-    --  it must be greater than 100.
-    --  it is a numerical number.\n
-  Try again..."
+  ID_NUM=$(pvesh get /cluster/nextid)
   PASS_MSG="${ID_NUM_TYPE} is set: ${YELLOW}${ID_NUM}${NC}"
-  result=$(valid_machineid ${ID_NUM} > /dev/null 2>&1)
-  if [ $? == 0 ]; then
-		info "$PASS_MSG"
-    if [ ${VM_TYPE} == 'ct' ]; then
-      CTID=${ID_NUM}
-    elif [ ${VM_TYPE} == 'vm' ]; then
-      VMID=${ID_NUM}
+  if [ ${VM_TYPE} == 'ct' ]; then
+    CTID=${ID_NUM}
+    info "$PASS_MSG"
+    echo
+  elif [ ${VM_TYPE} == 'vm' ]; then
+    VMID=${ID_NUM}
+    info "$PASS_MSG"
+    echo
+  fi
+fi
+# Query for non-dhcp
+if [ -n "${IP}" ] && [ ! ${IP} == 'dhcp' ] || [ -n "${IP6}" ] && [ ! ${IP6} == 'dhcp' ]; then
+  msg "Proxmox ${ID_NUM_TMP} numeric IDs must be greater than 100. $(if [ -n "${IP}" ] && [ $(echo ${IP} | awk -F'.' '{print $4}') >= '100' ]; then echo -e "We recommend the User uses the last octet or host section value of your ${HOSTNAME^} IPv4 address to set a valid ${ID_NUM_TYPE}. If this ${ID_NUM_TYPE} is not available then PVE will auto-generate a valid ${ID_NUM_TYPE} for the User to accept or reject."; fi)"
+  while true; do
+    read -p "Enter ${ID_NUM_TYPE} : " -e -i ${ID_NUM_TMP} ID_NUM
+    FAIL_MSG="The ${ID_NUM_TYPE} is not valid. A valid ${ID_NUM_TYPE} is when all of the following constraints are satisfied:\n
+      --  it is not assigned to any other PVE CT or VM machine.
+      --  it must be greater than 100.
+      --  it is a numerical number.\n
+    Try again..."
+    PASS_MSG="${ID_NUM_TYPE} is set: ${YELLOW}${ID_NUM}${NC}"
+    result=$(valid_machineid ${ID_NUM} > /dev/null 2>&1)
+    if [ $? == 0 ]; then
+      info "$PASS_MSG"
+      if [ ${VM_TYPE} == 'ct' ]; then
+        CTID=${ID_NUM}
+      elif [ ${VM_TYPE} == 'vm' ]; then
+        VMID=${ID_NUM}
+      fi
+      echo
+      break
+    elif [ $? != 0 ]; then
+      warn "$FAIL_MSG"
+      echo
     fi
-    echo
-    break
-  elif [ $? != 0 ]; then
-		warn "$FAIL_MSG"
-    echo
-	fi
-done
+  done
+fi
 
 #---- Set Root Disk Size
 if [ ${VM_TYPE} == 'ct' ]; then
