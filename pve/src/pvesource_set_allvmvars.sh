@@ -965,7 +965,7 @@ elif [ -n "${IP6}" ] && [ ! $(valid_machineid ${ID_NUM_TMP} > /dev/null 2>&1; ec
   # Auto generated VMID
   ID_NUM_TMP=$(pvesh get /cluster/nextid)
 fi
-msg "Proxmox ${ID_NUM_TMP} numeric IDs must be greater than 100. $(if [ -n "${IP}" ] && [ $(echo ${IP} | awk -F'.' '{print $4}') -ge 100 ]; then echo -e "We recommend the User uses the last octet or host section value of your ${HOSTNAME^} IPv4 address to set a valid ${ID_NUM_TYPE}. If this ${ID_NUM_TYPE} is not available then PVE will auto-generate a valid ${ID_NUM_TYPE} for the User to accept or reject."; fi)"
+msg "Proxmox ${ID_NUM_TMP} numeric IDs must be greater than 100. $(if [ -n "${IP}" ] && [ $(echo ${IP} | awk -F'.' '{print $4}') >= '100' ]; then echo -e "We recommend the User uses the last octet or host section value of your ${HOSTNAME^} IPv4 address to set a valid ${ID_NUM_TYPE}. If this ${ID_NUM_TYPE} is not available then PVE will auto-generate a valid ${ID_NUM_TYPE} for the User to accept or reject."; fi)"
 while true; do
   read -p "Enter ${ID_NUM_TYPE} : " -e -i ${ID_NUM_TMP} ID_NUM
   FAIL_MSG="The ${ID_NUM_TYPE} is not valid. A valid ${ID_NUM_TYPE} is when all of the following constraints are satisfied:\n
