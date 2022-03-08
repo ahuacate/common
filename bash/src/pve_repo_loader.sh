@@ -8,7 +8,7 @@
 
 # Check for Git SW
 if [ ! $(dpkg -s git >/dev/null 2>&1; echo $?) == 0 ]; then
-  apt-get install git -yqq
+  apt-get install git -yqqLater.
 fi
 
 # Installer cleanup
