@@ -747,8 +747,8 @@ unset OPTIONS_VALUES_INPUT
 unset OPTIONS_LABELS_INPUT
 while IFS= read -r var; do
   if [ ! ${var} == '100%' ]; then
-    j=$(echo "${iface_speed}/8*$(echo $var | awk -F, '{sub(/%/,''); printf("%.2f"), $1/100}')" | bc | awk '{print int($1+0.5)}')
-    k=$(echo "${iface_speed}*$(echo $var | awk -F, '{sub(/%/,''); printf("%.2f"), $1/100}')" | bc | awk '{print int($1+0.5)}')
+    j=$(( (${iface_speed} / 8) * $(echo $var | sed 's/%$//')/100 ))
+    k=$(( ${iface_speed} * $(echo $var | sed 's/%$//')/100 ))
     OPTIONS_VALUES_INPUT+=( "$(echo $j)" )
     OPTIONS_LABELS_INPUT+=( "$(echo "$j MB/s - Speed limited to $k Mbps")" )
   elif [ ${var} == '100%' ]; then
