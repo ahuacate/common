@@ -46,5 +46,6 @@ if [ ! -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ]; then
   # chmod -R 777 ${REPO_TEMP}/${GIT_REPO}/common
   # Create new tar files
   # rm ${REPO_TEMP}/${GIT_REPO}.tar.gz
+  chmod -R 777 ${REPO_TEMP}/${GIT_REPO}
   tar --exclude=".*" -czf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP} ${GIT_REPO}/
 fi
