@@ -34,7 +34,7 @@ HOSTNAME_FAIL_MSG="The PVE hostname is not valid. A valid PVE hostname is when a
   --  it doesn't contain any other special characters [!#$&%*+_].
   --  it doesn't contain any white space.\n
 Why is this important?
-Because Proxmox computing power is expanded using clusters of PVE machine hosts. Each PVE hostname should be denoted and sequenced with a numeric suffix beginning with '1' or '01' for easy installation scripting identification. Our standard PVE host naming convention is 'pve-01', 'pve-02', 'pve-03' and so on. Our scripts by default create NFS and SMB export permissions based on consecutive PVE hostnames beginning with the primary hostname (i.e pve-01 to pve-0${PVE_HOST_NODE_CNT}). If you proceed with '${PVE_HOSTNAME}', which has no identifiable numeric suffix, only the single PVE host '${PVE_HOSTNAME}' will be recognised or configured. This will cause problems with NFS exports for example.\n
+Because Proxmox computing power is expanded using clusters of PVE machine hosts. Each PVE hostname should be denoted and sequenced with a numeric suffix beginning with '1' or '01' for easy installation scripting identification. Our standard PVE host naming convention is 'pve-01', 'pve-02', 'pve-03' and so on. Our scripts by default create NFS and SMB export permissions based on consecutive PVE hostnames beginning with the primary hostname (i.e pve-01 to pve-0${PVE_HOST_NODE_CNT}). If you proceed with '${PVE_HOSTNAME}', which has no identifiable numeric suffix ('1' or '01'), only the single PVE host '${PVE_HOSTNAME}' will be recognised or configured. This will cause problems with NFS exports for example.\n
 We recommend the User immediately changes the PVE primary hostname to 'pve-01' and all secondary PVE hosts to 'pve-02' and so on before proceeding.\n"
 IP_FAIL_MSG="The IP address is not valid. A valid IP address is when all of the following constraints are satisfied:\n
   --  it meets the IPv4 or IPv6 standard.
@@ -62,7 +62,7 @@ else
       unset OPTIONS_LABELS_INPUT
       OPTIONS_VALUES_INPUT+=( "OPTION_01" "OPTION_02" "OPTION_03" )
       OPTIONS_LABELS_INPUT+=( "Exit installer and fix the naming of your Proxmox PVE hostnames ( Recommended )" \
-      "Proceed with '${PVE_HOSTNAME_VAR} ( invalid PVE hostname )" \
+      "Proceed with '${PVE_HOSTNAME_VAR}' ( invalid PVE hostname )" \
       "Input a different PVE hostname" )
       makeselect_input2
       singleselect SELECTED "$OPTIONS_STRING"

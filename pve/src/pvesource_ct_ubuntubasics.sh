@@ -79,6 +79,9 @@ pct exec $CTID -- apt-get -qqy install curl > /dev/null
 # msg "Installing ACL..."
 msg "Installing ACL (Access Control Lists)..."
 pct exec $CTID -- apt-get install -y acl > /dev/null
-echo
 
+# msg "Installing BC..."
+msg "Installing BC..."
+pct exec $CTID -- apt-get install -y bc > /dev/null
+echo
 #---- Finish Line ------------------------------------------------------------------
