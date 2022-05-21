@@ -119,7 +119,7 @@ do
   eval i='$'$var
   if [ -n "${i}" ]; then
     # Wrap Description var in quotes
-    if [ "${var}" == 'DESCRIPTION' ]; then
+    if [ "$var" == 'DESCRIPTION' ]; then
       i=\"${i}\"
     fi
     general_LIST+=( "$(echo "--${var,,} ${i}")" )
@@ -162,7 +162,7 @@ do
   eval i='$'$var
   if [ -n "${i}" ]; then
     # Ignore of tag=(0|1)
-    if [ $var = TAG ] && [[ ${i} =~ ^(0|1)$ ]]; then 
+    if [ "$var" == TAG ] && [[ ${i} =~ ^(0|1)$ ]]; then 
       continue
     fi
     net_LIST+=( "$(echo "${var,,}=${i}")" )
@@ -181,11 +181,11 @@ do
   eval i='$'$var
   if [ -n "${i}" ]; then
     # Add CIDR value to IP/IP6
-    if [ $var = 'IP' ] && [[ $i =~ ${ip4_regex} ]]; then
+    if [ "$var" == 'IP' ] && [[ $i =~ ${ip4_regex} ]]; then
       i=$(echo ${i} | sed "s/$/\/${CIDR}/")
-    elif [ $var = 'IP' ] || [ $var = 'IP6' ] && [[ $i =~ 'dhcp' ]]; then
+    elif [ "$var" == 'IP' ] || [ $var = 'IP6' ] && [[ $i =~ 'dhcp' ]]; then
       i=$(echo ${i})
-    elif [ $var = 'IP6' ] && [[ $i =~ ${ip6_regex} ]]; then
+    elif [ "$var" == 'IP6' ] && [[ $i =~ ${ip6_regex} ]]; then
       i=$(echo ${i} | sed "s/$/\/${CIDR6}/")
     fi
     net_LIST+=( "$(echo "${var,,}=${i}")" )
@@ -247,10 +247,10 @@ echo
 
 # Check CT Status
 sleep 2
-if [ $(pct list | grep -w "^${CTID}" > /dev/null; echo $?) == '0' ]; then
+if [ "$(pct list | grep -w "^${CTID}" > /dev/null; echo $?)" == '0' ]; then
     info "${HOSTNAME^} CT has been created. Current status: ${YELLOW}$(pct status ${CTID} | awk '{print $2}')${NC}"
     echo
-elif [ ! $(pct list | grep -w "^${CTID}" > /dev/null; echo $?) == '0' ]; then
+elif [ ! "$(pct list | grep -w "^${CTID}" > /dev/null; echo $?)" == '0' ]; then
   warn "Something went wrong. ${HOSTNAME^} CT has NOT been created. Aborting this installation."
   echo
   trap cleanup EXIT
