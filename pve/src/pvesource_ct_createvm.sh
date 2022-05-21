@@ -183,7 +183,7 @@ do
     # Add CIDR value to IP/IP6
     if [ "$var" == 'IP' ] && [[ $i =~ ${ip4_regex} ]]; then
       i=$(echo ${i} | sed "s/$/\/${CIDR}/")
-    elif [ "$var" == 'IP' ] || [ $var = 'IP6' ] && [[ $i =~ 'dhcp' ]]; then
+    elif [ "$var" == 'IP' ] || [ "$var" == 'IP6' ] && [[ $i =~ 'dhcp' ]]; then
       i=$(echo ${i})
     elif [ "$var" == 'IP6' ] && [[ $i =~ ${ip6_regex} ]]; then
       i=$(echo ${i} | sed "s/$/\/${CIDR6}/")
