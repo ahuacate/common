@@ -119,7 +119,7 @@ do
   eval i='$'$var
   if [ -n "${i}" ]; then
     # Wrap Description var in quotes
-    if [ $var = 'DESCRIPTION' ]; then
+    if [ ${var} == "DESCRIPTION" ]; then
       i=\"${i}\"
     fi
     general_LIST+=( "$(echo "--${var,,} ${i}")" )
