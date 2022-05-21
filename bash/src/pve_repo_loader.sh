@@ -27,6 +27,8 @@ rm ${REPO_TEMP}/${GIT_REPO}.tar.gz &> /dev/null
 if [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ]; then
   cp -R /mnt/pve/nas-*[0-9]-git/${GIT_USER}/${GIT_REPO} ${REPO_TEMP}
   tar --exclude=".*" -czf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP} ${GIT_REPO}/ &> /dev/null
+  # Create tmp dir
+  mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
 fi
 
 #---- Download Github repo
@@ -48,4 +50,6 @@ if [ ! -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ]; then
   # rm ${REPO_TEMP}/${GIT_REPO}.tar.gz
   chmod -R 777 ${REPO_TEMP}/${GIT_REPO}
   tar --exclude=".*" -czf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP} ${GIT_REPO}/
+  # Create tmp dir
+  mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
 fi
