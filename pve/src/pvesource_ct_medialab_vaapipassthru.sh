@@ -33,7 +33,7 @@ if [ $(ls -l /dev/dri | grep renderD128 > /dev/null; echo $?) == 0 ]; then
     DRM_VAR01=$(ls -l /dev/dri | grep renderD128 | awk '{print $5}' | sed "s/,//")
     DRM_VAR02=$(ls -l /dev/dri | grep renderD128 | awk '{print $6}')
     echo -e "lxc.cgroup2.devices.allow: c $DRM_VAR01:$DRM_VAR02 rwm\nlxc.cgroup2.devices.allow: c $DRM_VAR01:0 rwm\nlxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file" >> /etc/pve/lxc/$CTID.conf
-    info "VA-API renderD128 is configured for ${CT_HOSTNAME_VAR^}."
+    info "VA-API renderD128 is configured for '${HOSTNAME^}'."
     echo
   else
     warn "Problems installing 'vainfo' package (VA-API). Reason unknown. Try manually installing VA-API at later stage. Skipping this step."
