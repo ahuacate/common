@@ -6,6 +6,9 @@
 
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
+
+# Requires variable 'PRESET_VAR_SRC' - src path & filename of preset file.
+
 #---- Static Variables -------------------------------------------------------------
 
 # Set OS version
@@ -17,14 +20,10 @@ ip4_regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0
 ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
 
 # Parent Script to get setting variables
-VAR_FILELIST="$0"
+# PRESET_VAR_SRC="$0"
 
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
-
-# List of variables
-# VAR_FILELIST=${COMMON_PVE_SRC}/pvesource_set_allvmvarslist.conf
-
 #---- Functions --------------------------------------------------------------------
 
 # Read variable file list
@@ -124,14 +123,14 @@ do
     fi
     general_LIST+=( "$(echo "--${var,,} ${i}")" )
   fi
-done <<< $(printsection COMMON_GENERAL_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection COMMON_GENERAL_OPTIONS < ${PRESET_VAR_SRC})
 while IFS== read var value
 do
   eval i='$'$var
   if [ -n "${i}" ]; then
     general_LIST+=( "$(echo "--${var,,} ${i,,}")" )
   fi
-done <<< $(printsection COMMON_NET_DNS_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection COMMON_NET_DNS_OPTIONS < ${PRESET_VAR_SRC})
 while IFS== read var value
 do
   eval i='$'$var
@@ -139,7 +138,7 @@ do
     j=$(echo ${var} | sed 's/^CT_//')
     general_LIST+=( "$(echo "--${j,,} ${i}")" )
   fi
-done <<< $(printsection CT_GENERAL_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection CT_GENERAL_OPTIONS < ${PRESET_VAR_SRC})
 
 # rootfs_LIST
 unset rootfs_LIST
@@ -152,7 +151,7 @@ do
     j=$(echo ${var} | sed 's/^CT_//')
     rootfs_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
-done <<< $(printsection CT_ROOTFS_OPTIONS < ${VAR_FILELIST} | grep -v '^CT_SIZE.*')
+done <<< $(printsection CT_ROOTFS_OPTIONS < ${PRESET_VAR_SRC} | grep -v '^CT_SIZE.*')
 
 # net_LIST
 unset net_LIST
@@ -167,7 +166,7 @@ do
     fi
     net_LIST+=( "$(echo "${var,,}=${i}")" )
   fi
-done <<< $(printsection COMMON_NET_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection COMMON_NET_OPTIONS < ${PRESET_VAR_SRC})
 while IFS== read var value
 do
   eval i='$'$var
@@ -175,7 +174,7 @@ do
     j=$(echo ${var} | sed 's/^CT_//')
     net_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
-done <<< $(printsection CT_NET_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection CT_NET_OPTIONS < ${PRESET_VAR_SRC})
 while IFS== read var value
 do
   eval i='$'$var
@@ -190,7 +189,7 @@ do
     fi
     net_LIST+=( "$(echo "${var,,}=${i}")" )
   fi
-done <<< $(printsection COMMON_NET_STATIC_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection COMMON_NET_STATIC_OPTIONS < ${PRESET_VAR_SRC})
 
 # features_LIST
 unset features_LIST
@@ -202,7 +201,7 @@ do
     j=$(echo ${var} | sed 's/^CT_//')
     features_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
-done <<< $(printsection CT_FEATURES_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection CT_FEATURES_OPTIONS < ${PRESET_VAR_SRC})
 
 # startup_LIST
 unset startup_LIST
@@ -214,7 +213,7 @@ do
     j=$(echo ${var} | sed 's/^CT_//')
     startup_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
-done <<< $(printsection CT_STARTUP_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection CT_STARTUP_OPTIONS < ${PRESET_VAR_SRC})
 
 
 #---- Create CT
