@@ -14,7 +14,7 @@
 #---- Source -----------------------------------------------------------------------
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-COMMON_PVE_SRC="${DIR}/../src"
+COMMON_PVE_SRC_DIR="${DIR}/../src"
 
 #---- Dependencies -----------------------------------------------------------------
 
@@ -29,7 +29,7 @@ else
 fi
 
 # Run Bash Header
-source ${COMMON_PVE_SRC}/pvesource_bash_defaults.sh
+source ${COMMON_PVE_SRC_DIR}/pvesource_bash_defaults.sh
 
 
 #---- Static Variables -------------------------------------------------------------
@@ -188,20 +188,20 @@ EOF
 # fi
 
 #---- Introduction
-source ${COMMON_PVE_SRC}/pvesource_ct_intro.sh
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_intro.sh
 
 echo hello
 #---- Set variables
-source ${COMMON_PVE_SRC}/pvesource_set_allvmvars.sh
+source ${COMMON_PVE_SRC_DIR}/pvesource_set_allvmvars.sh
 
 #---- Create OS CT
-source ${COMMON_PVE_SRC}/pvesource_ct_createvm.sh
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createvm.sh
 
 # #---- Create CT Bind Mounts
-# source ${COMMON_PVE_SRC}/pvesource_ct_createbindmounts.sh
+# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createbindmounts.sh
 
 # #---- Configure New CT OS
-# source ${COMMON_PVE_SRC}/pvesource_ct_ubuntubasics.sh
+# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntubasics.sh
 
 
 

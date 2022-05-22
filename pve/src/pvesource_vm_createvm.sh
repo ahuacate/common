@@ -22,7 +22,7 @@ ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
 #---- Other Files ------------------------------------------------------------------
 
 # List of variables
-VAR_FILELIST=${COMMON_PVE_SRC}/pvesource_set_allvmvarslist.conf
+VAR_FILELIST=${COMMON_PVE_SRC_DIR}/pvesource_set_allvmvarslist.conf
 
 # Generic OS URLS - Available compatible cloud-init images to download
 DEBIAN_10_URL="https://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.raw"

@@ -555,6 +555,7 @@ while true; do
   # PVESM Storage validation
   unset pvesm_input_LIST
   pvesm_input_LIST=()
+  pvesm_check_LIST=()
   if [[ ${#pvesm_required_LIST[@]} -ge '1' ]]; then
     while read -r line; do
       if [[ $(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-$line") ]]; then
@@ -1181,4 +1182,10 @@ if [[ ${#pvesm_required_LIST[@]} -ge 1 ]]; then
   if [ ${DEV_GIT_MOUNT_ENABLE} == 0 ] && [[ $(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git") ]]; then
     pvesm_input_LIST+=( "$(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git$" | awk 'BEGIN {OFS = ","}{print $1,"/mnt/pve/"$1}')" )
   fi
+
+  # Create PVESM check list
+  while IFS=',' read -r PVE_MNT CT_MNT; do
+    pvesm_check_LIST+=( "/mnt/pve/${PVE_MNT}:$(echo ${CT_MNT} | sed 's/^\/mnt\///')" )
+  done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}")
+
 fi # End of bind mounts statement
