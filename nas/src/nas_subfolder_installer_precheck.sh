@@ -64,16 +64,10 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
     mkdir -p "${sub_dir}" 2>/dev/null || display_dir_error_MSG+=( "Linux command: mkdir\nLocal PVE folder: ${sub_dir}\nRemote NAS folder:$(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
     chgrp -R "${group}" "${sub_dir}" 2>/dev/null || display_dir_error_MSG+=( "Linux command: chgrp\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
     chmod -R "${permission}" "${sub_dir}" 2>/dev/null || display_dir_error_MSG+=( "Linux command: chmod\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
-    # If mmkdir error
+    # If mkdir error
     if [ ! ${#display_dir_error_MSG[@]} == '0' ]; then
       # Fail msg
-      FAIL_MSG="A error occurred in the creation of NAS subfolder(s). Such errors are often caused by NAS user and file permissions. We recommend the User reads our Github NAS guides ( 'https://github.com/ahuacate/nas-hardmetal' and 'https://github.com/ahuacate/pve-nas' ) and make sure the following constraints are satisfied:\n
-        --  NAS base folders exists.
-        --  NAS subfolders exists.
-        --  NAS base and subfolders permissions are set.
-        --  NAS Ahuacate default Users and Groups exist (privatelab, homelab, medialab).
-        --  NAS ACL is enabled and all folder ACL permissions are set.
-        Try again..."
+      FAIL_MSG="A error occurred in the creation of NAS subfolder(s). Such errors are often caused by NAS user and file permissions. We recommend the User reads our Github NAS guides ( 'https://github.com/ahuacate/nas-hardmetal' and 'https://github.com/ahuacate/pve-nas' ) and make sure the following constraints are satisfied:\n\n  --  NAS base folders exists.\n  --  NAS subfolders exists.\n  --  NAS base and subfolders permissions are set.\n  --  NAS Ahuacate default Users and Groups exist (privatelab, homelab, medialab).\n  --  NAS ACL is enabled and all folder ACL permissions are set.\n\nError report:\n\n$(printf '%s\n' "${display_dir_error_MSG[@]}")\n\nFix the issues and try again..."
       warn "${FAIL_MSG}"
       echo
       trap die ERR
