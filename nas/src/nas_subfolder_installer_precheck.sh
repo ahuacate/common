@@ -35,6 +35,7 @@ unset display_dir_error_MSG
 unset display_permission_error_MSG
 
 # Create PVESM check list
+unset dir_check_LIST
 while IFS=',' read -r pve_mnt ct_mnt; do
   label=$(echo ${ct_mnt} | sed 's/^\/mnt\///')
   remote_mnt=$(df -h | awk -v var="${pve_mnt}" '{ if ($0 ~ var) print $1 }')
@@ -57,6 +58,9 @@ done <<< $(printf '%s\n' "${dir_check_LIST[@]}")
 
 
 # Create SubFolders required by CT
+unset display_dir_error_MSG
+unset display_permission_error_MSG
+unset display_chattr_error_MSG
 if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
   section "${HOSTNAME^} Subfolders"
   msg "Creating ${SECTION_HEAD} subfolders required by CT applications..."
@@ -69,10 +73,10 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
     # If mkdir error
     if [ ! ${#display_dir_error_MSG[@]} == '0' ]; then
       # Fail msg
-      FAIL_MSG="A error occurred in the creation of NAS subfolder(s). Such errors are often caused by NAS user and file permissions. We recommend the User reads our Github NAS guides ( 'https://github.com/ahuacate/nas-hardmetal' and 'https://github.com/ahuacate/pve-nas' ) and make sure the following constraints are satisfied:\n\n  --  NAS base folders exists.\n  --  NAS subfolders exists.\n  --  NAS base and subfolders permissions are set.\n  --  NAS Ahuacate default Users and Groups exist (privatelab, homelab, medialab).\n  --  NAS ACL is enabled and all folder ACL permissions are set.\n\nError report:\n\n$(printf '%s\n' "${display_dir_error_MSG[@]}")\n\nFix the issues and try again..."
-      warn "${FAIL_MSG}"
+      # Display Installation error report
+      source ${COMMON_PVE_SRC_DIR}/pvesource_error_report.sh
       echo
-      trap die ERR
+      trap error_exit
     fi
 
     # Set setfacl

@@ -34,7 +34,6 @@ set -Eeuo pipefail
 shopt -s expand_aliases
 alias die='EXIT=$? LINE=$LINENO error_exit'
 trap die ERR
-trap cleanup EXIT
 
 function error_exit() {
   trap - ERR
@@ -43,6 +42,7 @@ function error_exit() {
   local FLAG="\e[91m[ERROR] \e[93m$EXIT@$LINE"
   msg "$FLAG $REASON"
   [ ! -z ${CTID-} ] && cleanup_failed
+  cleanup
   exit $EXIT
 }
 function cleanup_failed () {
