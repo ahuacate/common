@@ -76,7 +76,7 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
       # Display Installation error report
       source ${COMMON_PVE_SRC_DIR}/pvesource_error_report.sh
       echo
-      trap error_exit
+      trap error_exit EXIT
     fi
 
     # Set setfacl

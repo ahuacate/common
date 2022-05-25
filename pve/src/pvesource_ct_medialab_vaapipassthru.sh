@@ -11,7 +11,7 @@
 #---- Other Files ------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
-msg_box "${CT_HOSTNAME_VAR^} supports hardware acceleration of video encoding/decoding/transcoding using FFMpeg. FFMpeg can support multiple hardware acceleration implementations for Linux such as Intel Quicksync (QSV), nVidia NVENC/NVDEC, and VA-API through Video Acceleration APIs.
+msg_box "${HOSTNAME^} supports hardware acceleration of video encoding/decoding/transcoding using FFMpeg. FFMpeg can support multiple hardware acceleration implementations for Linux such as Intel Quicksync (QSV), nVidia NVENC/NVDEC, and VA-API through Video Acceleration APIs.
 
 This script ONLY supports Proxmox hosts installed with a AMD/Intel CPU with integrated graphics GPU. If your Proxmox host is installed with a NVIDIA Graphics Card you must manually configure video passthrough at a later stage.
 
