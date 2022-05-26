@@ -7,7 +7,7 @@
 #---- Dependencies -----------------------------------------------------------------
 
 # Check for Git SW
-if [ ! $(dpkg -s git >/dev/null 2>&1; echo $?) == 0 ] && ! [[ $(uname -a | grep 'synology') ]]; then; then
+if [ ! $(dpkg -s git >/dev/null 2>&1; echo $?) == 0 ] && ! [[ $(uname -a | grep 'synology') ]]; then
   apt-get install git -yqq
 fi
 
