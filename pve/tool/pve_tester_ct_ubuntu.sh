@@ -47,6 +47,9 @@ SSH_ENABLE=0
 # Developer enable git mounts inside CT (0 is enabled, 1 is disabled)
 DEV_GIT_MOUNT_ENABLE=0
 
+# Set file source (path/filename) of preset variables for 'pvesource_ct_createvm.sh'
+PRESET_VAR_SRC="$( dirname "${BASH_SOURCE[0]}" )/$( basename "${BASH_SOURCE[0]}" )"
+
 #---- Other Variables --------------------------------------------------------------
 
 #---- Common Machine Variables
@@ -85,7 +88,7 @@ HWADDR=""
 # Controls whether this interface’s firewall rules should be used.
 FIREWALL='1'
 # VLAN tag for this interface (value 0 for none, or VLAN[2-N] to enable).
-TAG='0'
+TAG='50'
 # VLAN ids to pass through the interface
 TRUNKS=""
 # Apply rate limiting to the interface (MB/s). Value "" for unlimited.
@@ -157,7 +160,7 @@ CT_TYPE='veth'
 
 #----[CT_OTHER]
 # OS Version
-CT_OSVERSION='21.04'
+CT_OSVERSION='22.04'
 # CTID numeric ID of the given container.
 CTID='188'
 
@@ -172,139 +175,44 @@ while IFS= read -r line; do
   pvesm_required_LIST+=( "$line" )
 done << EOF
 # Example
-# backup:CT settings backup storage
+audio:Audiobooks and podcasts
+backup:CT settings backup storage
+books:Ebooks and Magazines
+music:Music, Albums and Songs
+photo:Photographic image collection
+transcode:Video transcoding disk or folder
+video:All video libraries (i.e movies, series, homevideos)
 EOF
 
 
 #---- Body -------------------------------------------------------------------------
 
-# if [ "$(pct_list | awk -F',' '{ print $1 }' | grep -w $CTID > /dev/null; echo $?)" != 0 ] && [ $(ls /var/lib/vz/dump/vzdump-lxc-${CTID}-*.tar.zst > /dev/null 2>&1; echo $?) == 0 ]; then
-#   GET_FILE=$(ls -t /var/lib/vz/dump/vzdump-lxc-${CTID}-*.tar.zst | head -n 1)
-#   pct restore ${CTID} ${GET_FILE} -storage local-zfs
-#   pct start ${CTID}
-#   CT_NEW=1
-# else
-#   CT_NEW=0
-# fi
-
 #---- Introduction
 source ${COMMON_PVE_SRC_DIR}/pvesource_ct_intro.sh
 
-echo hello
-#---- Set variables
+#---- Setup PVE CT Variables
+# Ubuntu NAS (all)
 source ${COMMON_PVE_SRC_DIR}/pvesource_set_allvmvars.sh
 
 #---- Create OS CT
 source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createvm.sh
 
-# #---- Create CT Bind Mounts
-# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createbindmounts.sh
+#---- Pre-Configuring PVE CT
+section "Pre-Configure ${HOSTNAME^} ${VM_TYPE^^}"
 
-# #---- Configure New CT OS
-# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntubasics.sh
+# MediaLab CT unprivileged mapping
+if [ ${CT_UNPRIVILEGED} == '1' ]; then
+  source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_ctidmapping.sh
+fi
 
+# Create CT Bind Mounts
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createbindmounts.sh
 
+# VA-API Install & Setup for CT
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_vaapipassthru.sh
 
-# #---- Create new CT
-# if [ $CT_NEW == 0 ] && [ "$(pct_list | awk -F',' '{ print $1 }' | grep -w $CTID > /dev/null; echo $?)" != 0 ]; then
-#   #---- Developer Options
-#   FUNC_NAS_HOSTNAME=nas
-#   if [ -f /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git ]; then
-#     while IFS== read -r var val; do
-#       eval ${var}=${val}
-#     done < <(cat /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git | grep -v '^#')
-#   fi
-#   if [ $dev_git_mount = 0 ] && [ $DEV_GIT_MOUNT_ENABLE = 0 ]; then
-#     pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git" | awk '{print $1,"/mnt/pve/"$1}' >> pvesm_input_list
-#   else
-#     touch pvesm_input_list
-#   fi
+#---- Configure New CT OS
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntubasics.sh
 
-#   #---- Create OS CT
-#   source ${COMMON_PVE_SOURCE}/pvesource_ct_createvm.sh
-
-#   #---- Pre-Configuring PVE CT
-#   section "Pre-Configure ${OSTYPE^} CT"
-
-#   # Create CT Bind Mounts
-#   source ${COMMON_PVE_SOURCE}/pvesource_ct_createbindmounts.sh
-
-#   # Configure New CT OS
-#   source ${COMMON_PVE_SOURCE}/pvesource_ct_ubuntubasics.sh
-
-#   # Download and Install Prerequisites
-#   pct exec $CTID -- apt-get install -y acl >/dev/null
-#   pct exec $CTID -- apt-get install -y putty-tools >/dev/null
-
-#   #---- Creating PVE NAS Users and Groups
-#   section "Creating Users and Groups."
-
-#   # Change Home folder permissions
-#   msg "Setting default adduser home folder permissions (DIR_MODE)..."
-#   pct exec $CTID -- sed -i "s/DIR_MODE=.*/DIR_MODE=0750/g" /etc/adduser.conf
-#   info "Default adduser permissions set: ${WHITE}0750${NC}"
-#   pct exec $CTID -- bash -c 'echo "HOME_MODE 0750" >> /etc/login.defs'
-
-#   # Create users and groups
-#   msg "Creating CT default user groups..."
-#   # Create Groups
-#   pct exec $CTID -- bash -c 'groupadd -g 65605 medialab > /dev/null'
-#   info "Default user group created: ${YELLOW}medialab${NC}"
-#   pct exec $CTID -- bash -c 'groupadd -g 65606 homelab > /dev/null'
-#   info "Default user group created: ${YELLOW}homelab${NC}"
-#   pct exec $CTID -- bash -c 'groupadd -g 65607 privatelab > /dev/null'
-#   info "Default user group created: ${YELLOW}privatelab${NC}"
-#   pct exec $CTID -- bash -c 'groupadd -g 65608 chrootjail > /dev/null'
-#   info "Default user group created: ${YELLOW}chrootjail${NC}"
-#   echo
-
-#   # Create Base User Accounts
-#   msg "Creating CT default users..."
-#   pct exec $CTID -- bash -c 'useradd -u 1605 -g medialab -s /bin/bash media >/dev/null'
-#   info "Default user created: ${YELLOW}media${NC} of group medialab"
-#   pct exec $CTID -- bash -c 'useradd -u 1606 -g homelab -G medialab -s /bin/bash home >/dev/null'
-#   info "Default user created: ${YELLOW}home${NC} of groups medialab, homelab"
-#   pct exec $CTID -- bash -c 'useradd -u 1607 -g privatelab -G medialab,homelab -s /bin/bash private >/dev/null'
-#   info "Default user created: ${YELLOW}private${NC} of groups medialab, homelab and privatelab"
-#   echo
-
-  # #---- Webmin
-  # section "Installing Webmin."
-  # # Install Webmin Prerequisites
-  # msg "Installing Webmin prerequisites (be patient, might take a while)..."
-
-  # pct exec $CTID -- bash -c "echo 'deb http://download.webmin.com/download/repository sarge contrib' | sudo tee -a /etc/apt/sources.list"
-  # pct exec $CTID -- bash -c 'wget -qL http://www.webmin.com/jcameron-key.asc'
-  # pct exec $CTID -- bash -c 'apt-key add jcameron-key.asc 2>/dev/null'
-  # pct exec $CTID -- apt-get update
-  # pct exec $CTID -- apt-get install -y webmin
-
-  # #---- Finish Up
-  # msg "Creating snapshot to local-zfs..."
-  # vzdump 888 --dumpdir /var/lib/vz/dump/ --mode snapshot --compress zstd
-# fi
-
-#---- Finish Line ------------------------------------------------------------------
-section "Completion Status."
-
-# msg "${HOSTNAME^} installation was a success. To manage your new Ubuntu CT use Webmin (a Linux web management tool). Webmin login credentials are user 'root' and password '${PASSWORD}'.\n\n  --  ${WHITE}https://$(echo "$CT_IP" | sed  's/\/.*//g'):10000/${NC}\n  --  ${WHITE}https://${CT_HOSTNAME}:10000/${NC}"
-
-# Cleanup
-# trap cleanup EXIT
-
-# pct create 101 local:vztmpl/ubuntu-21.04-standard_21.04-1_amd64.tar.gz --hostname nas-01 \
-# --memory 512 \
-# --cpulimit 0 \
-# --cpuunits 1024 \
-# --cores 1 \
-# --unprivileged 1 \
-# --swap 512 \
-# --ostype ubuntu \
-# --onboot 1 \
-# --timezone host \
-# --password ahuacate \
-# --arch amd64 \
-# --rootfs local-zfs:5,acl=1 \
-# --net0 name=eth0,bridge=vmbr0,firewall=1,ip=dhcp \
-# --features fuse=0,keyctl=0,nesting=0 \
-# --startup order=1,up=2,down=2
+#---- Create MediaLab Group and User
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntu_addmedialabuser.sh

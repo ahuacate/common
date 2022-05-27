@@ -158,7 +158,7 @@ function valid_hostname() {
   local  name=$1
   local  stat=1
   # Run function
-  if [[ $name =~ ${hostname_regex} ]] && [[ ! $name =~ ^(pve).*$ ]] && [[ ! $(grep -h -Po 'hostname: \K[^/]*' /etc/pve/lxc/* 2> /dev/null) =~ $name ]] && [[ ! $(grep -h -Po 'name: \K[^/]*' /etc/pve/qemu-server/* 2> /dev/null) =~ $name ]] && [[ ! $name == $(echo $(hostname) | awk '{ print tolower($0) }') ]] && [ ! $(ping -s 1 -c 2 ${name} > /dev/null; echo $?) == '0' ]; then
+  if [[ $name =~ ${hostname_regex} ]] && [[ ! $name =~ ^(pve).*$ ]] && [[ ! $(grep -h -Po 'hostname: \K[^/]*' /etc/pve/lxc/* 2> /dev/null | grep "^${name}$") ]] && [[ ! $(grep -h -Po 'name: \K[^/]*' /etc/pve/qemu-server/* 2> /dev/null | grep "^${name}$") ]] && [[ ! $name == $(echo $(hostname) | awk '{ print tolower($0) }') ]] && [ ! $(ping -s 1 -c 2 ${name} > /dev/null; echo $?) == '0' ]; then
     stat=$?
   fi
   return $stat
