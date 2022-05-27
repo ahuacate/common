@@ -556,7 +556,7 @@ while true; do
   unset pvesm_input_LIST
   pvesm_input_LIST=()
   pvesm_check_LIST=()
-  if [[ ${#pvesm_required_LIST[@]} -ge '1' ]]; then
+  if [ ${#pvesm_required_LIST[@]} -ge '1' ]; then
     while read -r line; do
       if [[ $(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-$line") ]]; then
         pvesm_input_LIST+=( "$(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-$line" | awk '{print $1}' | sed "s/$/,\/mnt\/$line/")" )
@@ -572,7 +572,6 @@ while true; do
   if [ ${DEV_GIT_MOUNT_ENABLE} == '0' ] && [[ $(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git") ]]; then
     pvesm_input_LIST+=( "$(pvesm status | grep -v 'local' | grep -wEi "^${FUNC_NAS_HOSTNAME}\-[0-9]+\-git" | awk 'BEGIN {OFS = ","}{print $1,"/mnt/pve/"$1}')" )
   fi
-
 
   # Confirm ES settings
   msg "Easy Script has confirmed all default variable settings are valid (Recommended). The settings for '${HOSTNAME^}' ${VM_TYPE^^} are:"
