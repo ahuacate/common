@@ -180,6 +180,29 @@ function pct_list() {
   print join ",", map {s/"/""/g; s/\s+$//; qq($_)} (/$patt/o);'
 }
 
+#---- SW Systemctl checks
+# Check Install CT SW status (active or abort script)
+function pct_check_systemctl() {
+  # Usage: check_systemctl_sw "jellyfin.service"
+  local service_name="$1"
+  msg "Checking '${service_name}' service status..."
+  FAIL_MSG='Systemctl '${service_name}' has failed. Reason unknown.\nExiting installation script in 2 second.'
+  i=0
+  while true; do
+    if [ $(pct exec $CTID -- systemctl is-active ${service_name}) = 'active' ]; then
+      info "Systemctl '${service_name}' status: ${YELLOW}active${NC}"
+      echo
+      break
+    elif [ $(pct exec $CTID -- systemctl is-active ${service_name}) != 'active' ] && [ "$i" = '5' ]; then
+      warn "$FAIL_MSG"
+      echo
+      trap error_exit EXIT
+    fi
+    ((i=i+1))
+    sleep 1
+  done
+}
+
 #---- Folder name functions
 # Make a folder name with validation
 function input_dirname_val() {
