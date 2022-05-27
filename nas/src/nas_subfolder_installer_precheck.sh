@@ -55,6 +55,12 @@ while IFS=',' read -r label mnt_protocol remote_mnt sub_dir other; do
 done <<< $(printf '%s\n' "${dir_check_LIST[@]}")
 
 
+
+[ -f /mnt/pve/nas-01-video/pron/.foo_protect ] || echo hello
+
+group=65606
+[ $(stat -c %a  /mnt/pve/nas-01-video/pron | awk '{ print $4 }') == ${group} ] || echo hello
+
 # Create SubFolders required by CT
 unset display_dir_error_MSG
 unset display_permission_error_MSG
@@ -64,41 +70,52 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
   msg "Creating ${SECTION_HEAD} subfolders required by CT applications..."
   echo
   while IFS=',' read -r label mnt_protocol remote_mnt sub_dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
-    info "New subfolder created:\n  ${WHITE}"${sub_dir}"${NC}"
-    mkdir -p "${sub_dir}" 2>/dev/null || display_dir_error_MSG+=( "Linux command: mkdir\nLocal PVE folder: ${sub_dir}\nRemote NAS folder:$(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
-    chgrp -R "${group}" "${sub_dir}" 2>/dev/null || display_dir_error_MSG+=( "Linux command: chgrp\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
-    chmod -R "${permission}" "${sub_dir}" 2>/dev/null || display_dir_error_MSG+=( "Linux command: chmod\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
-    # If mkdir error
-    if [ ! ${#display_dir_error_MSG[@]} == '0' ]; then
-      # Fail msg
-      # Display Installation error report
-      source ${COMMON_PVE_SRC_DIR}/pvesource_error_report.sh
+    if [ -d "${sub_dir}" ]; then
+      info "Pre-existing folder: ${UNDERLINE}"${sub_dir}"${NC}"
+      # Check for '.foo_protect' file
+      [ -f ${sub_dir}/.foo_protect ] || display_chattr_error_MSG+=( "Linux command: chattr (missing .foo_protect)\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: chattr +i <foldername>/.foo_protect\n" )
+      # Check folder grp ownership
+      [ $(ls -ld ${sub_dir} | awk '{ print $4 }') = ${group} ] || display_dir_error_MSG+=( "Linux command: chgrp (not GID ${group})\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
       echo
-      trap error_exit EXIT
-    fi
+    else
+      info "New subfolder created:\n  ${WHITE}"${sub_dir}"${NC}"
+      mkdir -p "${sub_dir}" 2>/dev/null || display_dir_error_MSG+=( "Linux command: mkdir\nLocal PVE folder: ${sub_dir}\nRemote NAS folder:$(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
+      chgrp -R "${group}" "${sub_dir}" 2>/dev/null || display_dir_error_MSG+=( "Linux command: chgrp\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
+      chmod -R "${permission}" "${sub_dir}" 2>/dev/null || display_dir_error_MSG+=( "Linux command: chmod\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
+      # If mkdir error
+      if [ ! ${#display_dir_error_MSG[@]} == '0' ]; then
+        # Fail msg
+        # Display Installation error report
+        source ${COMMON_PVE_SRC_DIR}/pvesource_error_report.sh
+        echo
+        trap error_exit EXIT
+      fi
 
-    # Set setfacl
-    if [ ! -z ${acl_01} ]; then
-      setfacl -Rm g:${acl_01} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_01} <foldername>\n" )
-    fi
-    if [ ! -z ${acl_02} ]; then
-      setfacl -Rm g:${acl_02} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_02} <foldername>\n" )
-    fi
-    if [ ! -z ${acl_03} ]; then
-      setfacl -Rm g:${acl_03} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_03} <foldername>\n" )
-    fi
-    if [ ! -z ${acl_04} ]; then
-      setfacl -Rm g:${acl_04} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_04} <foldername>\n" )
-    fi
-    if [ ! -z ${acl_05} ]; then
-      setfacl -Rm g:${acl_05} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_05} <foldername>\n" )
+      # Set setfacl
+      if [ ! -z ${acl_01} ]; then
+        setfacl -Rm g:${acl_01} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_01} <foldername>\n" )
+      fi
+      if [ ! -z ${acl_02} ]; then
+        setfacl -Rm g:${acl_02} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_02} <foldername>\n" )
+      fi
+      if [ ! -z ${acl_03} ]; then
+        setfacl -Rm g:${acl_03} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_03} <foldername>\n" )
+      fi
+      if [ ! -z ${acl_04} ]; then
+        setfacl -Rm g:${acl_04} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_04} <foldername>\n" )
+      fi
+      if [ ! -z ${acl_05} ]; then
+        setfacl -Rm g:${acl_05} "${sub_dir}" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: setfacl -Rm g:${acl_05} <foldername>\n" )
+      fi
     fi
   done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
 
   # Chattr set ZFS share points attributes to +a
   while IFS=',' read -r label mnt_protocol remote_mnt sub_dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
-    touch ${sub_dir}/.foo_protect 2> /dev/null || display_chattr_error_MSG+=( "Linux command: touch\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: touch <foldername>/.foo_protect\n" )
-    chattr +i ${sub_dir}/.foo_protect 2> /dev/null || display_chattr_error_MSG+=( "Linux command: chattr\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: chattr +i <foldername>/.foo_protect\n" )
+    if [ ! -f ${sub_dir}/.foo_protect ]; then
+      touch ${sub_dir}/.foo_protect 2> /dev/null || display_chattr_error_MSG+=( "Linux command: touch\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: touch <foldername>/.foo_protect\n" )
+      chattr +i ${sub_dir}/.foo_protect 2> /dev/null || display_chattr_error_MSG+=( "Linux command: chattr\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: chattr +i <foldername>/.foo_protect\n" )
+    fi
   done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
 fi
 #---- Finish Line ------------------------------------------------------------------
