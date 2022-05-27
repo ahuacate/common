@@ -100,7 +100,7 @@ MTU=""
 # Nameserver server IP (IPv4 or IPv6) (value "" for none).
 NAMESERVER=''
 # Search domain name (local domain)
-SEARCHDOMAIN=''
+SEARCHDOMAIN='local'
 
 #----[COMMON_NET_STATIC_OPTIONS]
 # IP address (IPv4). Only works with static IP (DHCP=0).

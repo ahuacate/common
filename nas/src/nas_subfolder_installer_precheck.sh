@@ -26,8 +26,6 @@ fi
 #---- Functions --------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
-pvesm_input_LIST=( "nas-01-video,/mnt/video" "nas-01-backup,/mnt/backup" "nas-01-public,/mnt/public" )
-
 # Unset all list arrays
 unset dir_check_LIST
 unset nas_subfolder_LIST
