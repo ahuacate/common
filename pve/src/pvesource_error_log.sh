@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------------------------------
-# Filename:     pvesource_error_report.sh
+# Filename:     pvesource_error_log.sh
 # Description:  Source script for displaying errors
 # ----------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ Failed to create CT subfolders on your PVE shared storage (NAS). The cause is of
   --  SMB 3.0 shares with access permissions set ( by User Group accounts )
   --  Set Local Domain option to set ( i.e .local, .localdomain, .home.arpa, .lan )
 
-Error report:"
+Error log:"
 msg_box "$(printf '%s\n' "${display_dir_error_MSG[@]}")"
 fi
 
@@ -57,7 +57,7 @@ The error occurred when setting the required CT application subfolders ACL (setf
   --  SMB 3.0 shares with access permissions set ( by User Group accounts )
   --  Set Local Domain option to set ( i.e .local, .localdomain, .home.arpa, .lan )
 
-Error report:"
+Error log:"
 msg_box "$(printf '%s\n' "${display_permission_error_MSG[@]}")"
 fi
 
@@ -71,6 +71,6 @@ The error occurred when creating subfolder file '.foo_protect' for chattr. We re
   --  Folder and user permissions are set including ACLs
   --  Chattr is applied to subfolders using a file named '.foo_protect'
 
-Error report:"
+Error log:"
 msg_box "$(printf '%s\n' "${display_chattr_error_MSG[@]}")"
 fi
