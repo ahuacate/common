@@ -45,10 +45,10 @@ function error_exit() {
   cleanup
   exit $EXIT
 }
-function installer_error_exit() {
+function ct_installer_error_return() {
   [ ! -z ${CTID-} ] && cleanup_failed
   cleanup
-  exit 0 $EXIT
+  return
 }
 function cleanup_failed () {
   if [ ! -z ${MOUNT+x} ]; then
