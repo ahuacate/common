@@ -55,12 +55,6 @@ while IFS=',' read -r label mnt_protocol remote_mnt sub_dir other; do
 done <<< $(printf '%s\n' "${dir_check_LIST[@]}")
 
 
-
-[ -f /mnt/pve/nas-01-video/pron/.foo_protect ] || echo hello
-
-group=65606
-[ $(stat -c %a  /mnt/pve/nas-01-video/pron | awk '{ print $4 }') == ${group} ] || echo hello
-
 # Create SubFolders required by CT
 unset display_dir_error_MSG
 unset display_permission_error_MSG
@@ -73,7 +67,7 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
     if [ -d "${sub_dir}" ]; then
       info "Pre-existing folder: ${UNDERLINE}"${sub_dir}"${NC}"
       # Check for '.foo_protect' file
-      [ -f ${sub_dir}/.foo_protect ] || display_chattr_error_MSG+=( "Linux command: chattr (missing .foo_protect)\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: chattr +i <foldername>/.foo_protect\n" )
+      [ -f ${sub_dir}/.foo_protect ] || display_chattr_error_MSG+=( "Linux command: touch & chattr (missing .foo_protect)\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: touch <foldername>/.foo_protect && chattr +i <foldername>/.foo_protect\n" )
       # Check folder grp ownership
       [ $(ls -ld ${sub_dir} | awk '{ print $4 }') = ${group} ] || display_dir_error_MSG+=( "Linux command: chgrp (not GID ${group})\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\n" )
       echo
