@@ -45,6 +45,11 @@ function error_exit() {
   cleanup
   exit $EXIT
 }
+function installer_error_exit() {
+  [ ! -z ${CTID-} ] && cleanup_failed
+  cleanup
+  exit 0 $EXIT
+}
 function cleanup_failed () {
   if [ ! -z ${MOUNT+x} ]; then
     pct unmount $CTID
