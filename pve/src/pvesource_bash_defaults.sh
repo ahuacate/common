@@ -45,7 +45,7 @@ function error_exit() {
   cleanup
   exit $EXIT
 }
-function ct_installer_error_return() {
+function ct_error_return() {
   [ ! -z ${CTID-} ] && cleanup_failed
   cleanup
   return
