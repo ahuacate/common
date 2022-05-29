@@ -831,7 +831,7 @@ if [ ${NET_DHCP} == '0' ]; then
   fi
   while true; do
     read -p "Enter a IP address ( IPv4 or IPv6 ): " -e -i ${IP_VAR} IP_VAR
-    if [[ ${IP_VAR} =~ ${ip4_regex} ]] && [ ${TAG} == 0 ] && [[ ! $(echo "${IP_VAR}" | awk -F'.' '{print $3}') == 1 ]]; then
+    if [[ ${IP_VAR} =~ ${ip4_regex} ]] && [ ${TAG} == 0 ] && [ ! $(echo "${IP_VAR}" | awk -F'.' '{print $3}') == 1 ]; then
       warn "The IPv4 address '${IP_VAR}' is set for VLAN $(echo "${IP_VAR}" | awk -F'.' '{print $3}'). Network VLAN is currently set as disabled. Try again..."
       echo
       break
@@ -847,7 +847,7 @@ if [ ${NET_DHCP} == '0' ]; then
     --  it is not assigned to any other PVE CT or VM.
     --  it doesn't contain any white space.\n
     Try again..."
-    PASS_MSG="IP address is set: ${YELLOW}${IP_VAR}${NC}\nVLAN is set : ${YELLOW}${TAG}${NC}$(if [ ${TAG} == 0 ]; then echo " - disabled"; else echo " - enabled"; fi)"
+    PASS_MSG="IP address is set: ${YELLOW}${IP_VAR}${NC}\nVLAN is set: ${YELLOW}${TAG}${NC}$(if [ ${TAG} == 0 ]; then echo " - disabled"; else echo " - enabled"; fi)"
     result=$(valid_ip ${IP_VAR} > /dev/null 2>&1)
     check1=$?
     result=$(ip_free ${IP_VAR} > /dev/null 2>&1)
