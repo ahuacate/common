@@ -862,10 +862,10 @@ if [ ${NET_DHCP} == '0' ]; then
         IP=''
       fi
       echo
-      break 2
+      break
     elif [ $check1 != $check2 ]; then
       warn "$FAIL_MSG"
-      break
+      # break
       echo
     fi
   done
