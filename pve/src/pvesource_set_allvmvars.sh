@@ -394,6 +394,12 @@ if [[ $(hostname -i) =~ ${ip4_regex} ]] && [ ${NET_DHCP} == '0' ]; then
   echo
 elif [ ${NET_DHCP} == '1' ]; then
   if [[ $(hostname -i) =~ ${ip4_regex} ]]; then
+    # Copy preset variable
+    preset_IP=$IP
+    preset_IP6=$IP6
+    preset_GW=$GW
+    preset_GW6=$GW6
+    preset_NAMESERVER=$NAMESERVER
     # Null/void any IP conflict settings when dhcp is enabled
     IP='dhcp'
     IP6=''
@@ -402,6 +408,12 @@ elif [ ${NET_DHCP} == '1' ]; then
     NAMESERVER=''
     NET_DHCP_TYPE='dhcp4'
   elif [[ $(hostname -i) =~ ${ip6_regex} ]]; then
+    # Copy preset variable
+    preset_IP=$IP
+    preset_IP6=$IP6
+    preset_GW=$GW
+    preset_GW6=$GW6
+    preset_NAMESERVER=$NAMESERVER
     # Null/void any IP conflict settings when dhcp is enabled
     IP=''
     IP6='dhcp'
@@ -684,6 +696,12 @@ while true; do
       [Nn]*)
         info "Proceeding with manual installation."
         echo
+        # Reset preset variable
+        IP=$preset_IP
+        IP6=$preset_IP6
+        GW=$preset_GW
+        GW6=$preset_GW6
+        NAMESERVER=$preset_NAMESERVER
         break
         ;;
       *)
