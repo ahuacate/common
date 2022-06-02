@@ -185,6 +185,18 @@ function pct_list() {
   print join ",", map {s/"/""/g; s/\s+$//; qq($_)} (/$patt/o);'
 }
 
+
+# Check PVE host SMTP status
+function check_pvesmtp_status() {
+  if [[ $(cat /etc/postfix/main.cf | grep "### Ahuacate_Check=0.*") ]]; then
+    # SMTP active & working
+    SMTP_STATUS=0
+  elif [[ ! $(cat /etc/postfix/main.cf | grep "### Ahuacate_Check=0.*") ]]; then
+    SMTP_STATUS=1
+  fi
+}
+
+
 #---- SW Systemctl checks
 # Check Install CT SW status (active or abort script)
 function pct_check_systemctl() {

@@ -126,7 +126,7 @@ CT_ONBOOT='1'
 # Timezone
 CT_TIMEZONE='host'
 # Root credentials
-CT_PASSWORD='ahuacate'
+CT_PASSWORD=''
 # Virtual OS/processor architecture.
 CT_ARCH='amd64'
 
@@ -160,7 +160,7 @@ CT_TYPE='veth'
 
 #----[CT_OTHER]
 # OS Version
-CT_OSVERSION='22.04'
+CT_OSVERSION='20.04'
 # CTID numeric ID of the given container.
 CTID='188'
 
@@ -201,18 +201,18 @@ source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createvm.sh
 section "Pre-Configure ${HOSTNAME^} ${VM_TYPE^^}"
 
 # MediaLab CT unprivileged mapping
-if [ ${CT_UNPRIVILEGED} == '1' ]; then
-  source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_ctidmapping.sh
-fi
+# if [ ${CT_UNPRIVILEGED} == '1' ]; then
+  # source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_ctidmapping.sh
+# fi
 
 # Create CT Bind Mounts
-source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createbindmounts.sh
+# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createbindmounts.sh
 
 # VA-API Install & Setup for CT
-source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_vaapipassthru.sh
+# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_vaapipassthru.sh
 
 #---- Configure New CT OS
-source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntubasics.sh
+# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntubasics.sh
 
 #---- Create MediaLab Group and User
-source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntu_addmedialabuser.sh
+# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntu_addmedialabuser.sh
