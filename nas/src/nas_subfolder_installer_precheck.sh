@@ -26,6 +26,14 @@ fi
 #---- Functions --------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
+
+# pvesm_input_LIST=( "nas-01-downloads,/mnt/downloads" \
+# "nas-01-public,/mnt/public" \
+# "nas-01-video,/mnt/video" )
+# COMMON_DIR='/mnt/pve/nas-01-git/ahuacate/common'
+
+# printf '%s\n' "${dir_check_LIST[@]}"
+
 # Unset all list arrays
 unset dir_check_LIST
 unset nas_subfolder_LIST

@@ -71,3 +71,7 @@ ${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/movies,65605,0750,65605:rwx,656
 ${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/musicvideo,65605,0750,65605:rwx,65607:rwx,65606:000,65608:rw-
 ${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/pron,65605,0750,65605:rwx,65607:rwx,65606:000,65608:rw-
 ${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/series,65605,0750,65605:rwx,65607:rwx,65606:000,65608:rw-
+
+# Download Folders
+${DIR_SCHEMA}/downloads/torrent,65605,0750,65605:rwx,65607:r-x,65606:000,65608:000
+${DIR_SCHEMA}/downloads/usenet,65605,0750,65605:rwx,65607:r-x,65606:000,65608:000
