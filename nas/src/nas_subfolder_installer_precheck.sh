@@ -80,7 +80,7 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
       if [ ! ${#display_dir_error_MSG[@]} == '0' ]; then
         # Fail msg
         # Display Installation error report
-        source ${COMMON_PVE_SRC_DIR}/pvesource_error_report.sh
+        source ${COMMON_PVE_SRC_DIR}/pvesource_error_log.sh
         echo
         error_exit
       fi

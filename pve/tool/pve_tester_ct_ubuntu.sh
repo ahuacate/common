@@ -88,7 +88,7 @@ HWADDR=""
 # Controls whether this interface’s firewall rules should be used.
 FIREWALL='1'
 # VLAN tag for this interface (value 0 for none, or VLAN[2-N] to enable).
-TAG='50'
+TAG='0'
 # VLAN ids to pass through the interface
 TRUNKS=""
 # Apply rate limiting to the interface (MB/s). Value "" for unlimited.
@@ -160,7 +160,7 @@ CT_TYPE='veth'
 
 #----[CT_OTHER]
 # OS Version
-CT_OSVERSION='20.04'
+CT_OSVERSION='22.04'
 # CTID numeric ID of the given container.
 CTID='188'
 
@@ -200,19 +200,19 @@ source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createvm.sh
 #---- Pre-Configuring PVE CT
 section "Pre-Configure ${HOSTNAME^} ${VM_TYPE^^}"
 
-# MediaLab CT unprivileged mapping
-# if [ ${CT_UNPRIVILEGED} == '1' ]; then
-  # source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_ctidmapping.sh
-# fi
+#MediaLab CT unprivileged mapping
+if [ ${CT_UNPRIVILEGED} == '1' ]; then
+  source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_ctidmapping.sh
+fi
 
-# Create CT Bind Mounts
-# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createbindmounts.sh
+#Create CT Bind Mounts
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_createbindmounts.sh
 
-# VA-API Install & Setup for CT
-# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_vaapipassthru.sh
+#VA-API Install & Setup for CT
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_medialab_vaapipassthru.sh
 
 #---- Configure New CT OS
-# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntubasics.sh
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntubasics.sh
 
 #---- Create MediaLab Group and User
-# source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntu_addmedialabuser.sh
+source ${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntu_addmedialabuser.sh
