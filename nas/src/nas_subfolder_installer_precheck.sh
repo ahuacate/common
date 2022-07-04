@@ -26,14 +26,6 @@ fi
 #---- Functions --------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
-
-# pvesm_input_LIST=( "nas-01-downloads,/mnt/downloads" \
-# "nas-01-public,/mnt/public" \
-# "nas-01-video,/mnt/video" )
-# COMMON_DIR='/mnt/pve/nas-01-git/ahuacate/common'
-
-# printf '%s\n' "${dir_check_LIST[@]}"
-
 # Unset all list arrays
 unset dir_check_LIST
 unset nas_subfolder_LIST
@@ -51,7 +43,7 @@ while IFS=',' read -r pve_mnt ct_mnt; do
     remote_mnt_sub=$(echo $sub_dir | awk -F',' '{ print $1}' | sed "s|.*${pve_mnt}||")
     dir_check_LIST+=( "${label},${mnt_protocol},${remote_mnt}${remote_mnt_sub},${sub_dir}" )
   done <<< $(cat ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist | awk -F',' -v var="\\\${DIR_SCHEMA}\/${label}" '{ if ($1 ~ var) print $0 }' | sed "s/\${DIR_SCHEMA}\/${label}/\/mnt\/pve\/${pve_mnt}/")
-done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}" | sed '/\/mnt\/backup$/d')
+done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}" | sed '/\/mnt\/backup$/d' | sed '/\/mnt\/music$/d' )
 
 
 # Create required SubFolder list
