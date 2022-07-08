@@ -22,3 +22,4 @@ proxmox,Proxmox storage,root,0750,65607:rwx,65606:rwx
 public,Public folder for all,root,1777,65605:rwx,65606:rwx,65607:rwx,65608:rwx
 sshkey,SSH key storage,root,1750,65607:rwx
 video,Video library storage,root,0750,65605:rwx,65607:rwx,65608:r-x
+transcode,Transcoding folder,root,0750,65605:rwx,65607:rwx

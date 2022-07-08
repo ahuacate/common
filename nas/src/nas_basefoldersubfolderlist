@@ -15,10 +15,6 @@ ${DIR_SCHEMA}/video/pron,65605,0750,65605:rwx,65606:000,65607:rwx,65608:rwx
 ${DIR_SCHEMA}/video/series,65605,0750,65605:rwx,65607:rwx,65606:000,65608:r-x
 ${DIR_SCHEMA}/video/transcode,root,0750,65605:rwx,65607:rwx,65606:000,65608:000
 
-# Transcode Folders
-${DIR_SCHEMA}/video/transcode/jellyfin,65605,0750,65605:rwx,65607:rwx,65606:000,65608:000
-${DIR_SCHEMA}/video/transcode/vidcoderr,65605,0750,65605:rwx,65607:rwx,65606:000,65608:000
-
 # Video Folders (stream is for low bandwidth HEVC video)
 ${DIR_SCHEMA}/video/stream,root,0750,65605:rwx,65607:rwx,65608:r-x
 ${DIR_SCHEMA}/video/stream/documentary,65605,0750,65605:rwx,65607:rwx,65606:000,65608:r-x
@@ -81,3 +77,7 @@ ${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/series,65605,0750,65605:rwx,656
 # Download Folders
 ${DIR_SCHEMA}/downloads/torrent,65605,0750,65605:rwx,65607:r-x,65606:000,65608:000
 ${DIR_SCHEMA}/downloads/usenet,65605,0750,65605:rwx,65607:r-x,65606:000,65608:000
+
+# Transcode Folders
+${DIR_SCHEMA}/transcode/jellyfin,65605,0750,65605:rwx,65607:rwx,65606:000,65608:000
+${DIR_SCHEMA}/transcode/vidcoderr,65605,0750,65605:rwx,65607:rwx,65606:000,65608:000
