@@ -43,7 +43,7 @@ while IFS=',' read -r pve_mnt ct_mnt; do
     remote_mnt_sub=$(echo $sub_dir | awk -F',' '{ print $1}' | sed "s|.*${pve_mnt}||")
     dir_check_LIST+=( "${label},${mnt_protocol},${remote_mnt}${remote_mnt_sub},${sub_dir}" )
   done <<< $(cat ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist | awk -F',' -v var="\\\${DIR_SCHEMA}\/${label}" '{ if ($1 ~ var) print $0 }' | sed "s/\${DIR_SCHEMA}\/${label}/\/mnt\/pve\/${pve_mnt}/")
-done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}" | sed '/\/mnt\/backup$/d' | sed '/\/mnt\/music$/d' )
+done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}" | sed '/\/mnt\/backup$/d' | sed '/\/mnt\/music$/d' | sed '/\/mnt\/photo$/d' )
 
 
 # Create required SubFolder list
