@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# ----------------------------------------------------------------------------------
+# Filename:     nas_create_users.sh
+# Description:  Create Ahuacate Groups and Users
+# ----------------------------------------------------------------------------------
+
+#---- Bash command to run script ---------------------------------------------------
+#---- Source -----------------------------------------------------------------------
+#---- Dependencies -----------------------------------------------------------------
+#---- Static Variables -------------------------------------------------------------
+#---- Other Variables --------------------------------------------------------------
+#---- Other Files ------------------------------------------------------------------
+#---- Body -------------------------------------------------------------------------
+
+
+# Create users and groups
+msg "Creating default user groups..."
+# Create Groups
+if [ $(egrep -i "^medialab" /etc/group >/dev/null; echo $?) != 0 ]; then
+  groupadd -g 65605 medialab > /dev/null
+  info "Default user group created: ${YELLOW}medialab${NC}"
+fi
+if [ $(egrep -i "^homelab" /etc/group >/dev/null; echo $?) -ne 0 ]; then
+  groupadd -g 65606 homelab > /dev/null
+  info "Default user group created: ${YELLOW}homelab${NC}"
+fi
+if [ $(egrep -i "^privatelab" /etc/group >/dev/null; echo $?) -ne 0 ]; then
+  groupadd -g 65607 privatelab > /dev/null
+  info "Default user group created: ${YELLOW}privatelab${NC}"
+fi
+if [ $(egrep -i "^chrootjail" /etc/group >/dev/null; echo $?) -ne 0 ]; then
+  groupadd -g 65608 chrootjail > /dev/null
+  info "Default user group created: ${YELLOW}chrootjail${NC}"
+fi
+echo
+
+# Create Base User Accounts
+msg "Creating default users..."
+mkdir -p ${DIR_SCHEMA}/homes >/dev/null
+chgrp -R root ${DIR_SCHEMA}/homes >/dev/null
+chmod -R 0755 ${DIR_SCHEMA}/homes >/dev/null
+if [ $(id -u media &>/dev/null; echo $?) = 1 ]; then
+  useradd -m -d ${DIR_SCHEMA}/homes/media -u 1605 -g medialab -s /bin/bash media >/dev/null
+  chmod 0700 ${DIR_SCHEMA}/homes/media
+  info "Default user created: ${YELLOW}media${NC} of group medialab"
+fi
+if [ $(id -u home &>/dev/null; echo $?) = 1 ]; then
+  useradd -m -d ${DIR_SCHEMA}/homes/home -u 1606 -g homelab -G medialab -s /bin/bash home >/dev/null
+  chmod 0700 ${DIR_SCHEMA}/homes/home
+  info "Default user created: ${YELLOW}home${NC} of groups medialab, homelab"
+fi
+if [ $(id -u private &>/dev/null; echo $?) = 1 ]; then
+  useradd -m -d ${DIR_SCHEMA}/homes/private -u 1607 -g privatelab -G medialab,homelab -s /bin/bash private >/dev/null
+  chmod 0700 ${DIR_SCHEMA}/homes/private
+  info "Default user created: ${YELLOW}private${NC} of groups medialab, homelab and privatelab"
+fi
+echo
+#---- Finish Line ------------------------------------------------------------------
