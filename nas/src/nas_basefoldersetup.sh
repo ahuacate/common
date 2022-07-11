@@ -21,33 +21,44 @@ fi
 #---- Other Variables --------------------------------------------------------------
 
 # Set DIR Schema ( PVE host or CT mkdir )
-if [ $(uname -a | grep -Ei --color=never '.*linux*|.*pve*' &> /dev/null; echo $?) == 0 ] && ! [[ $(dpkg -l | grep -w openmediavault) ]]; then
-  DIR_SCHEMA="/${POOL}/${HOSTNAME}"
+if [ $(uname -a | grep -Ei --color=never '.*pve*' &> /dev/null; echo $?) == 0 ]; then
+  DIR_SCHEMA="${PVE_SRC_MNT}"
+  # DIR_SCHEMA="/${POOL}/${HOSTNAME}"
 else
   # Select or input a storage path ( set DIR_SCHEMA )
   source ${COMMON_DIR}/nas/src/nas_identify_storagepath.sh
 fi
 
-
 #---- Other Files ------------------------------------------------------------------
-
-# Create empty files
-touch nas_basefolderlist-xtra
-
 #---- Body -------------------------------------------------------------------------
 
+#---- Create Arrays ( must be after setting 'DIR_SCHEMA' )
+# Create 'nas_basefolder_LIST' array
+unset nas_basefolder_LIST
+nas_basefolder_LIST=()
+while IFS= read -r line; do
+  [[ "$line" =~ (^\#.*$|^\s*$) ]] && continue
+  nas_basefolder_LIST+=( "$line" )
+done < ${COMMON_DIR}/nas/src/nas_basefolderlist
+
+# Create 'nas_subfolder_LIST' array
+unset nas_subfolder_LIST
+nas_subfolder_LIST=()
+while IFS= read -r line; do
+  [[ "$line" =~ (^\#.*$|^\s*$) ]] && continue
+  nas_subfolder_LIST+=( "$(eval echo "$line")" )
+done < ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist
+
+
 #---- Setting Folder Permissions
-section "Create and Set Folder Permissions."
+section "Create and Set Folder Permissions"
 
 # Create Default Proxmox Share points
-msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n
-Shared folders are the basic directories where you can store files and folders on your NAS. Below is a list of default NAS shared folders. You can create additional custom shared folders in the coming steps.
-
-$(while IFS=',' read -r var1 var2; do msg "  --  /srv/${HOSTNAME}/'${var1}'\n"; done <<< $( cat nas_basefolderlist | sed 's/^#.*//' | sed '/^$/d' ))"
+msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n\nShared folders are the basic directories where you can store files and folders on your NAS. Below is a list of our default NAS shared folders. You can create additional 'custom' shared folders in the coming steps.\n\n$(while IFS=',' read -r var1 var2; do msg "\t--  /srv/${HOSTNAME}/'${var1}'"; done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" ))"
 echo
-
+nas_basefolder_extra_LIST=()
 while true; do
-  if [ $(cat nas_basefolderlist-xtra | wc -l) == 0 ]; then
+  if [ ${#nas_basefolder_extra_LIST[@]} == '0' ]; then
     read -p "Do you want to create a custom shared folder [y/n]? " -n 1 -r YN
   else
     read -p "Do you want to another custom shared folder [y/n]? " -n 1 -r YN
@@ -58,62 +69,47 @@ while true; do
       while true; do
         # Function to input dir name
         input_dirname_val
-        if [ $(cat nas_basefolderlist | sed '/^#/d' | sed '/^$/d' | awk '{ print $1 }' | grep -xqFe ${DIR_NAME} > /dev/null; echo $?) == 0 ];then
+        if [ $(printf '%s\n' "${nas_basefolder_LIST[@]}" | awk -F',' '{ print $1 }' | grep -xqFe ${DIR_NAME} > /dev/null; echo $?) == 0 ];then
           warn "There are issues with your input:\n  1. The folder '${DIR_NAME}' already exists.\n  Try again..."
           echo
         else
           break
         fi
       done
-      XTRA_SHARE01="Standard User - For restricted jailed users (GID: chrootjail)." >/dev/null
-      XTRA_SHARE02="Medialab - Photos, series, movies, music and general media content only." >/dev/null
-      XTRA_SHARE03="Homelab - Everything to do with your smart home." >/dev/null
-      XTRA_SHARE04="Privatelab - User has access to all NAS data." >/dev/null
-      PS3="Select the group permission rights for the new folder (entering numeric) : "
-      msg "Your options are:"
-      options=("$XTRA_SHARE01" "$XTRA_SHARE02" "$XTRA_SHARE03" "$XTRA_SHARE04")
-      select menu in "${options[@]}"; do
-        case $menu in
-          "$XTRA_SHARE01")
-            echo "${DIR_NAME},Custom folder,root,0750,65608:rwx,65607:rwx" >> nas_basefolderlist
-            echo "${DIR_NAME},Custom folder,root,0750,65608:rwx,65607:rwx" >> nas_basefolderlist-xtra
-            info "You have selected: ${YELLOW}Standard User${NC} for folder '${DIR_NAME}'."
-            echo
-            break
-            ;;
-          "$XTRA_SHARE02")
-            echo "${DIR_NAME},Custom folder,root,0750,65605:rwx,65607:rwx" >> nas_basefolderlist
-            echo "${DIR_NAME},Custom folder,root,0750,65605:rwx,65607:rwx" >> nas_basefolderlist-xtra
-            info "You have selected: ${YELLOW}Medialab${NC} for folder '${DIR_NAME}'."
-            echo
-            break
-            ;;
-          "$XTRA_SHARE03")
-            echo "${DIR_NAME},Custom folder,root,0750,65606:rwx,65607:rwx" >> nas_basefolderlist
-            echo "${DIR_NAME},Custom folder,root,0750,65606:rwx,65607:rwx" >> nas_basefolderlist-xtra
-            info "You have selected: ${YELLOW}Homelab${NC} for folder '${DIR_NAME}'."
-            echo
-            break
-            ;;
-          "$XTRA_SHARE04")
-            echo "${DIR_NAME},Custom folder,root,0750,65607:rwx" >> nas_basefolderlist
-            echo "${DIR_NAME},Custom folder,root,0750,65607:rwx" >> nas_basefolderlist-xtra
-            info "You have selected: ${YELLOW}Privatelab${NC} for folder '${DIR_NAME}'."
-            echo
-            break
-            ;;
-          *) warn "Invalid entry. Try again.." >&2
-        esac
-      done
+      msg "Select the group permission rights for '${DIR_NAME}' custom folder..."
+      # Make selection
+      OPTIONS_VALUES_INPUT=( "LEVEL01" "LEVEL02" "LEVEL03" "LEVEL04" )
+      OPTIONS_LABELS_INPUT=( "Standard User - For restricted jailed users (GID: chrootjail)" \
+      "Medialab - Photos, series, movies, music and general media content only" \
+      "Homelab - Everything to do with your smart home" \
+      "Privatelab - User has access to all NAS data" )
+      makeselect_input2
+      singleselect SELECTED "$OPTIONS_STRING"
+      # Set type
+      LEVEL=${RESULTS}
+      if [ ${LEVEL} == LEVEL01 ]; then
+        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,0750,65608:rwx,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,0750,65608:rwx,65607:rwx" )
+        info "You have selected: ${YELLOW}Standard User${NC} for folder '${DIR_NAME}'."
+        echo
+      elif [ ${LEVEL} == LEVEL02 ]; then
+        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,0750,65605:rwx,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,0750,65605:rwx,65607:rwx" )
+        info "You have selected: ${YELLOW}Medialab${NC} for folder '${DIR_NAME}'."
+        echo
+      elif [ ${LEVEL} == LEVEL03 ]; then
+        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,0750,65606:rwx,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,0750,65606:rwx,65607:rwx" )
+        info "You have selected: ${YELLOW}Homelab${NC} for folder '${DIR_NAME}'."
+        echo
+      elif [ ${LEVEL} == LEVEL04 ]; then
+        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,0750,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,0750,65607:rwx" )
+        info "You have selected: ${YELLOW}Privatelab${NC} for folder '${DIR_NAME}'."
+        echo
+      fi
       ;;
     [Nn]*)
-      if [ $(cat nas_basefolderlist-xtra | wc -l) == 0 ]; then
-        XTRA_SHARES=1
-        info "You have chosen not create any custom shared folders."
-      else
-        XTRA_SHARES=0
-        info "You have chosen not create any more custom shared folders."
-      fi
       echo
       break
       ;;
@@ -124,10 +120,10 @@ while true; do
   esac
 done
 
-# Create Proxmox ZFS Share points
-msg "Creating $SECTION_HEAD base /$POOL/$HOSTNAME folder shares..."
+# Create Proxmox Share points
+msg "Creating ${SECTION_HEAD} base ${PVE_SRC_MNT} folder shares..."
+# msg "Creating ${SECTION_HEAD} base /$POOL/$HOSTNAME folder shares..."
 echo
-cat nas_basefolderlist | sed '/^#/d' | sed '/^$/d' >/dev/null > nas_basefolderlist_input
 while IFS=',' read -r dir desc group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
   if [ -d "${DIR_SCHEMA}/${dir}" ]; then
     info "Pre-existing folder: ${UNDERLINE}"${DIR_SCHEMA}/${dir}"${NC}\n  Setting ${group} group permissions for existing folder."
@@ -173,19 +169,17 @@ while IFS=',' read -r dir desc group permission acl_01 acl_02 acl_03 acl_04 acl_
     fi
     echo
   fi
-done < nas_basefolderlist_input
+done  <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 
 # # Chattr set ZFS share points attributes to +a
 # while read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
 #   chattr +a "${DIR_SCHEMA}/${dir}"
 # done < nas_basefolderlist_input
 
-
 # Create Default SubFolders
-if [ -f nas_basefoldersubfolderlist ]; then
+if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
   msg "Creating $SECTION_HEAD subfolder shares..."
   echo
-  echo -e "$(eval "echo -e \"`<nas_basefoldersubfolderlist`\"")" | sed '/^#/d' | sed '/^$/d' >/dev/null > nas_basefoldersubfolderlist_input
   while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ -d "${dir}" ]; then
       info "${dir} exists.\n  Setting ${group} group permissions for this folder."
@@ -230,13 +224,12 @@ if [ -f nas_basefoldersubfolderlist ]; then
       fi
       echo
     fi
-  done < nas_basefoldersubfolderlist_input
+  done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
   # Chattr set ZFS share points attributes to +a
   while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
     touch ${dir}/.foo_protect
     chattr +i ${dir}/.foo_protect
     # chmod +t ${dir}/.foo_protect
-  done < nas_basefoldersubfolderlist_input
+  done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
 fi
-
-#---- Finish Line ------------------------------------------------------------------
+#-----------------------------------------------------------------------------------
