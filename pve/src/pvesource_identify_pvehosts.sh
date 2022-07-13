@@ -27,7 +27,7 @@ PVE_HOST_NODE_CNT='5'
 section "Input PVE primary node hostname and IP address"
 
 # Set PVE hostname
-if [ -z ${PVE_HOSTNAME} ]; then
+if [ -z $PVE_HOSTNAME ]; then
   read -p "Enter your PVE primary host hostname: " -e -i pve-01 PVE_HOSTNAME
 fi
 
