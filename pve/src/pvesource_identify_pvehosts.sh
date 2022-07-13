@@ -26,10 +26,6 @@ PVE_HOST_NODE_CNT='5'
 #---- Input PVE primary host IP address & hostname
 section "Input PVE primary node hostname and IP address"
 
-# Set PVE hostname
-if [ -z "${PVE_HOSTNAME+x}" ]; then
-  read -p "Enter your PVE primary host hostname: " -e -i pve-01 PVE_HOSTNAME
-fi
 
 HOSTNAME_FAIL_MSG="The PVE hostname is not valid. A valid PVE hostname is when all of the following constraints are satisfied:\n
   --  it does exists on the network.
