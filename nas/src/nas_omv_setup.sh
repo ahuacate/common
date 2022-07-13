@@ -103,19 +103,19 @@ EOF
 #---- Prerequisites
 section "Prerequisites"
 
-# Perform OMV update
-msg "Performing OS update..."
-apt-get update -y
-apt-get upgrade -y
+# # Perform OMV update
+# msg "Performing OS update..."
+# apt-get update -y
+# apt-get upgrade -y
 
 # Edit UID_MIN and UID_MAX in /etc/login.defs
 msg "Increasing UID to 70000..."
 sed -i 's|^UID_MAX.*|UID_MAX                 70000|g' /etc/login.defs
 sed -i 's|^GID_MAX.*|GID_MAX                 70000|g' /etc/login.defs
 
-# Install OMV-Extras
-msg "Installing OMV-Extras..."
-sudo wget -O - https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install | sudo bash
+# # Install OMV-Extras
+# msg "Installing OMV-Extras..."
+# sudo wget -O - https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install | sudo bash
 
 
 #---- Search Domain
