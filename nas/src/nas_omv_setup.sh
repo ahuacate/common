@@ -158,8 +158,10 @@ section "Prerequisites"
 source /usr/share/openmediavault/scripts/helper-functions
 
 # Install OMV-Extras
-msg "Installing OMV-Extras..."
-sudo wget -O - https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install | sudo bash
+if [ $(dpkg -s openmediavault-omvextrasorg >/dev/null 2>&1; echo $?) != 0 ]; then
+  msg "Installing OMV-Extras..."
+  sudo wget -O - https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install | sudo bash
+fi
 
 # OMV system edits
 xmlstarlet edit -L \
