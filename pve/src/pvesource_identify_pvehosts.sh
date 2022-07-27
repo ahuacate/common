@@ -156,5 +156,4 @@ elif [[ ${PVE_HOSTNAME} =~ ^.*([1|0])$ ]] && [[ ${PVE_HOST_IP} =~ ${ip6_regex} ]
   printf '%s\n' "${pve_node_LIST[@]}" | column -s "," -t -N "PVE HOSTNAME,IP ADDRESS,CLUSTER NODE TYPE" | indent2
   echo
 fi
-
-#---- Finish Line ------------------------------------------------------------------
+#-----------------------------------------------------------------------------------
