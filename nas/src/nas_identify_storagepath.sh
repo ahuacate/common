@@ -16,8 +16,9 @@
 
 section "Select a Storage Location"
 # Create print display
+print_DISPLAY=()
 while IFS=',' read -r dir; do
-  print_DISPLAY=( "$dir,$(df -Th ${dir} | tail -n +2 | awk '{ print $2 }'),$(df -h ${dir} | tail -n +2 | awk '{ print $4 }')" )
+  print_DISPLAY+=( "$dir,$(df -Th ${dir} | tail -n +2 | awk '{ print $2 }'),$(df -h ${dir} | tail -n +2 | awk '{ print $4 }')" )
 done <<< $( df -hx tmpfs --output=target | sed '1d' | grep -v '/$\|^/dev.*\|^/var.*\|^/boot.*\|^/rpool.*\|/etc.*' )
 print_DISPLAY+=( "Other. Input your own storage path,-,-" )
 
