@@ -111,20 +111,6 @@ localdomain:Common domain name for small networks
 other:Input your own registered or made-up domain name
 EOF
 
-# Group LIST
-# 1=GRPNAME:2=GID:3=COMMENT
-grp_LIST=( "medialab:65605:For media apps (Sonarr, Radar, Jellyfin etc)"
-"homelab:65606:For smart home apps (CCTV, Home Assistant)"
-"privatelab:65607:Power, trusted or admin User group"
-"chrootjail:65608:Users are jailed to their home folder (General user group)"
-"sftp-access:65609:sFTP access group (for sftp plugin)" )
-
-# Username List
-# 1=USERNAME:2=UID:3=HOMEDIR:4=GRP:5=ADD_GRP:6=SHELL:7=COMMENT
-user_LIST=( "media:1605:${DIR_SCHEMA}/homes/media:medialab::/bin/bash:Member of medialab group only"
-"home:1606:${DIR_SCHEMA}/homes/home:homelab:medialab:/bin/bash:Member of homelab group (+ homelab)"
-"private:1607:${DIR_SCHEMA}/homes/private:privatelab:medialab,homelab:/bin/bash:Member of privatelab group (+ medialab,homelab)" )
-
 #---- Other Files ------------------------------------------------------------------
 #---- Functions --------------------------------------------------------------------
 
@@ -298,6 +284,22 @@ source ${COMMON_PVE_SRC_DIR}/pvesource_identify_pvehosts.sh
 source ${COMMON_PVE_SRC_DIR}/pvesource_identify_storagepath.sh
 # Get DIR_SCHEMA volume OMV UUID
 DIR_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
+
+
+#---- Create User & Group lists
+# Group LIST
+# 1=GRPNAME:2=GID:3=COMMENT
+grp_LIST=( "medialab:65605:For media apps (Sonarr, Radar, Jellyfin etc)"
+"homelab:65606:For smart home apps (CCTV, Home Assistant)"
+"privatelab:65607:Power, trusted or admin User group"
+"chrootjail:65608:Users are jailed to their home folder (General user group)"
+"sftp-access:65609:sFTP access group (for sftp plugin)" )
+
+# Username List
+# 1=USERNAME:2=UID:3=HOMEDIR:4=GRP:5=ADD_GRP:6=SHELL:7=COMMENT
+user_LIST=( "media:1605:${DIR_SCHEMA}/homes/media:medialab::/bin/bash:Member of medialab group only"
+"home:1606:${DIR_SCHEMA}/homes/home:homelab:medialab:/bin/bash:Member of homelab group (+ homelab)"
+"private:1607:${DIR_SCHEMA}/homes/private:privatelab:medialab,homelab:/bin/bash:Member of privatelab group (+ medialab,homelab)" )
 
 #---- Start Build ------------------------------------------------------------------
 
