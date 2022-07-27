@@ -49,6 +49,7 @@ if [ "$(xmlstarlet sel -t -m "//config/system/fstab/mntent" -v dir -nl /etc/open
   
   Fix the issues and try again. Bye..."
   sleep 2
+  echo
   return
 fi
 
