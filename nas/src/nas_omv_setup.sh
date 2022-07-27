@@ -41,7 +41,7 @@ elif [[ $(dpkg -l | grep -w openmediavault) ]] && [ ! ${majorversion} -ge ${OMV_
 fi
 
 # Check OMV availaible FS storage
-if [ "$(xmlstarlet sel -t -m "//config/system/fstab/mntent" -v dir -nl ${OMV_CONFIG} | wc -l)" == 0 ]; then
+if [ "$(xmlstarlet sel -t -m "//config/system/fstab/mntent" -v dir -nl /etc/openmediavault/config.xml | wc -l)" == 0 ]; then
   echo "There are problems with this installation:
   
   --  The installer could not identify a OMV file system for creating NAS storage.
