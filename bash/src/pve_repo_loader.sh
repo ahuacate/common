@@ -24,14 +24,14 @@ rm -R ${REPO_TEMP}/${GIT_REPO} &> /dev/null
 rm ${REPO_TEMP}/${GIT_REPO}.tar.gz &> /dev/null
 
 
-#---- Developer Options
+#---- Local repo (developer)
 # if [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ]; then
 #   cp -R /mnt/pve/nas-*[0-9]-git/${GIT_USER}/${GIT_REPO} ${REPO_TEMP}
 #   tar --exclude=".*" -czf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP} ${GIT_REPO}/ &> /dev/null
 #   # Create tmp dir
 #   mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
 # fi
-if [ -f ${REPO_PATH}/developer_settings.git ]; then
+if [ -d ${REPO_PATH}/${GIT_REPO} ]; then
   cp -R ${REPO_PATH}/${GIT_REPO} ${REPO_TEMP}
   tar --exclude=".*" -czf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP} ${GIT_REPO}/ &> /dev/null
   # Create tmp dir
@@ -62,7 +62,7 @@ fi
 #   # Create tmp dir
 #   mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
 # fi
-if [ ! -f ${REPO_PATH}/developer_settings.git ]; then
+if [ ! -d ${REPO_PATH}/${GIT_REPO} ]; then
   # Git clone
   git clone --recurse-submodules https://github.com/${GIT_USER}/${GIT_REPO}.git
   # # Download Repo packages
