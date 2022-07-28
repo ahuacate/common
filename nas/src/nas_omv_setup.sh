@@ -288,16 +288,13 @@ else
 fi
 
 #---- Validating your PVE hosts
-# Identify PVE host IP
-# PVE_HOSTNAME='pve-01'
-# PVE_HOST_IP='192.168.1.101'
 source ${COMMON_PVE_SRC_DIR}/pvesource_identify_pvehosts.sh
 
 
 #---- Identify storage
-source ${COMMON_PVE_SRC_DIR}/pvesource_identify_storagepath.sh
-# Get DIR_SCHEMA volume OMV UUID
-DIR_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
+# source ${COMMON_PVE_SRC_DIR}/pvesource_identify_storagepath.sh
+# # Get DIR_SCHEMA volume OMV UUID
+# DIR_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
 
 
 #---- Create User & Group lists
@@ -319,6 +316,8 @@ user_LIST=( "media:1605:${DIR_SCHEMA}/homes/media:medialab::/bin/bash:Member of 
 
 #---- Create default base and sub folders
 source ${COMMON_DIR}/nas/src/nas_basefoldersetup.sh
+# Get DIR_SCHEMA volume OMV UUID
+DIR_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
 
 
 #---- Create OVM 'Shared Folders'

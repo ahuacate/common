@@ -60,7 +60,7 @@ while true; do
               info "Storage path set: ${YELLOW}${stor_path}${NC}"
               DIR_SCHEMA="${stor_path}"
               echo
-              break 2
+              break 3
               ;;
             [Nn]*)
               msg "Try again..."
