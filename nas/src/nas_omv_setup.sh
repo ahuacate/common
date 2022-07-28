@@ -177,7 +177,7 @@ omv-salt stage run deploy & spinner $!
 
 # Perform OMV update
 msg "Performing OMV OS update ( be patient, might take a long, long time )..."
-omv-upgrade
+# omv-upgrade
 
 # Edit UID_MIN and UID_MAX in /etc/login.defs
 msg "Increasing UID/GID to 70000..."
@@ -292,9 +292,9 @@ source ${COMMON_PVE_SRC_DIR}/pvesource_identify_pvehosts.sh
 
 
 #---- Identify storage
-# source ${COMMON_PVE_SRC_DIR}/pvesource_identify_storagepath.sh
-# # Get DIR_SCHEMA volume OMV UUID
-# DIR_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
+source ${COMMON_DIR}/nas/src/nas_identify_storagepath.sh
+# Get DIR_SCHEMA volume OMV UUID
+DIR_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
 
 
 #---- Create User & Group lists
@@ -316,8 +316,6 @@ user_LIST=( "media:1605:${DIR_SCHEMA}/homes/media:medialab::/bin/bash:Member of 
 
 #---- Create default base and sub folders
 source ${COMMON_DIR}/nas/src/nas_basefoldersetup.sh
-# Get DIR_SCHEMA volume OMV UUID
-DIR_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
 
 
 #---- Create OVM 'Shared Folders'

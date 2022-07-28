@@ -7,6 +7,8 @@
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
 
+# Requires arg: 'DIR_SCHEMA' (use script: nas_identify_storagepath.sh)
+
 # Check for ACL installation
 if [ $(dpkg -s acl > /dev/null 2>&1; echo $?) != 0 ]; then
   apt-get install -y acl > /dev/null
@@ -19,17 +21,6 @@ fi
 
 #---- Static Variables -------------------------------------------------------------
 #---- Other Variables --------------------------------------------------------------
-
-# Set DIR Schema ( PVE host or CT mkdir )
-if [ $(uname -a | grep -Ei --color=never '.*pve*' &> /dev/null; echo $?) == 0 ]; then
-  DIR_SCHEMA="${PVE_SRC_MNT}"
-  # DIR_SCHEMA="/${POOL}/${HOSTNAME}"
-else
-  # Select or input a storage path ( set DIR_SCHEMA )
-  # source ${COMMON_DIR}/nas/src/nas_identify_storagepath.sh
-  source ${COMMON_PVE_SRC_DIR}/pvesource_identify_storagepath.sh
-fi
-
 #---- Other Files ------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
