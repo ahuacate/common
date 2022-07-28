@@ -80,6 +80,16 @@ OMV_CONFIG='/etc/openmediavault/config.xml'
 # Base dir permissions (ie 0750 or 0755)
 DIR_PERM='0755'
 
+# Set PVE primary host IP and hostname
+if [ $(nslookup -timeout=5 pve-01.$(hostname -d) >/dev/null 2>&1; echo $?) == '0' ]; then
+  PVE_HOSTNAME='pve-01'
+  PVE_HOST_IP="$(nslookup -timeout=5 pve-01.$(hostname -d) | awk '/^Address: / { print $2 }')"
+else
+  # Temporary PVE hostname & IP
+  PVE_HOSTNAME=ignore
+  PVE_HOST_IP=0.0.0.0
+fi
+
 #---- Other Variables --------------------------------------------------------------
 
 # Easy Script Section Header Body Text
@@ -151,6 +161,7 @@ if [ $(dpkg -s openmediavault-omvextrasorg >/dev/null 2>&1; echo $?) != 0 ]; the
 fi
 
 # OMV system edits
+msg "Setting OMV timezone & community updates..."
 TIME_ZONE=$(timedatectl | awk '/Time zone:/ {print $3}')
 xmlstarlet edit -L \
   --update "//config/system/apt/distribution/partner" \
