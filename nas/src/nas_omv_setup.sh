@@ -151,18 +151,22 @@ if [ $(dpkg -s openmediavault-omvextrasorg >/dev/null 2>&1; echo $?) != 0 ]; the
 fi
 
 # OMV system edits
+TIME_ZONE=$(timedatectl | awk '/Time zone:/ {print $3}')
 xmlstarlet edit -L \
   --update "//config/system/apt/distribution/partner" \
   --value '1' \
+  --update "//config/system/time/timezone" \
+  --value "${TIME_ZONE}" \
   ${OMV_CONFIG}
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt deploy run apt & spinner $!
+# omv-salt deploy run apt & spinner $!
+# omv-salt deploy run timezone & spinner $!
+omv-salt stage run deploy & spinner $!
 
 # Perform OMV update
-msg "Performing OS update..."
-apt-get update -y
-apt-get upgrade -y
+msg "Performing OMV OS update ( be patient, might take a long, long time )..."
+omv-upgrade
 
 # Edit UID_MIN and UID_MAX in /etc/login.defs
 msg "Increasing UID/GID to 70000..."
@@ -171,7 +175,6 @@ sed -i 's|^GID_MAX.*|GID_MAX                 70000|g' /etc/login.defs
 
 # Setup Skel
 sudo mkdir -p /etc/skel/{audio,backup,books,documents,downloads,templates,video,music,photo,public,.ssh}
-
 
 #---- Search Domain
 # Check DNS Search domain setting compliance with Ahuacate default options
@@ -338,7 +341,7 @@ done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt deploy run all
+omv-salt deploy run fstab
 
 
 #---- Create Groups
