@@ -26,7 +26,8 @@ if [ $(uname -a | grep -Ei --color=never '.*pve*' &> /dev/null; echo $?) == 0 ];
   # DIR_SCHEMA="/${POOL}/${HOSTNAME}"
 else
   # Select or input a storage path ( set DIR_SCHEMA )
-  source ${COMMON_DIR}/nas/src/nas_identify_storagepath.sh
+  # source ${COMMON_DIR}/nas/src/nas_identify_storagepath.sh
+  source ${COMMON_PVE_SRC_DIR}/pvesource_identify_storagepath.sh
 fi
 
 #---- Other Files ------------------------------------------------------------------
