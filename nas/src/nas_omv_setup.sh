@@ -5,19 +5,17 @@
 #
 # Usage:        SSH into OMV. Login as 'root'.
 # ----------------------------------------------------------------------------------
-# # OMV config file
+# # # OMV config file
 # DIR='/tmp'
 # OMV_CONFIG='/etc/openmediavault/config.xml'
 # # OMV_CONFIG='/etc/openmediavault/test.xml'
-# COMMON_DIR='/srv/d7ea42e4-b2af-422d-a42d-98fcec4f6b16/ahuacate/common'
+# COMMON_DIR='/srv/9a0b0119-e833-42df-9131-4ee98920edec/ahuacate/common'
 # COMMON_PVE_SRC_DIR="${COMMON_DIR}/pve/src"
-# DIR_SCHEMA='/srv/dev-disk-by-uuid-34c2166a-ee95-4a59-8afb-33eb6f6754de'
+# DIR_SCHEMA='/srv/dev-disk-by-uuid-0508acf1-5612-4990-80ac-00543db8c712'
 # # OMV Helper functions
 # source /usr/share/openmediavault/scripts/helper-functions
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
-
-# Requires file: 'nas_basefolderlist' & 'nas_basefoldersubfolderlist'
 
 # Check OMV version
 majorversion=$(dpkg -l | grep -i "openmediavault -" | awk {'print $3'} | cut -d '.' -f1)
@@ -171,13 +169,13 @@ xmlstarlet edit -L \
   ${OMV_CONFIG}
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-# omv-salt deploy run apt & spinner $!
-# omv-salt deploy run timezone & spinner $!
-omv-salt stage run deploy & spinner $!
+omv-salt deploy run apt & spinner $!
+omv-salt deploy run timezone & spinner $!
+# omv-salt stage run deploy & spinner $!
 
 # Perform OMV update
 msg "Performing OMV OS update ( be patient, might take a long, long time )..."
-# omv-upgrade
+omv-upgrade
 
 # Edit UID_MIN and UID_MAX in /etc/login.defs
 msg "Increasing UID/GID to 70000..."
@@ -319,6 +317,7 @@ source ${COMMON_DIR}/nas/src/nas_basefoldersetup.sh
 
 
 #---- Create OVM 'Shared Folders'
+section "Create storage shares"
 msg "Creating OVM shares..."
 
 while IFS=',' read -r dir desc grp other; do
@@ -774,10 +773,9 @@ display_msg3+=( "private - UID 1607:Member of privatelab. Supplementary medialab
 x='\\\\'
 display_msg4=( "$x$(hostname -I | sed -r 's/\s+//g')\:" )
 display_msg4+=( "$x$(hostname).$(hostname -d)\:" )
-printf '%s\n' "${display_msg3[@]}" 
 
 # Display msg
-msg_box "${HOSTNAME^^} OMV NAS installation was a success. The NAS is fully configured and is ready to provide NFS and/or SMB/CIFS backend storage mounts to your PVE hosts.
+msg_box "${HOSTNAME^^} OMV NAS installation was a success. Your NAS is fully configured and is ready to provide NFS and/or SMB/CIFS backend storage mounts to your PVE hosts.
 
 OMV NAS has a WebGUI management interface. Your login credentials are user 'admin' and password 'openmediavault'. You can change your login credentials using the WebGUI.
 

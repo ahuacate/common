@@ -22,7 +22,6 @@ while IFS=',' read -r dir; do
 done <<< $( df -hx tmpfs --output=target | sed '1d' | grep -v '/$\|^/dev.*\|^/var.*\|^/boot.*\|^/rpool.*\|/etc.*' )
 print_DISPLAY+=( "Other. Input your own storage path,-,-" )
 
-section "Select a Storage Location"
 msg_box "#### PLEASE READ CAREFULLY - SELECT A STORAGE LOCATION ####\n\nA storage location is a parent directory, LVM volume, ZPool or another storage filesystem where your new folder shares will be created. A scan shows the following available storage locations:\n\n$(printf '%s\n' "${print_DISPLAY[@]}" | column -s "," -t -N "STORAGE DEVICE,FS TYPE,CAPACITY" | indent2)\n\nThe User must now select a storage location. Or select 'other' to manually input the full storage path."
 echo
 msg "Select a storage location from the menu:"
@@ -31,10 +30,13 @@ while true; do
   stor_LIST+=( $(df -hx tmpfs --output=target | sed '1d' | grep -v '/$\|^/dev.*\|^/var.*\|^/boot.*\|^/rpool.*\|/etc.*' | sed -e '$aother') )
   OPTIONS_VALUES_INPUT=$(printf '%s\n' "${stor_LIST[@]}")
   OPTIONS_LABELS_INPUT=$(printf '%s\n' "${stor_LIST[@]}" | awk '{if ($1 != "other") print $1; else print "Other. Input your own storage path"; }')
+  # Add exit option to menu
+  OPTIONS_VALUES_INPUT+=( "TYPE00" )
+  OPTIONS_LABELS_INPUT+=( "None - Exit this installer" ) 
   makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
   singleselect SELECTED "$OPTIONS_STRING"
-  DIR_SCHEMA=${RESULTS}
-  if [ ${DIR_SCHEMA} == "other" ]; then
+  
+  if [ ${RESULTS} == 'other' ]; then
     # Input a storage path
     while true; do
       msg "The User must now enter a valid storage location path. For example:\n
@@ -75,7 +77,14 @@ while true; do
         done
       fi
     done
+  elif [ ${RESULTS} == 'TYPE00' ]; then
+    # Exit installation
+    msg "You have chosen not to proceed. Aborting. Bye..."
+    echo
+    exit 0
   else
+    # Set 'DIR_SCHEMA'
+    DIR_SCHEMA=${RESULTS}
     break
   fi
 done
