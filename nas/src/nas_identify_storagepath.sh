@@ -28,13 +28,14 @@ msg "Select a storage location from the menu:"
 while true; do
   unset stor_LIST
   stor_LIST+=( $(df -hx tmpfs --output=target | sed '1d' | grep -v '/$\|^/dev.*\|^/var.*\|^/boot.*\|^/rpool.*\|/etc.*') )
-  OPTIONS_VALUES_INPUT=( "$(printf '%s\n' "${stor_LIST[@]}")" "other" )
-  OPTIONS_LABELS_INPUT=( "$(printf '%s\n' "${stor_LIST[@]}")" "Input your own storage path" )
-  echo "${#OPTIONS_VALUES_INPUT[@]}"
-  echo "${#OPTIONS_LABELS_INPUT[@]}"
+  OPTIONS_VALUES_INPUT=( $(printf '%s\n' "${stor_LIST[@]}") )
+  OPTIONS_LABELS_INPUT=( $(printf '%s\n' "${stor_LIST[@]}") )
+  # Add 'other' option
+  OPTIONS_VALUES_INPUT+=( "other" )
+  OPTIONS_LABELS_INPUT+=( "Input your own storage path" )
   # Add exit option to menu
   OPTIONS_VALUES_INPUT+=( "TYPE00" )
-  OPTIONS_LABELS_INPUT+=( "None - Exit this installer & setup a File System" )
+  OPTIONS_LABELS_INPUT+=( "None - Exit this installer" )
   # Menu options
   makeselect_input2
   singleselect SELECTED "$OPTIONS_STRING"

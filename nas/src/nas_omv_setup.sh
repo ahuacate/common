@@ -522,6 +522,7 @@ done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+omv-salt deploy run fstab & spinner $!
 omv-salt deploy run nfs & spinner $!
 
 
