@@ -27,15 +27,18 @@ echo
 msg "Select a storage location from the menu:"
 while true; do
   unset stor_LIST
-  stor_LIST+=( $(df -hx tmpfs --output=target | sed '1d' | grep -v '/$\|^/dev.*\|^/var.*\|^/boot.*\|^/rpool.*\|/etc.*' | sed -e '$aother') )
-  OPTIONS_VALUES_INPUT=$(printf '%s\n' "${stor_LIST[@]}")
-  OPTIONS_LABELS_INPUT=$(printf '%s\n' "${stor_LIST[@]}" | awk '{if ($1 != "other") print $1; else print "Other. Input your own storage path"; }')
+  stor_LIST+=( $(df -hx tmpfs --output=target | sed '1d' | grep -v '/$\|^/dev.*\|^/var.*\|^/boot.*\|^/rpool.*\|/etc.*') )
+  OPTIONS_VALUES_INPUT=( "$(printf '%s\n' "${stor_LIST[@]}")" "other" )
+  OPTIONS_LABELS_INPUT=( "$(printf '%s\n' "${stor_LIST[@]}")" "Input your own storage path" )
+  echo "${#OPTIONS_VALUES_INPUT[@]}"
+  echo "${#OPTIONS_LABELS_INPUT[@]}"
   # Add exit option to menu
   OPTIONS_VALUES_INPUT+=( "TYPE00" )
-  OPTIONS_LABELS_INPUT+=( "None - Exit this installer" ) 
-  makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
+  OPTIONS_LABELS_INPUT+=( "None - Exit this installer & setup a File System" )
+  # Menu options
+  makeselect_input2
   singleselect SELECTED "$OPTIONS_STRING"
-  
+
   if [ ${RESULTS} == 'other' ]; then
     # Input a storage path
     while true; do
