@@ -337,6 +337,7 @@ FAIL_MSG="${RED}[WARNING]${NC}\nThere is a conflict with a existing OMV storage 
 Use the OMV WebGUI 'Storage' > 'Shared Folders' to:
 
 --  Delete the conflicting Shared Folder '${name}'
+--  Delete any associated SMB or NFS '${name}' share 
 
 Fix the issues and try again. Bye..."
 
@@ -367,7 +368,7 @@ while IFS=',' read -r dir desc grp other; do
     # Existing OMV share
     info "Pre-existing OMV share folder: '${dir}' (no change)"
     # Update share comment
-    xmlstarlet ed -u "//config/system/shares/sharedfolder[name='${dir}']/comment" -v ${desc} ${OMV_CONFIG}
+    # xmlstarlet ed -u "//config/system/shares/sharedfolder[name='${dir}']/comment" -v ${desc} ${OMV_CONFIG}
   elif [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
     # Create new share folder
     info "New OMV share folder created: ${WHITE}'${dir}'${NC}"
@@ -492,88 +493,88 @@ while IFS=':' read -r username uid homedir grp add_grp shell comment; do
 done <<< $( printf '%s\n' "${user_LIST[@]}" )
 
 
-#---- Create OVM 'NFS Shares'
-section "Create NFS Shares"
-msg "Creating NFS shares..."
+# #---- Create OVM 'NFS Shares'
+# section "Create NFS Shares"
+# msg "Creating NFS shares..."
 
-# Enabled NFS
-xmlstarlet edit -L \
-  --update "//config/services/nfs/enable" \
-  --value '1' ${OMV_CONFIG}
+# # Enabled NFS
+# xmlstarlet edit -L \
+#   --update "//config/services/nfs/enable" \
+#   --value '1' ${OMV_CONFIG}
 
-# Create 'nas_nfsfolder_LIST' array
-rm_match='^\#.*$|^\s*$|^git.*$|^homes.*$|^openvpn.*$|^sshkey.*$'
-# 'nas_basefolder_LIST' array
-unset nas_nfsfolder_LIST
-nas_nfsfolder_LIST=()
-while IFS= read -r line; do
-  [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
-  nas_nfsfolder_LIST+=( "$line" )
-done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
+# # Create 'nas_nfsfolder_LIST' array
+# rm_match='^\#.*$|^\s*$|^git.*$|^homes.*$|^openvpn.*$|^sshkey.*$'
+# # 'nas_basefolder_LIST' array
+# unset nas_nfsfolder_LIST
+# nas_nfsfolder_LIST=()
+# while IFS= read -r line; do
+#   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
+#   nas_nfsfolder_LIST+=( "$line" )
+# done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 
-# Create NFS share
-while IFS=',' read -r dir desc grp other; do
-  # Create uuid(s)
-  MNTENT_UUID="$(omv_uuid)"
-  NFS_SHARE_UUID="$(omv_uuid)"
-  SHARE_FOLDERREF=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='$dir']/uuid" -nl /etc/openmediavault/config.xml)
+# # Create NFS share
+# while IFS=',' read -r dir desc grp other; do
+#   # Create uuid(s)
+#   MNTENT_UUID="$(omv_uuid)"
+#   NFS_SHARE_UUID="$(omv_uuid)"
+#   SHARE_FOLDERREF=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='$dir']/uuid" -nl /etc/openmediavault/config.xml)
 
-  # OMV fstab mntent template
-  echo "<mntent>
-    <uuid>${MNTENT_UUID}</uuid>
-    <fsname>${DIR_SCHEMA}/${dir}/</fsname>
-    <dir>/export/${dir}</dir>
-    <type>none</type>
-    <opts>bind,nofail</opts>
-    <freq>0</freq>
-    <passno>0</passno>
-    <hidden>0</hidden>
-    <usagewarnthreshold>0</usagewarnthreshold>
-    <comment></comment>
-  </mntent>" > ${DIR}/fstab_mntent.xml
+#   # OMV fstab mntent template
+#   echo "<mntent>
+#     <uuid>${MNTENT_UUID}</uuid>
+#     <fsname>${DIR_SCHEMA}/${dir}/</fsname>
+#     <dir>/export/${dir}</dir>
+#     <type>none</type>
+#     <opts>bind,nofail</opts>
+#     <freq>0</freq>
+#     <passno>0</passno>
+#     <hidden>0</hidden>
+#     <usagewarnthreshold>0</usagewarnthreshold>
+#     <comment></comment>
+#   </mntent>" > ${DIR}/fstab_mntent.xml
 
-  # Delete subnode if already exist
-  xmlstarlet ed -L -d  "//config/system/fstab/mntent[dir='/export/${dir}' and fsname='${DIR_SCHEMA}/${dir}/']" ${OMV_CONFIG}
+#   # Delete subnode if already exist
+#   xmlstarlet ed -L -d  "//config/system/fstab/mntent[dir='/export/${dir}' and fsname='${DIR_SCHEMA}/${dir}/']" ${OMV_CONFIG}
 
-  #Adding a new subnode to fstab mntent
-  TMP_XML=$(mktemp)
-  xmlstarlet edit --subnode "//config/system/fstab" --type elem --name "mntent" \
-  -v "$(xmlstarlet sel -t -c '/mntent/*' ${DIR}/fstab_mntent.xml)" ${OMV_CONFIG} \
-  | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
-  mv "$TMP_XML" ${OMV_CONFIG}
+#   #Adding a new subnode to fstab mntent
+#   TMP_XML=$(mktemp)
+#   xmlstarlet edit --subnode "//config/system/fstab" --type elem --name "mntent" \
+#   -v "$(xmlstarlet sel -t -c '/mntent/*' ${DIR}/fstab_mntent.xml)" ${OMV_CONFIG} \
+#   | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
+#   mv "$TMP_XML" ${OMV_CONFIG}
 
-  # Create NFS share template
-  while IFS=',' read -r host_id host_ip other; do
-    # NFS client IP
-    NFS_CLIENT="${host_ip}/32"
+#   # Create NFS share template
+#   while IFS=',' read -r host_id host_ip other; do
+#     # NFS client IP
+#     NFS_CLIENT="${host_ip}/32"
 
-    # OMV nfs share template
-    echo "<share>
-      <uuid>${NFS_SHARE_UUID}</uuid>
-      <sharedfolderref>${SHARE_FOLDERREF}</sharedfolderref>
-      <mntentref>${MNTENT_UUID}</mntentref>
-      <client>${NFS_CLIENT}</client>
-      <options>rw</options>
-      <comment>${desc}</comment>
-      <extraoptions>${NFS_STRING}</extraoptions>
-    </share>" > ${DIR}/nfs_share.xml
+#     # OMV nfs share template
+#     echo "<share>
+#       <uuid>${NFS_SHARE_UUID}</uuid>
+#       <sharedfolderref>${SHARE_FOLDERREF}</sharedfolderref>
+#       <mntentref>${MNTENT_UUID}</mntentref>
+#       <client>${NFS_CLIENT}</client>
+#       <options>rw</options>
+#       <comment>${desc}</comment>
+#       <extraoptions>${NFS_STRING}</extraoptions>
+#     </share>" > ${DIR}/nfs_share.xml
 
-    # Delete subnode if already exist
-    xmlstarlet ed -L -d  "//config/services/nfs/shares/share[sharedfolderref='${SHARE_FOLDERREF}' and client='${NFS_CLIENT}']" ${OMV_CONFIG}
+#     # Delete subnode if already exist
+#     xmlstarlet ed -L -d  "//config/services/nfs/shares/share[sharedfolderref='${SHARE_FOLDERREF}' and client='${NFS_CLIENT}']" ${OMV_CONFIG}
 
-    #Adding a new subnode to nfs share
-    TMP_XML=$(mktemp)
-    xmlstarlet edit --subnode "//config/services/nfs/shares" --type elem --name "share" \
-    -v "$(xmlstarlet sel -t -c '/share/*' ${DIR}/nfs_share.xml)" ${OMV_CONFIG} \
-    | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
-    mv "$TMP_XML" ${OMV_CONFIG} 
-  done <<< $( printf '%s\n' "${pve_node_LIST[@]}" )
+#     #Adding a new subnode to nfs share
+#     TMP_XML=$(mktemp)
+#     xmlstarlet edit --subnode "//config/services/nfs/shares" --type elem --name "share" \
+#     -v "$(xmlstarlet sel -t -c '/share/*' ${DIR}/nfs_share.xml)" ${OMV_CONFIG} \
+#     | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
+#     mv "$TMP_XML" ${OMV_CONFIG} 
+#   done <<< $( printf '%s\n' "${pve_node_LIST[@]}" )
 
-done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
+# done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
 
-# Stage config edit
-msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt stage run deploy & spinner $!
+# # Stage config edit
+# msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+# omv-salt stage run deploy & spinner $!
 
 
 #---- Setup OVM SMB Shares
