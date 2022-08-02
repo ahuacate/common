@@ -365,12 +365,9 @@ while IFS=',' read -r dir desc grp other; do
     msg "$FAIL_MSG"
   elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
     # Existing OMV share
-    info "Pre-existing OMV share folder: '${dir}' (existing)"
-    # Update comment
-    # xmlstarlet edit -L \
-    #   --update "//config/system/usermanagement/homedirectory/enable" \
-    #   --value '1' ${OMV_CONFIG}
-    continue
+    info "Pre-existing OMV share folder: '${dir}' (no change)"
+    # Update share comment
+    xmlstarlet ed -u "//config/system/shares/sharedfolder[name='${dir}']/comment" -v ${desc} ${OMV_CONFIG}
   elif [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
     # Create new share folder
     info "New OMV share folder created: ${WHITE}'${dir}'${NC}"
