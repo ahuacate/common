@@ -502,7 +502,6 @@ done <<< $( printf '%s\n' "${user_LIST[@]}" )
 section "Create NFS Shares"
 msg "Creating NFS shares..."
 
-
 # Enabled NFS
 xmlstarlet edit -L \
   --update "//config/services/nfs/enable" \
@@ -770,24 +769,35 @@ msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )...
 omv-salt deploy run fail2ban & spinner $!
 
 
----- Other OMV Plug-ins
+#---- Other OMV Plug-ins
 section "Install OMV Plugins"
+
+msg "Installing OMV sftp plugins..."
+PLUGIN_STATUS=0
 # SFTP plugin
 if [ $(dpkg -s openmediavault-sftp >/dev/null 2>&1; echo $?) != 0 ]; then
-  msg "Installing sftp plugin..."
+  info "OMV sftp plugin status: ${WHITE}installed${NC}"
   apt-get install openmediavault-sftp -y
+  PLUGIN_STATUS=1
 fi
 
 # USB backup plugin
 if [ $(dpkg -s openmediavault-usbbackup >/dev/null 2>&1; echo $?) != 0 ]; then
-  msg "Installing USB backup plugin..."
+  info "OMV usbbackup plugin status: ${WHITE}installed${NC}"
   apt-get install openmediavault-usbbackup -y
+  PLUGIN_STATUS=1
 fi
 
 # USB remote mount plugin
 if [ $(dpkg -s openmediavault-remotemount >/dev/null 2>&1; echo $?) != 0 ]; then
-  msg "Installing remote mount plugin..."
+  info "OMV remote mount plugin status: ${WHITE}installed${NC}"
   apt-get install openmediavault-remotemount -y
+  PLUGIN_STATUS=1
+fi
+
+# Plugin status
+if [ ${PLUGIN_STATUS} == 0 ]; then
+  info "All default OMV Plugins already installed. Non required."
 fi
 echo
 
