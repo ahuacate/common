@@ -364,11 +364,12 @@ while IFS=',' read -r dir desc grp other; do
     # Print fail msg
     msg "$FAIL_MSG"
   elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
-    # Share exists
-    # Update
-    xmlstarlet edit -L \
-      --update "//config/system/usermanagement/homedirectory/enable" \
-      --value '1' ${OMV_CONFIG}
+    # Existing OMV share
+    info "Pre-existing OMV share folder: '${dir}' (existing)"
+    # Update comment
+    # xmlstarlet edit -L \
+    #   --update "//config/system/usermanagement/homedirectory/enable" \
+    #   --value '1' ${OMV_CONFIG}
     continue
   elif [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
     # Create new share folder
@@ -395,9 +396,6 @@ while IFS=',' read -r dir desc grp other; do
     -v "$(xmlstarlet sel -t -c '/sharedfolder/*' ${DIR}/shares_sharedfolder.xml)" ${OMV_CONFIG} \
     | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
     mv "$TMP_XML" ${OMV_CONFIG}
-  else
-    # Existing OMV share
-    info "Pre-existing OMV share folder: '${dir}' (existing)"
   fi
 done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 echo
