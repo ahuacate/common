@@ -320,31 +320,87 @@ source ${COMMON_DIR}/nas/src/nas_basefoldersetup.sh
 section "Create Storage Shares"
 msg "Creating OVM shares..."
 
+# OMV_CONFIG='/etc/openmediavault/config.xml'
+# dir=fuck
+# DIR_SCHEMA_UUID='ca47f77a-4701-47f6-b121-a7ea8cabdbcc'
+
+# Fail msg
+FAIL_MSG="${RED}[WARNING]${NC}\nThere is a conflict with a existing OMV storage folder setting:
+
+--  Share name: '${name}'
+    $(if [ "${name}" = "${dir}" ]; then printf "Status: ${GREEN}ok${NC}"; else printf "Status: ${RED}fail${NC} (requires: '${dir}')"; fi)
+--  File system: '${file_system}'
+    $(if [ "${file_system}" = "${DIR_SCHEMA_UUID}" ]; then printf "Status: ${GREEN}ok${NC}"; else printf "Status: ${RED}fail${NC} (requires: '${DIR_SCHEMA_UUID}')"; fi)
+--  Relative path: '${relative_path}'
+    $(if [ "${relative_path}" = "${dir}/" ]; then printf "Status: ${GREEN}ok${NC}"; else printf "Status: ${RED}fail${NC} (requires: '${dir/}')"; fi)
+
+Use the OMV WebGUI 'Storage' > 'Shared Folders' to:
+
+--  Delete the conflicting Shared Folder '${name}'
+
+Fix the issues and try again. Bye..."
+
+
 while IFS=',' read -r dir desc grp other; do
-  # Create uuid
-  SHARE_UUID="$(omv_uuid)"
+  if [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${dir}/' and not(mntentref='${DIR_SCHEMA_UUID}')]" -nl ${OMV_CONFIG}) ]]; then
+    # Set fail msg vars
+    name=${dir}
+    relative_path="${dir}/"
+    file_system=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}']/mntentref" -nl ${OMV_CONFIG})
+    # Print fail msg
+    msg "$FAIL_MSG"
+  elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and not (reldirpath='${dir}/')]" -nl ${OMV_CONFIG}) ]]; then
+    # Set fail msg vars
+    name=${dir}
+    relative_path=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}']/reldirpath" -nl ${OMV_CONFIG})
+    file_system=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}']/mntentref" -nl ${OMV_CONFIG})
+    # Print fail msg
+    msg "$FAIL_MSG"
+  elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${dir}/' and not (name='${dir}')]" -nl ${OMV_CONFIG}) ]]; then
+    # Set fail msg vars
+    name=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${dir}/']/name" -nl ${OMV_CONFIG})
+    relative_path="${dir}/"
+    file_system=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${dir}/']/mntentref" -nl ${OMV_CONFIG})
+    # Print fail msg
+    msg "$FAIL_MSG"
+  elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
+    # Share exists
+    # Update
+    xmlstarlet edit -L \
+      --update "//config/system/usermanagement/homedirectory/enable" \
+      --value '1' ${OMV_CONFIG}
+    continue
+  elif [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
+    # Create new share folder
+    info "New OMV share folder created: ${WHITE}'${dir}'${NC}"
+    # Create uuid
+    SHARE_UUID="$(omv_uuid)"
 
-  # OMV shared folder template
-  echo "<sharedfolder>
-    <uuid>${SHARE_UUID}</uuid>
-    <name>${dir}</name>
-    <comment>${desc}</comment>
-    <mntentref>${DIR_SCHEMA_UUID}</mntentref>
-    <reldirpath>${dir}/</reldirpath>
-    <privileges></privileges>
-  </sharedfolder>" > ${DIR}/shares_sharedfolder.xml
+    # OMV shared folder template
+    echo "<sharedfolder>
+      <uuid>${SHARE_UUID}</uuid>
+      <name>${dir}</name>
+      <comment>${desc}</comment>
+      <mntentref>${DIR_SCHEMA_UUID}</mntentref>
+      <reldirpath>${dir}/</reldirpath>
+      <privileges></privileges>
+    </sharedfolder>" > ${DIR}/shares_sharedfolder.xml
 
-  # Delete subnode if already exist
-  xmlstarlet ed -L -d  "//config/system/shares/sharedfolder[name='$dir' and mntentref='$DIR_SCHEMA_UUID']" ${OMV_CONFIG}
+    # Delete subnode if already exist
+    xmlstarlet ed -L -d  "//config/system/shares/sharedfolder[name='$dir' and mntentref='$DIR_SCHEMA_UUID']" ${OMV_CONFIG}
 
-  #Adding a new subnode to certain nodes
-  TMP_XML=$(mktemp)
-  xmlstarlet edit --subnode "//config/system/shares" --type elem --name "sharedfolder" \
-  -v "$(xmlstarlet sel -t -c '/sharedfolder/*' ${DIR}/shares_sharedfolder.xml)" ${OMV_CONFIG} \
-  | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
-  mv "$TMP_XML" ${OMV_CONFIG}
-
+    #Adding a new subnode to certain nodes
+    TMP_XML=$(mktemp)
+    xmlstarlet edit --subnode "//config/system/shares" --type elem --name "sharedfolder" \
+    -v "$(xmlstarlet sel -t -c '/sharedfolder/*' ${DIR}/shares_sharedfolder.xml)" ${OMV_CONFIG} \
+    | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
+    mv "$TMP_XML" ${OMV_CONFIG}
+  else
+    # Existing OMV share
+    info "Pre-existing OMV share folder: '${dir}' (existing)"
+  fi
 done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
+echo
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
@@ -522,8 +578,7 @@ done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt deploy run fstab & spinner $!
-omv-salt deploy run nfs & spinner $!
+omv-salt stage run deploy & spinner $!
 
 
 #---- Setup OVM SMB Shares
