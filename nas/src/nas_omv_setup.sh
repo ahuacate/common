@@ -340,7 +340,7 @@ Use the OMV WebGUI 'Storage' > 'Shared Folders' to:
 
 Fix the issues and try again. Bye..."
 
-
+# Check OMV share and process
 while IFS=',' read -r dir desc grp other; do
   if [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${dir}/' and not(mntentref='${DIR_SCHEMA_UUID}')]" -nl ${OMV_CONFIG}) ]]; then
     # Set fail msg vars
