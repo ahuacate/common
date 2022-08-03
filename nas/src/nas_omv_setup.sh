@@ -773,41 +773,35 @@ omv-salt deploy run fail2ban & spinner $!
 section "Install OMV Plugins"
 
 msg "Installing OMV sftp plugins..."
-PLUGIN_STATUS=0
-# SFTP plugin
-if [ $(dpkg -s openmediavault-sftp >/dev/null 2>&1; echo $?) != 0 ]; then
-  info "OMV sftp plugin status: ${WHITE}installed${NC}"
-  apt-get install openmediavault-sftp -y
-  PLUGIN_STATUS=1
-fi
+# Required PVESM Storage Mounts for CT ( new version )
+unset plugin_LIST
+plugin_LIST=()
+while IFS= read -r line; do
+  [[ "$line" =~ ^\#.*$ ]] && continue
+  plugin_LIST+=( "$line" )
+done << EOF
+# Example
+# name:description
+openmediavault-sftp:sftp
+openmediavault-usbbackup:usb backup
+openmediavault-remotemount:remote mount
+EOF
 
-# USB backup plugin
-if [ $(dpkg -s openmediavault-usbbackup >/dev/null 2>&1; echo $?) != 0 ]; then
-  info "OMV usbbackup plugin status: ${WHITE}installed${NC}"
-  apt-get install openmediavault-usbbackup -y
-  PLUGIN_STATUS=1
-fi
-
-# USB remote mount plugin
-if [ $(dpkg -s openmediavault-remotemount >/dev/null 2>&1; echo $?) != 0 ]; then
-  info "OMV remote mount plugin status: ${WHITE}installed${NC}"
-  apt-get install openmediavault-remotemount -y
-  PLUGIN_STATUS=1
-fi
-
-# Plugin status
-if [ ${PLUGIN_STATUS} == 0 ]; then
-  info "All default OMV Plugins already installed. Non required."
-fi
+# Check plugin status
+while IFS=':' read -r plugin desc; do
+  if [ $(dpkg -s ${plugin} >/dev/null 2>&1; echo $?) != 0 ]; then
+    apt-get install ${plugin} -y
+    info "OMV ${desc} plugin status: ${WHITE}installed${NC}"
+  else
+    info "OMV ${desc} plugin status: existing (already installed)"
+  fi
+done <<< $( printf '%s\n' "${plugin_LIST[@]}" )
 echo
 
 
 #---- Set Hostname
 if [ ${HOSTNAME_MOD} == 0 ]; then
   section "Modify OMV Hostname"
-
-  # Assign old hostnames
-  HOSTNAME_OLD=$(hostname)
 
   # Change hostname
   xmlstarlet edit -L \
@@ -857,7 +851,7 @@ display_msg4=( "$x$(hostname -I | sed -r 's/\s+//g')\:" )
 display_msg4+=( "$x$(hostname).$(hostname -d)\:" )
 
 # Display msg
-msg_box "${HOSTNAME^^} OMV NAS installation was a success. Your NAS is fully configured and is ready to provide NFS and/or SMB/CIFS backend storage mounts to your PVE hosts.
+msg_box "${HOSTNAME^^} OMV NAS setup was a success. Your NAS is fully configured and is ready to provide NFS and/or SMB/CIFS backend storage mounts to your PVE hosts.
 
 OMV NAS has a WebGUI management interface. Your login credentials are user 'admin' and password 'openmediavault'. You can change your login credentials using the WebGUI.
 
