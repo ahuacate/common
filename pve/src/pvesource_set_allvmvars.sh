@@ -576,7 +576,7 @@ while true; do
         unset pvesm_input_LIST
         info "$FAIL_MSG"
         echo
-        break -2 > /dev/null 2>&1
+        break 2 > /dev/null 2>&1
       fi 
     done <<< $(printf '%s\n' "${pvesm_required_LIST[@]}" | awk -F':' '{ print $1 }' | grep -v 'none')
   fi
