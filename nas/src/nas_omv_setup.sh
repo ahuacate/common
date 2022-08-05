@@ -311,7 +311,7 @@ grp_LIST=( "medialab:65605:For media apps (Sonarr, Radar, Jellyfin etc)"
 # Username List
 # 1=USERNAME:2=UID:3=HOMEDIR:4=GRP:5=ADD_GRP:6=SHELL:7=COMMENT
 user_LIST=( "media:1605:${DIR_SCHEMA}/homes/media:medialab::/bin/bash:Member of medialab group only"
-"home:1606:${DIR_SCHEMA}/homes/home:homelab:medialab:/bin/bash:Member of homelab group (+ homelab)"
+"home:1606:${DIR_SCHEMA}/homes/home:homelab:medialab:/bin/bash:Member of homelab group (+ medialab)"
 "private:1607:${DIR_SCHEMA}/homes/private:privatelab:medialab,homelab:/bin/bash:Member of privatelab group (+ medialab,homelab)" )
 
 #---- Start Build ------------------------------------------------------------------
@@ -861,7 +861,7 @@ The NAS is installed with Ahuacate default User accounts, Groups and file sharin
 
 $(printf '%s\n' "${display_msg2[@]}" | column -s ":" -t -N "GROUP NAME,DESCRIPTION" | indent2)
 
-$(printf '%s\n' "${display_msg3[@]}" | column -s ":" -t -N "NEW USERS,DESCRIPTION" | indent2)
+$(printf '%s\n' "${display_msg3[@]}" | column -s ":" -t -N "NEW APP USERS,DESCRIPTION" | indent2)
 
 To access ${HOSTNAME^^} files use SMB.
 
