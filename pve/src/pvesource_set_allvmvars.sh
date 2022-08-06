@@ -1230,6 +1230,7 @@ if [[ ${#pvesm_required_LIST[@]} -ge 1 ]]; then
     done <<< $(printf '%s\n' "${pvesm_missing_LIST[@]}")
   fi
   echo
+
   # Confirmation of ES auto assigned bind mounts
   while true; do
     read -p "Confirm the '${#pvesm_input_LIST[@]}' auto assignments are correct [y/n]?: " -n 1 -r YN
@@ -1278,7 +1279,7 @@ if [[ ${#pvesm_required_LIST[@]} -ge 1 ]]; then
         echo
         trap cleanup EXIT
       else
-        pvesm_input_LIST+=( "$(echo ${RESULTS} | sed "s/$/,\/mnt\/$var1/")" )
+        pvesm_input_LIST+=( "$(echo ${RESULTS} | sed "s/$/,\/mnt\/${var01}/")" )
         echo
       fi
     done
