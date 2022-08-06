@@ -981,13 +981,13 @@ if [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp)$ ]] || [[ ${IP} =~ 
   # Set nameserver
   msg "Setting '${HOSTNAME^}' Nameserver IP address..."
   while true; do
-    read -p "Enter a Nameserver IP address: " -e -i ${NAMESERVER_VAR} NAMESERVER
+    read -p "Enter a Nameserver IP address for vlan${TAG}: " -e -i ${NAMESERVER_VAR} NAMESERVER
     FAIL_MSG="The Nameserver address 'appears' to be not valid. A valid Nameserver IP address is when all of the following constraints are satisfied:\n
     --  the Nameserver server IP exists on the network ( passes ping test ).
     --  it meets the IPv4 or IPv6 standard.
     --  can resolve host command tests of public URLs ( ibm.com, github.com ).\n
-    But it maybe okay. Because the Nameserver IP address is on a VLAN LAN security maybe blocking access to '${NAMESERVER}'.\n
-    Accept or try again..."
+    This fail warning may be false flag. Because the Nameserver IP address is on a VLAN different to the host LAN network security maybe blocking access to '${NAMESERVER}' vlan.\n
+    Manually accept or try again..."
     PASS_MSG="Nameserver IP server is set: ${YELLOW}${NAMESERVER}${NC}"
     result=$(valid_dns ${NAMESERVER} > /dev/null 2>&1)
     if [ $? == 0 ]; then
@@ -998,7 +998,7 @@ if [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp)$ ]] || [[ ${IP} =~ 
       warn "$FAIL_MSG"
       # Manually validate the entry
       while true; do
-        read -p "Accept Nameserver IP '${NAMESERVER}' is correct [y/n]?: " -n 1 -r YN
+        read -p "Accept Nameserver IP '${NAMESERVER}' as correct [y/n]?: " -n 1 -r YN
         echo
         case $YN in
           [Yy]*)
@@ -1183,6 +1183,20 @@ if [ ${SSH_ENABLE} == 0 ]; then
 fi
 
 #---- PVESM Storage Bind Mounts
+
+##### Temp stuff
+# Required PVESM Storage Mounts for CT ( new version )
+unset pvesm_required_LIST
+pvesm_required_LIST=()
+while IFS= read -r line; do
+  [[ "$line" =~ ^\#.*$ ]] && continue
+  pvesm_required_LIST+=( "$line" )
+done << EOF
+# Example
+backup:CT settings backup storage
+downloads:General downloads storage
+EOF
+
 if [[ ${#pvesm_required_LIST[@]} -ge 1 ]]; then
   unset pvesm_input_LIST
   while IFS=':' read -r var1 var2; do
@@ -1192,6 +1206,7 @@ if [[ ${#pvesm_required_LIST[@]} -ge 1 ]]; then
       pvesm_missing_LIST+=( "$(echo $var1:$var2)" )
     fi
   done <<< $(printf '%s\n' "${pvesm_required_LIST[@]}" | grep -v 'none')
+
 
   # Validate ES Auto match
   msg "Easy Script has auto assigned '${#pvesm_input_LIST[@]}' of the required '${#pvesm_required_LIST[@]}' storage bind mounts. The User must confirm all '${#pvesm_input_LIST[@]}' storage bind mounts are correctly assigned. $(if [[ ${#pvesm_missing_LIST[@]} -ge 1 ]]; then echo "The missing '${#pvesm_missing_LIST[@]}' storage bind mounts can me manually assigned in the next steps."; fi)"
@@ -1228,7 +1243,10 @@ if [[ ${#pvesm_required_LIST[@]} -ge 1 ]]; then
       [Nn]*)
         unset pvesm_input_LIST
         unset pvesm_missing_LIST
-        pvesm_missing_LIST+=$(printf '%s\n' "${pvesm_required_LIST[@]}" | grep -v 'none')
+        while IFS= read -r line; do
+          [[ "$line" =~ ^none ]] && continue
+          pvesm_missing_LIST+=( "$line" )
+        done <<< $(printf '%s\n' "${pvesm_required_LIST[@]}")
         echo
         break
         ;;
