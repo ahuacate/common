@@ -395,9 +395,11 @@ if [[ $(hostname -i) =~ ${ip4_regex} ]] && [ ${NET_DHCP} == '0' ]; then
 elif [ ${NET_DHCP} == '1' ]; then
   if [[ $(hostname -i) =~ ${ip4_regex} ]]; then
     # Nameserver - match to PVE host IP format ( for IPv4 only )
-    nameserver_octet3=$TAG
-    nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
-    NAMESERVER=$(hostname -i | awk -F'.' -v octet3="${nameserver_octet3}" -v octet4="${nameserver_octet4}" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
+    if [ ! ${TAG} == '0' ]; then
+      nameserver_octet3=$TAG
+      nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
+      NAMESERVER=$(hostname -i | awk -F'.' -v octet3="${nameserver_octet3}" -v octet4="${nameserver_octet4}" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
+    fi
     # Copy preset variable
     preset_IP=$IP
     preset_IP6=$IP6
@@ -409,7 +411,11 @@ elif [ ${NET_DHCP} == '1' ]; then
     IP6=''
     GW=''
     GW6=''
-    NAMESERVER=$NAMESERVER
+    if [ ! ${TAG} == '0' ]; then
+      NAMESERVER=$NAMESERVER
+    else
+      NAMESERVER=''
+    fi
     NET_DHCP_TYPE='dhcp4'
   elif [[ $(hostname -i) =~ ${ip6_regex} ]]; then
     # Copy preset variable
@@ -590,7 +596,7 @@ while true; do
   fi
 
   # Confirm ES settings
-  msg "Easy Script has confirmed all default variable settings are valid (Recommended). The settings for '${HOSTNAME^}' ${VM_TYPE^^} are:"
+  msg "Easy Script has done its best to confirm all default variable settings are valid (Recommended). The settings for '${HOSTNAME^}' ${VM_TYPE^^} are:"
 
   # Set ES display variables
   unset displayVARS
@@ -663,7 +669,7 @@ while true; do
       msg "\t$i. Gateway IPv6 address : ${YELLOW}${GW6}${NC}"
       (( i=i+1 ))
     elif [ 'NAMESERVER' == $j ]; then
-      msg "\t$i. Name server : ${YELLOW}${NAMESERVER}${NC}"
+      msg "\t$i. Name server : ${YELLOW}${NAMESERVER}${NC} ( user best check )"
       (( i=i+1 ))
     elif [ 'SEARCHDOMAIN' == $j ]; then
       msg "\t$i. Search domain ( local domain ) : ${YELLOW}${SEARCHDOMAIN}${NC}"
