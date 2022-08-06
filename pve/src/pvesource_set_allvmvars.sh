@@ -932,43 +932,150 @@ if [ ${NET_DHCP} == '0' ]; then
     fi
   done
 
-  #---- Set Nameserver IP Address ( DNS )
-  msg "Select static IP or use PVE host Nameserver (DNS) address assignment..."
-  OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" )
-  OPTIONS_LABELS_INPUT=( "Static Nameserver - Manually set a Nameserver IP address ( Recommended )" \
-  "PVE Host Nameserver - Use PVE host Nameserver settings" )
-  makeselect_input2
-  singleselect SELECTED "$OPTIONS_STRING"
+  # #---- Set Nameserver IP Address ( DNS )
+  # msg "Select static IP or use PVE host Nameserver (DNS) address assignment..."
+  # OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" )
+  # OPTIONS_LABELS_INPUT=( "Static Nameserver - Manually set a Nameserver IP address ( Recommended )" \
+  # "PVE Host Nameserver - Use PVE host Nameserver settings" )
+  # makeselect_input2
+  # singleselect SELECTED "$OPTIONS_STRING"
 
-  # Set Nameserver (DNS)
-  if [ ${RESULTS} == 'TYPE01' ]; then
-    # Pre-set to hosts Nameserver IP
-    if [ -n "${NAMESERVER}" ]; then
-      NAMESERVER=$(grep -i "nameserver" /etc/resolv.conf | head -n1 | cut -d ' ' -f2)
+  # # Set Nameserver (DNS)
+  # if [ ${RESULTS} == 'TYPE01' ]; then
+  #   # Pre-set to hosts Nameserver IP
+  #   if [ -n "${NAMESERVER}" ]; then
+  #     NAMESERVER=$(grep -i "nameserver" /etc/resolv.conf | head -n1 | cut -d ' ' -f2)
+  #   fi
+  #   msg "Setting '${HOSTNAME^}' Nameserver IP address..."
+  #   while true; do
+  #     read -p "Enter a Nameserver IP address: " -e -i ${NAMESERVER} NAMESERVER
+  #     FAIL_MSG="The Nameserver address is not valid. A valid Nameserver IP address is when all of the following constraints are satisfied:\n
+  #     --  the Nameserver server IP exists on the network ( passes ping test ).
+  #     --  it meets the IPv4 or IPv6 standard.
+  #     --  can resolve host command tests of public URLs ( ibm.com, github.com ).\n
+  #     Try again..."
+  #     PASS_MSG="Nameserver IP server is set: ${YELLOW}${NAMESERVER}${NC}"
+  #     result=$(valid_dns ${NAMESERVER} > /dev/null 2>&1)
+  #     if [ $? == 0 ]; then
+  #       info "$PASS_MSG"
+  #       # NAMESERVER=${NAMESERVER}
+  #       echo
+  #       break
+  #     elif [ $? != 0 ]; then
+  #       warn "$FAIL_MSG"
+  #       echo
+  #     fi
+  #   done
+  # elif [ ${RESULTS} == 'TYPE02' ]; then
+  #   NAMESERVER=''
+  # fi
+fi
+
+
+#---- Set Nameserver IP Address ( DNS )
+if [ ! ${TAG} == '0' ] && [[ ${IP} =~ ${ip4_regex} ]] && [[ ! $(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }') == ${TAG}]]; then
+  # Nameserver - match to PVE host IP format ( for IPv4 only )
+  nameserver_octet3=$TAG
+  nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
+  NAMESERVER_VAR=$(hostname -i | awk -F'.' -v octet3="${nameserver_octet3}" -v octet4="${nameserver_octet4}" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
+  # Set nameserver
+  msg "Setting '${HOSTNAME^}' Nameserver IP address..."
+  while true; do
+    read -p "Enter a Nameserver IP address: " -e -i ${NAMESERVER_VAR} NAMESERVER
+    FAIL_MSG="The Nameserver address 'appears' to be not valid. A valid Nameserver IP address is when all of the following constraints are satisfied:\n
+    --  the Nameserver server IP exists on the network ( passes ping test ).
+    --  it meets the IPv4 or IPv6 standard.
+    --  can resolve host command tests of public URLs ( ibm.com, github.com ).\n
+    But it maybe okay. Because the Nameserver IP address is on a VLAN LAN security maybe blocking access to '${NAMESERVER}'.\n
+    Accept or try again..."
+    PASS_MSG="Nameserver IP server is set: ${YELLOW}${NAMESERVER}${NC}"
+    result=$(valid_dns ${NAMESERVER} > /dev/null 2>&1)
+    if [ $? == 0 ]; then
+      info "$PASS_MSG"
+      echo
+      break
+    elif [ $? != 0 ]; then
+      warn "$FAIL_MSG"
+      # Manually validate the entry
+      while true; do
+        read -p "Accept Nameserver IP '${NAMESERVER}' is correct [y/n]?: " -n 1 -r YN
+        echo
+        case $YN in
+          [Yy]*)
+            info "$PASS_MSG"
+            echo
+            break 2
+            ;;
+          [Nn]*)
+            msg "Try again..."
+            echo
+            break
+            ;;
+          *)
+            warn "Error! Entry must be 'y' or 'n'. Try again..."
+            echo
+            ;;
+        esac
+      done
+
+      echo
     fi
-    msg "Setting '${HOSTNAME^}' Nameserver IP address..."
-    while true; do
-      read -p "Enter a Nameserver IP address: " -e -i ${NAMESERVER} NAMESERVER
-      FAIL_MSG="The Nameserver address is not valid. A valid Nameserver IP address is when all of the following constraints are satisfied:\n
-      --  the Nameserver server IP exists on the network ( passes ping test ).
-      --  it meets the IPv4 or IPv6 standard.
-      --  can resolve host command tests of public URLs ( ibm.com, github.com ).\n
-      Try again..."
-      PASS_MSG="Nameserver IP server is set: ${YELLOW}${NAMESERVER}${NC}"
-      result=$(valid_dns ${NAMESERVER} > /dev/null 2>&1)
-      if [ $? == 0 ]; then
-        info "$PASS_MSG"
-        # NAMESERVER=${NAMESERVER}
-        echo
-        break
-      elif [ $? != 0 ]; then
-        warn "$FAIL_MSG"
-        echo
-      fi
-    done
-  elif [ ${RESULTS} == 'TYPE02' ]; then
-    NAMESERVER=''
+  done
+elif [ ! ${TAG} == '0' ] && [[ ${IP} =~ ${ip4_regex} ]] && [[ $(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }') == ${TAG}]]; then
+  # Set nameserver to match host (same vlan)
+  NAMESERVER=$(ip route show default | awk '/default/ {print $3}')
+elif [ ${TAG} == '0' ]; then
+  # Nameserver set to host
+  NAMESERVER=''
+elif [ ! ${TAG} == '0' ] && [[ ! ${IP} =~ ${ip4_regex} ]]; then
+  # IPv6 Nameserver set to host
+  NAMESERVER=''
+fi
+
+if [[ ${IP_VAR} =~ ${ip4_regex} ]]; then
+  IP=${IP_VAR}
+  IP6=''
+elif [[ ${IP_VAR} =~ ${ip6_regex} ]]; then
+  IP6=${IP_VAR}
+  IP=''
+fi
+
+
+msg "Select static IP or use PVE host Nameserver (DNS) address assignment..."
+OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" )
+OPTIONS_LABELS_INPUT=( "Static Nameserver - Manually set a Nameserver IP address ( Recommended )" \
+"PVE Host Nameserver - Use PVE host Nameserver settings" )
+makeselect_input2
+singleselect SELECTED "$OPTIONS_STRING"
+
+# Set Nameserver (DNS)
+if [ ${RESULTS} == 'TYPE01' ]; then
+  # Pre-set to hosts Nameserver IP
+  if [ -n "${NAMESERVER}" ]; then
+    NAMESERVER=$(grep -i "nameserver" /etc/resolv.conf | head -n1 | cut -d ' ' -f2)
   fi
+  msg "Setting '${HOSTNAME^}' Nameserver IP address..."
+  while true; do
+    read -p "Enter a Nameserver IP address: " -e -i ${NAMESERVER} NAMESERVER
+    FAIL_MSG="The Nameserver address is not valid. A valid Nameserver IP address is when all of the following constraints are satisfied:\n
+    --  the Nameserver server IP exists on the network ( passes ping test ).
+    --  it meets the IPv4 or IPv6 standard.
+    --  can resolve host command tests of public URLs ( ibm.com, github.com ).\n
+    Try again..."
+    PASS_MSG="Nameserver IP server is set: ${YELLOW}${NAMESERVER}${NC}"
+    result=$(valid_dns ${NAMESERVER} > /dev/null 2>&1)
+    if [ $? == 0 ]; then
+      info "$PASS_MSG"
+      # NAMESERVER=${NAMESERVER}
+      echo
+      break
+    elif [ $? != 0 ]; then
+      warn "$FAIL_MSG"
+      echo
+    fi
+  done
+elif [ ${RESULTS} == 'TYPE02' ]; then
+  NAMESERVER=''
 fi
 
 
