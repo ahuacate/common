@@ -1183,20 +1183,6 @@ if [ ${SSH_ENABLE} == 0 ]; then
 fi
 
 #---- PVESM Storage Bind Mounts
-
-##### Temp stuff
-# Required PVESM Storage Mounts for CT ( new version )
-unset pvesm_required_LIST
-pvesm_required_LIST=()
-while IFS= read -r line; do
-  [[ "$line" =~ ^\#.*$ ]] && continue
-  pvesm_required_LIST+=( "$line" )
-done << EOF
-# Example
-backup:CT settings backup storage
-downloads:General downloads storage
-EOF
-
 if [[ ${#pvesm_required_LIST[@]} -ge 1 ]]; then
   unset pvesm_input_LIST
   while IFS=':' read -r var1 var2; do
