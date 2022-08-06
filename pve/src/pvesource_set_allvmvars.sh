@@ -973,7 +973,7 @@ fi
 
 
 #---- Set Nameserver IP Address ( DNS )
-if [ ! ${TAG} == '0' ] && [[ ${IP} =~ ${ip4_regex} ]] && [ $(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }') != ${TAG} ]; then
+if [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp)$ ]] || [[ ${IP} =~ ${ip4_regex} ]] && [ $(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }') != ${TAG} ]; then
   # Nameserver - match to PVE host IP format ( for IPv4 only )
   nameserver_octet3=$TAG
   nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
@@ -1021,14 +1021,14 @@ if [ ! ${TAG} == '0' ] && [[ ${IP} =~ ${ip4_regex} ]] && [ $(ip route show defau
       echo
     fi
   done
-elif [ ! ${TAG} == '0' ] && [[ ${IP} =~ ${ip4_regex} ]] && [ $(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }') == ${TAG}]; then
+elif [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp)$ ]] || [[ ${IP} =~ ${ip4_regex} ]] && [ $(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }') == ${TAG}]; then
   # Set nameserver to match host (same vlan)
   NAMESERVER=$(ip route show default | awk '/default/ {print $3}')
+elif [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp6)$ ]] || [[ ${IP6} =~ ${ip6_regex} ]]; then
+  # IPv6 Nameserver set to host
+  NAMESERVER=''
 elif [ ${TAG} == '0' ]; then
   # Nameserver set to host
-  NAMESERVER=''
-elif [ ! ${TAG} == '0' ] && [[ ! ${IP} =~ ${ip4_regex} ]]; then
-  # IPv6 Nameserver set to host
   NAMESERVER=''
 fi
 
