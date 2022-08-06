@@ -909,7 +909,7 @@ if [ ${NET_DHCP} == '0' ]; then
   fi
   while true; do
     read -p "Enter a Gateway IP address: " -e -i ${GW_VAR} GW_VAR
-    FAIL_MSG="The GW address is not valid. A valid Gateway IP address is when all of the following constraints are satisfied:\n
+    FAIL_MSG="The Gateway address is not valid. A valid Gateway IP address is when all of the following constraints are satisfied:\n
     --  it does exist on the network ( passes ping test ).
     --  it meets the IPv4 or IPv6 standard.\n
     Try again..."
