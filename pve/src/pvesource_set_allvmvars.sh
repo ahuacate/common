@@ -394,6 +394,10 @@ if [[ $(hostname -i) =~ ${ip4_regex} ]] && [ ${NET_DHCP} == '0' ]; then
   echo
 elif [ ${NET_DHCP} == '1' ]; then
   if [[ $(hostname -i) =~ ${ip4_regex} ]]; then
+    # Nameserver - match to PVE host IP format ( for IPv4 only )
+    nameserver_octet3=$TAG
+    nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
+    NAMESERVER=$(hostname -i | awk -F'.' -v octet3="${nameserver_octet3}" -v octet4="${nameserver_octet4}" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
     # Copy preset variable
     preset_IP=$IP
     preset_IP6=$IP6
@@ -405,7 +409,7 @@ elif [ ${NET_DHCP} == '1' ]; then
     IP6=''
     GW=''
     GW6=''
-    NAMESERVER=''
+    NAMESERVER=$NAMESERVER
     NET_DHCP_TYPE='dhcp4'
   elif [[ $(hostname -i) =~ ${ip6_regex} ]]; then
     # Copy preset variable
