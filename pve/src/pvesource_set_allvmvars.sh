@@ -355,7 +355,7 @@ fi
 
 
 # Query and match or map network variables to PVE host IP format
-if [[ $(hostname -i) =~ ${ip4_regex} ]] && [[ ${NET_DHCP} == '0' ]] || [[ ${VLAN_STATUS} == '0' ]]; then
+if [[ "$(hostname -i)" =~ ${ip4_regex} ]] && [ ${NET_DHCP} == '0' ] || [ ${VLAN_STATUS} == '0' ]; then
   # Copy preset variable
   preset_IP=$IP
   preset_IP6=$IP6
