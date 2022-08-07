@@ -301,9 +301,11 @@ singleselect SELECTED "$OPTIONS_STRING"
 echo
 # Set VLAN support
 if [ ${RESULTS} == 'TYPE02' ]; then
+  # Set VLAN to disable/off
   if [ ! ${TAG} == '0' ]; then
     TAG='0'
   fi
+  VLAN_STATUS='0'
 fi
 
 
@@ -352,8 +354,15 @@ else
 fi
 
 
-# Query and match to PVE host IP format ( for IPv4 only ) and DHCP check
-if [[ $(hostname -i) =~ ${ip4_regex} ]] && [ ${NET_DHCP} == '0' ]; then
+# Query and match or map network variables to PVE host IP format
+if [[ $(hostname -i) =~ ${ip4_regex} ]] && [ ${NET_DHCP} == '0' ] || [ ${VLAN_STATUS} == '0' ]; then
+  # Copy preset variable
+  preset_IP=$IP
+  preset_IP6=$IP6
+  preset_GW=$GW
+  preset_GW6=$GW6
+  preset_NAMESERVER=$NAMESERVER
+
   # Create & display list of variable changes
   unset ipVARS
   unset displayVARS
@@ -390,11 +399,14 @@ if [[ $(hostname -i) =~ ${ip4_regex} ]] && [ ${NET_DHCP} == '0' ]; then
     fi
   done <<< $(printf '%s\n' "${ipVARS[@]}")
 
-  msg_box "#### MODIFYING EASY SCRIPT IPv4 PRESETS ####\n\nOur Easy Scripts (ES) settings for your IPv4 ${VM_TYPE^^} addresses have been modified where required to match your PVE hosts IPv4 range, nameserver and gateway addresses and VLAN status ( $(if [ ${TAG} == '0' ]; then echo "disabled"; else echo "enabled"; fi) ).\n\n$(printf '%s\n' "${displayVARS[@]}" | column -s ":" -t -N "IP DESCRIPTION,DEFAULT ES PRESET,NEW ES PRESET" | indent2)\n\nThe new ES presets will be checked and validated in the next steps."
-  echo
+  # Display msg for static IP only
+  if [ ${NET_DHCP} == '0' ]; then
+    msg_box "#### MODIFYING EASY SCRIPT IPv4 PRESETS ####\n\nOur Easy Scripts (ES) settings for your IPv4 ${VM_TYPE^^} addresses have been modified where required to match your PVE hosts IPv4 range, nameserver and gateway addresses and VLAN status ( $(if [ ${TAG} == '0' ]; then echo "disabled"; else echo "enabled"; fi) ).\n\n$(printf '%s\n' "${displayVARS[@]}" | column -s ":" -t -N "IP DESCRIPTION,DEFAULT ES PRESET,NEW ES PRESET" | indent2)\n\nThe new ES presets will be checked and validated in the next steps."
+    echo
+  fi
 elif [ ${NET_DHCP} == '1' ]; then
   if [[ $(hostname -i) =~ ${ip4_regex} ]]; then
-    # Nameserver - match to PVE host IP format ( for IPv4 only )
+    # Nameserver - match to PVE host IP format & VLAN ( for IPv4 only )
     if [ ! ${TAG} == '0' ]; then
       nameserver_octet3=$TAG
       nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
@@ -411,6 +423,7 @@ elif [ ${NET_DHCP} == '1' ]; then
     IP6=''
     GW=''
     GW6=''
+    # Set Nameserver
     if [ ! ${TAG} == '0' ]; then
       NAMESERVER=$NAMESERVER
     else
@@ -931,44 +944,6 @@ if [ ${NET_DHCP} == '0' ]; then
       echo
     fi
   done
-
-  # #---- Set Nameserver IP Address ( DNS )
-  # msg "Select static IP or use PVE host Nameserver (DNS) address assignment..."
-  # OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" )
-  # OPTIONS_LABELS_INPUT=( "Static Nameserver - Manually set a Nameserver IP address ( Recommended )" \
-  # "PVE Host Nameserver - Use PVE host Nameserver settings" )
-  # makeselect_input2
-  # singleselect SELECTED "$OPTIONS_STRING"
-
-  # # Set Nameserver (DNS)
-  # if [ ${RESULTS} == 'TYPE01' ]; then
-  #   # Pre-set to hosts Nameserver IP
-  #   if [ -n "${NAMESERVER}" ]; then
-  #     NAMESERVER=$(grep -i "nameserver" /etc/resolv.conf | head -n1 | cut -d ' ' -f2)
-  #   fi
-  #   msg "Setting '${HOSTNAME^}' Nameserver IP address..."
-  #   while true; do
-  #     read -p "Enter a Nameserver IP address: " -e -i ${NAMESERVER} NAMESERVER
-  #     FAIL_MSG="The Nameserver address is not valid. A valid Nameserver IP address is when all of the following constraints are satisfied:\n
-  #     --  the Nameserver server IP exists on the network ( passes ping test ).
-  #     --  it meets the IPv4 or IPv6 standard.
-  #     --  can resolve host command tests of public URLs ( ibm.com, github.com ).\n
-  #     Try again..."
-  #     PASS_MSG="Nameserver IP server is set: ${YELLOW}${NAMESERVER}${NC}"
-  #     result=$(valid_dns ${NAMESERVER} > /dev/null 2>&1)
-  #     if [ $? == 0 ]; then
-  #       info "$PASS_MSG"
-  #       # NAMESERVER=${NAMESERVER}
-  #       echo
-  #       break
-  #     elif [ $? != 0 ]; then
-  #       warn "$FAIL_MSG"
-  #       echo
-  #     fi
-  #   done
-  # elif [ ${RESULTS} == 'TYPE02' ]; then
-  #   NAMESERVER=''
-  # fi
 fi
 
 
