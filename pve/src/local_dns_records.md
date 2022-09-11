@@ -51,5 +51,3 @@ Finally edit all your Proxmox hosts DNS setting (in identical order, PiHole DNS 
 
 
 > Note: The network Local Domain or Search domain must be set. We recommend only top-level domain (spTLD) names for residential and small networks names because they cannot be resolved across the internet. Routers and DNS servers know, in theory, not to forward ARPA requests they do not understand onto the public internet. It is best to choose one of our listed names: local, home.arpa, localdomain or lan only. Do NOT use made-up names.
-
-<a href="http://example.com/" target="_blank">HERE</a>
