@@ -1,6 +1,6 @@
 <h2>Local DNS Records</h2>
 
-Some network DNS servers may not map arbitrary hostnames to their static IP addresses. UniFi is an example.
+Some network DNS servers may not map arbitrary hostnames to their static IP addresses. UniFi for example.
 
 UniFi UGS/UDM routers only resolves locally assigned DHCP client hostnames. This means hard-static set IP addresses or pfSense issued DHCP clients hostnames will not be mapped by any UniFi DHCP client.
 
