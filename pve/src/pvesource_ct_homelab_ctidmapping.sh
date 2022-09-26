@@ -26,5 +26,5 @@ grep -qxF 'root:65604:100' /etc/subgid || echo 'root:65604:100' >> /etc/subgid
 grep -qxF 'root:100:1' /etc/subgid || echo 'root:100:1' >> /etc/subgid
 grep -qxF 'root:1606:1' /etc/subuid || echo 'root:1606:1' >> /etc/subuid
 info "${CT_HOSTNAME_VAR^} CT 'unprivileged' UID mapping is set: ${YELLOW}home${NC}"
-info "${CT_HOSTNAME_VAR^} CT 'unprivileged' GUID mapping is set: ${YELLOW}homelab${NC}."
+info "${CT_HOSTNAME_VAR^} CT 'unprivileged' GUID mapping is set: ${YELLOW}homelab${NC}"
 echo

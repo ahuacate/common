@@ -46,7 +46,7 @@ Finally edit all your Proxmox hosts DNS setting (in identical order, PiHole DNS 
 |Type|Value|Description
 |----|----|----
 |Search Domain|local
-|DNS Server 1|192.168.1.254|This is your PiHole server IP address
+|DNS Server 1|192.168.1.6|This is your PiHole server IP address
 |DNS Server 2|192.168.1.5|This is your network router DNS IP
 
 
