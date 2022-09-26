@@ -46,6 +46,18 @@ else
   fi
 fi
 
+# Install Puttytools
+if [ $(dpkg -s putty-tools >/dev/null 2>&1; echo $?) = 0 ]; then
+  msg "Putty-Tools status..."
+  info "Putty-Tools status: ${GREEN}installed${NC}"
+  echo
+else
+  msg "Installing Putty Tools..."
+  apt-get install -y putty-tools >/dev/null
+  info "Putty-Tools status: ${GREEN}installed${NC}"
+  echo
+fi
+
 #---- Static Variables -------------------------------------------------------------
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------

@@ -10,6 +10,11 @@
 
 # Must run after 'pvesource_set_allvmvars.sh'
 
+# Check mnt Cnt
+if [ $(printf '%s\n' "${pvesm_input_LIST[@]}" | sed '/\/mnt\/backup$/d' | sed '/\/mnt\/music$/d' | sed '/\/mnt\/photo$/d' | wc -l) = 0 ]; then
+  return
+fi
+
 # Check for ACL installation
 if [ $(dpkg -s acl > /dev/null 2>&1; echo $?) != 0 ]; then
   apt-get install -y acl > /dev/null
