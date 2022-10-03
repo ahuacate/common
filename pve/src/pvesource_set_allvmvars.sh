@@ -50,11 +50,21 @@ EOF
 
 #---- Other Variables --------------------------------------------------------------
 
-# Developer Options
+# Developer Option
 if [ -f /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git ]; then
   while IFS== read -r var val; do
     eval ${var}=${val}
   done < <(cat /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git | grep -v '^#')
+fi
+
+# Host SMTP Option ('0' is inactive, '1' is active)
+var='ahuacate_smtp'
+file='/etc/postfix/main.cf'
+if [ -f $file ]; then
+  SMTP_STATUS=$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)
+else
+  # Set SMTP inactive
+  SMTP_STATUS=0
 fi
 
 #---- Other Files ------------------------------------------------------------------

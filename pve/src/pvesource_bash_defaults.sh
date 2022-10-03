@@ -188,12 +188,15 @@ function pct_list() {
 
 # Check PVE host SMTP status
 function check_pvesmtp_status() {
-  if [[ $(cat /etc/postfix/main.cf | grep "### Ahuacate_Check=0.*") ]]; then
-    # SMTP active & working
+  # Host SMTP Option ('0' is inactive, '1' is active)
+  var='ahuacate_smtp'
+  file='/etc/postfix/main.cf'
+  if [ -f $file ]; then
+    SMTP_STATUS=$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)
+  else
+    # Set SMTP inactive
     SMTP_STATUS=0
-  elif [[ ! $(cat /etc/postfix/main.cf | grep "### Ahuacate_Check=0.*") ]]; then
-    SMTP_STATUS=1
-  fi
+fi
 }
 
 
