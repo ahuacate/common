@@ -3,45 +3,53 @@
 # Filename:     pvesource_install_postfix_client.sh
 # Description:  Source script for installing and setup Postfix client
 #               Requires PVE host install: 'pve_host_setup_postfix.sh'
+#               Host SMTP_STATUS=1 to install
+#               Check arg at head of /etc/postfix/main.cf: # ahuacate_smtp=1
+#               Script works with PVE CTs (LXC) only
 # ----------------------------------------------------------------------------------
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
-
-# Check IP
-ipvalid () {
-  # Set up local variables
-  local ip=${1:-1.2.3.4}
-  local IFS=.; local -a a=($ip)
-  # Start with a regex format test
-  [[ $ip =~ ^[0-9]+(\.[0-9]+){3}$ ]] || return 1
-  # Test values of quads
-  local quad
-  for quad in {0..3}; do
-    [[ "${a[$quad]}" -gt 255 ]] && return 1
-  done
-  return 0
-}
-
 #---- Static Variables -------------------------------------------------------------
 
 # Easy Script Section Header Body Text
 SECTION_HEAD='Postfix Client'
 
-# # Check for PVE Hostname mod
-# if [ -z "${HOSTNAME_FIX+x}" ]; then
-#   PVE_HOSTNAME=$HOSTNAME
-# fi
-
-# Local network
-LOCAL_NET=$(hostname -I | awk -F'.' -v OFS="." '{ print $1,$2,"0.0/16" }')
-
-# Postfix vars
-POSTFIX_CONFIG=/etc/postfix/main.cf
-POSTFIX_SASL_PWD=/etc/postfix/sasl_passwd
-POSTFIX_SASL_DB=/etc/postfix/sasl_passwd.db
-
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
-#---- Install and Configure SSMTP Email
+#---- Prerequisites
+
+# Run SMTP check
+check_pvesmtp_status
+if [ ${SMTP_STATUS} != 1 ]; then
+  return
+fi
+
+# Set SMTP server relay address
+SMTP_SERVER_ADDRESS=$(hostname -I)
+
+#---- Install and Configure SMTP email client
+section "Configure Postfix"
+
+# Install Postfix 
+pct exec $CTID -- apt-get install postfix -y
+# Install mailutils
+pct exec $CTID -- apt-get install mailutils -y
+# Install shareutils
+pct exec $CTID -- apt-get install sharutils -y
+
+# Set SMTP relay server address
+pct exec $CTID -- bash -c "postconf -e relayhost=${SMTP_SERVER_ADDRESS}"
+
+# Create check line in /etc/postfix/main.cf
+pct exec $CTID -- sed -i \
+    -e '/^#\?\(\s*ahuacate_smtp\s*=\s*\).*/{s//\11/;:a;n;ba;q}' \
+    -e '1i ahuacate_smtp=1' /etc/postfix/main.cf
+
+# Reload Postfix configuration file /etc/postfix/main.cf
+pct exec $CTID -- systemctl restart postfix.service
+
+info "Postfix email status: ${YELLOW}active${NC}"
+echo
+#-----------------------------------------------------------------------------------

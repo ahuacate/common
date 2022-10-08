@@ -253,17 +253,17 @@ if [ ${SSH_TYPE} = "TYPE02" ]; then
   # Check SMTP server status
   msg "Checking PVE host SMTP email server status..."
   EMAIL_RECIPIENT=$(pveum user list | awk -F " │ " '$1 ~ /root@pam/' | awk -F " │ " '{ print $3 }')
-  if [ ${SMTP_STATUS} = 0 ]; then
+  if [ ${SMTP_STATUS} = 1 ]; then
     info "SMTP email status: ${YELLOW}enabled${NC}.\nThe Users SSH key pairs will be sent to: ${YELLOW}${EMAIL_RECIPIENT}${NC}"
     echo
-  elif [ ${SMTP_STATUS} = 1 ]; then
+  elif [ ${SMTP_STATUS} = 0 ]; then
     SMTP_STATUS=1
     info "The PVE host SMTP is not configured or working.\nNo SSH key pairs will be sent by email."
     echo
   fi
 
   # uuencode for Postfix (part of package sharutils)
-  if [ ${SMTP_STATUS} = 0 ]; then
+  if [ ${SMTP_STATUS} = 1 ]; then
     msg "Checking SMTP Postfix email server prerequisites..."
     if [ $(dpkg -s sharutils >/dev/null 2>&1; echo $?) = 0 ]; then
       msg "Checking sharutils (uuencode) status..."
@@ -291,7 +291,7 @@ if [ ${SSH_TYPE} = "TYPE02" ]; then
   cp ${SSH_BACKUP_FILENAME} ${SSH_BACKUP_LOCATION}
 
   # Email SSH key pairs
-  if [ ${SMTP_STATUS} = 0 ]; then
+  if [ ${SMTP_STATUS} = 1 ]; then
     msg "Emailing SSH key pairs..."
     echo -e "\n==========   SSH KEYS FOR HOST : ${HOSTNAME^^}   ==========\n\nFor SSH access to host '${HOSTNAME,,}' use the attached SSH Private Key file named id_${HOSTNAME,,}_${KEY_FORMAT}.\n\nYour login credentials details are:\n    Username: root username\n    Password: Not Required (SSH Private Key only).\n    SSH Private Key: id_${HOSTNAME,,}_${KEY_FORMAT}\n    Putty SSH Private Key: id_${HOSTNAME,,}_${KEY_FORMAT}.ppk\n    PVE Server LAN IP Address: ${HOSTNAME,,}.$(hostname -d)\n\nA backup linux tar.gz file containing your SSH Key pairs is also attached.\n    Backup filename of SSH Key Pairs: $SSH_BACKUP_FILENAME\n" | (cat - && uuencode id_${HOSTNAME,,}_${KEY_FORMAT} id_${HOSTNAME,,}_${KEY_FORMAT} ; uuencode id_${HOSTNAME,,}_${KEY_FORMAT}.pub id_${HOSTNAME,,}_${KEY_FORMAT}.pub ; uuencode ${SSH_BACKUP_FILENAME} $SSH_BACKUP_FILENAME) | mail -s "SHH key pairs for host $(echo ${SSH_BACKUP_FILENAME} | awk -F'_' '{ print $1}')." -- $EMAIL_RECIPIENT
     info "SSH key pairs to emailed to: ${YELLOW}$EMAIL_RECIPIENT${NC}"
@@ -299,10 +299,10 @@ if [ ${SSH_TYPE} = "TYPE02" ]; then
   fi
 
   # Closing Message
-  if [ ${SMTP_STATUS} = 0 ]; then
+  if [ ${SMTP_STATUS} = 1 ]; then
     info "Success. Your new SSH Public Key has been added to host ${HOSTNAME,,}\nauthorized_keys file.\n\n==========   SSH KEYS FOR HOST : ${PVE_HOSTNAME^^}   ==========\n\nFor root access to PVE host ${PVE_HOSTNAME,,} use SSH Private Key\nfile named id_${PVE_HOSTNAME,,}_ed25519.\n\nYour login credentials details are:\n    Username: ${YELLOW}root${NC}\n    Password: Not Required (SSH Private Key only).\n    SSH Private Key: ${YELLOW}id_${PVE_HOSTNAME,,}_ed25519${NC}\n    Putty SSH Private Key: ${YELLOW}id_${PVE_HOSTNAME,,}_ed25519.ppk${NC}\n    PVE Server LAN IP Address: ${YELLOW}$(hostname -I)${NC}\n\nA backup linux tar.gz file containing your SSH Key {pairs has also been} created.\n    Backup filename of SSH Key Pairs: ${YELLOW}${SSH_BACKUP_FILENAME}${NC}\n    Backup of SSH Key Pairs emailed to: ${YELLOW}$EMAIL_RECIPIENT${NC}\n    Backup location for SSH Key Pairs: ${YELLOW}${SSH_BACKUP_LOCATION}/${SSH_BACKUP_FILENAME}${NC}"
     echo
-  elif [ ${SMTP_STATUS} = 1 ]; then
+  elif [ ${SMTP_STATUS} = 0 ]; then
     info "Success. Your new SSH Public Key has been added to PVE host ${PVE_HOSTNAME,,}\nauthorized_keys file.\n\n==========   SSH KEYS FOR PVE HOST : ${PVE_HOSTNAME^^}   ==========\n\nFor root access to PVE host ${PVE_HOSTNAME,,} use SSH Private Key\nfile named id_${PVE_HOSTNAME,,}_ed25519.\n\nYour login credentials details are:\n    Username: ${YELLOW}root${NC}\n    Password: Not Required (SSH Private Key only).\n    SSH Private Key: ${YELLOW}id_${PVE_HOSTNAME,,}_ed25519${NC}\n    Putty SSH Private Key: ${YELLOW}id_${PVE_HOSTNAME,,}_ed25519.ppk${NC}\n    PVE Server LAN IP Address: ${YELLOW}$(hostname -I)${NC}\n\nA backup linux tar.gz file containing your SSH Key pairs has also been created.\n    Backup filename of SSH Key Pairs: ${YELLOW}${SSH_BACKUP_FILENAME}${NC}\n    Backup location for SSH Key Pairs: ${YELLOW}${SSH_BACKUP_LOCATION}/${SSH_BACKUP_FILENAME}${NC}"
     echo
   fi

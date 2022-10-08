@@ -57,15 +57,8 @@ if [ -f /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git ]; then
   done < <(cat /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git | grep -v '^#')
 fi
 
-# Host SMTP Option ('0' is inactive, '1' is active)
-var='ahuacate_smtp'
-file='/etc/postfix/main.cf'
-if [ -f $file ]; then
-  SMTP_STATUS=$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)
-else
-  # Set SMTP inactive
-  SMTP_STATUS=0
-fi
+# Check PVE SMTP status
+check_pvesmtp_status
 
 #---- Other Files ------------------------------------------------------------------
 #---- Functions --------------------------------------------------------------------
