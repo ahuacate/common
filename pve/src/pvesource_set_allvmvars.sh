@@ -157,11 +157,30 @@ function valid_gw() {
 }
 
 # Check Hostname availability status
+# function valid_hostname() {
+#   local  name=$1
+#   local  stat=1
+#   # Run function
+#   if [[ $name =~ ${hostname_regex} ]] && [[ ! $name =~ ^(pve).*$ ]] && [[ ! $(grep -h -Po 'hostname: \K[^/]*' /etc/pve/lxc/* 2> /dev/null | grep "^${name}$") ]] && [[ ! $(grep -h -Po 'name: \K[^/]*' /etc/pve/qemu-server/* 2> /dev/null | grep "^${name}$") ]] && [[ ! $name == $(echo $(hostname) | awk '{ print tolower($0) }') ]] && [ ! $(ping -s 1 -c 2 ${name} > /dev/null; echo $?) == '0' ]; then
+#     stat=$?
+#   fi
+#   return $stat
+# }
 function valid_hostname() {
   local  name=$1
   local  stat=1
+  # Check if hostname is set
+  if [ ! -n "${HOSTNAME}" ]; then
+    local  HOSTNAME=$(echo $name | sed -E 's/(\-|\.)[0-9]+$//')
+  fi
   # Run function
-  if [[ $name =~ ${hostname_regex} ]] && [[ ! $name =~ ^(pve).*$ ]] && [[ ! $(grep -h -Po 'hostname: \K[^/]*' /etc/pve/lxc/* 2> /dev/null | grep "^${name}$") ]] && [[ ! $(grep -h -Po 'name: \K[^/]*' /etc/pve/qemu-server/* 2> /dev/null | grep "^${name}$") ]] && [[ ! $name == $(echo $(hostname) | awk '{ print tolower($0) }') ]] && [ ! $(ping -s 1 -c 2 ${name} > /dev/null; echo $?) == '0' ]; then
+  if [[ $name =~ ${hostname_regex} ]] && \
+  [[ $(echo $name | sed -E 's/(\-|\.)[0-9]+$//') =~ $(echo $HOSTNAME | sed -E 's/(\-|\.)[0-9]+$//') ]] && \
+  [[ ! $name =~ ^(pve).*$ ]] && \
+  [[ ! $(pct list | awk '{if (NR!=1) { print $NF }}' 2> /dev/null | grep "^${name}$") ]] && \
+  [[ ! $(qm list | awk '{ if (NR!=1) { print $2 }}' 2> /dev/null | grep "^${name}$") ]] && \
+  [[ ! $name == $(echo $(hostname) | awk '{ print tolower($0) }') ]] && \
+  [ ! $(ping -s 1 -c 2 ${name} 2> /dev/null; echo $?) == '0' ]; then
     stat=$?
   fi
   return $stat
@@ -744,22 +763,54 @@ done
 section "Manual variable setting"
 
 #---- Set Hostname
+# msg "Setting hostname..."
+# while true; do
+#   read -p "Enter a Hostname: " -e -i ${HOSTNAME} HOSTNAME
+#   FAIL_MSG="The hostname is not valid. A valid hostname is when all of the following constraints are satisfied:\n
+#   $(if [ -n "${HOSTNAME}" ]; then echo "--  it begins with the word '$(echo ${HOSTNAME} | sed -E 's/(\-|\.)[0-9]+$//')'.\n"; fi)
+#   --  it does not exist on the network.
+#   --  it contains only lowercase characters.
+#   --  it may include numerics, hyphens (-) and periods (.) but not start or end with them.
+#   --  it doesn't contain any other special characters [!#$&%*+_].
+#   --  it doesn't contain any white space.
+#   --  a name that begins with 'pve' is not allowed.\n
+#   Try again..."
+#   PASS_MSG="Hostname is set: ${YELLOW}${HOSTNAME}${NC}"
+#   result=$(valid_hostname ${HOSTNAME} > /dev/null 2>&1)
+#   if [ $? == 0 ]; then
+# 		info "$PASS_MSG"
+#     # HOSTNAME=${HOSTNAME}
+#     echo
+#     break
+#   elif [ $? != 0 ]; then
+# 		warn "$FAIL_MSG"
+#     echo
+# 	fi
+# done
+
 msg "Setting hostname..."
+# Check if hostname is a ES preset
+if [ -n "${HOSTNAME}" ]; then
+  PRESET_HOSTNAME=$HOSTNAME
+fi
 while true; do
-  read -p "Enter a Hostname: " -e -i ${HOSTNAME} HOSTNAME
-  FAIL_MSG="The hostname is not valid. A valid hostname is when all of the following constraints are satisfied:\n
+  read -p "Enter a Hostname: " -e -i ${PRESET_HOSTNAME} NEW_HOSTNAME
+  NEW_HOSTNAME=${NEW_HOSTNAME,,}
+  FAIL_MSG="The hostname is not valid. A valid hostname is when all of the following constraints are satisfied:
+  $(if [ -n "${PRESET_HOSTNAME}" ]; then echo -e "\n  --  it begins with our repo name '$(echo ${PRESET_HOSTNAME} | sed -E 's/(\-|\.)[0-9]+$//')'."; else echo -e "\n"; fi)
   --  it does not exist on the network.
   --  it contains only lowercase characters.
   --  it may include numerics, hyphens (-) and periods (.) but not start or end with them.
+  --  it can be suffixed using a hyphen (-) [nas-01 or nas-02 or sonarr-01].
   --  it doesn't contain any other special characters [!#$&%*+_].
   --  it doesn't contain any white space.
   --  a name that begins with 'pve' is not allowed.\n
   Try again..."
-  PASS_MSG="Hostname is set: ${YELLOW}${HOSTNAME}${NC}"
-  result=$(valid_hostname ${HOSTNAME} > /dev/null 2>&1)
+  PASS_MSG="Hostname is set: ${YELLOW}${NEW_HOSTNAME}${NC}"
+  result=$(valid_hostname ${NEW_HOSTNAME} > /dev/null 2>&1)
   if [ $? == 0 ]; then
 		info "$PASS_MSG"
-    # HOSTNAME=${HOSTNAME}
+    HOSTNAME=${NEW_HOSTNAME,,}
     echo
     break
   elif [ $? != 0 ]; then
