@@ -166,6 +166,7 @@ function valid_gw() {
 #   fi
 #   return $stat
 # }
+
 function valid_hostname() {
   local  name=$1
   local  stat=1
