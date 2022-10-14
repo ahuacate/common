@@ -22,7 +22,10 @@ ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
 #---- Other Files ------------------------------------------------------------------
 
 # List of variables
-VAR_FILELIST=${COMMON_PVE_SRC_DIR}/pvesource_set_allvmvarslist.conf
+# PRESET_VAR_SRC="${COMMON_PVE_SRC_DIR}/pvesource_set_allvmvarslist.conf"
+
+# Set file source (path/filename) of preset variables for 'pvesource_ct_createvm.sh'
+PRESET_VAR_SRC="$( dirname "${BASH_SOURCE[0]}" )/$( basename "${BASH_SOURCE[0]}" )"
 
 # Generic OS URLS - Available compatible cloud-init images to download
 DEBIAN_10_URL="https://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.raw"
@@ -48,7 +51,6 @@ printsection() {
     echo "$line" | sed '/^#/d' | sed -r '/^\s*$/d'
   done
 }
-
 #---- Body -------------------------------------------------------------------------
 
 #---- Prerequisites
@@ -108,7 +110,7 @@ fi
 #---- Validate & set architecture dependent variables
 ARCH=$(dpkg --print-architecture)
 
-#---- Create CT input arrays
+#---- Create VM input arrays
 # general_LIST array
 unset general_LIST
 while IFS== read var value
@@ -121,15 +123,17 @@ do
     fi
     general_LIST+=( "$(echo "--${var,,} ${i}")" )
   fi
-done <<< $(printsection COMMON_GENERAL_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection COMMON_GENERAL_OPTIONS < ${PRESET_VAR_SRC})
+printf '%s\n' "${general_LIST[@]}"
 while IFS== read var value
 do
   eval i='$'$var
   if [ -n "${i}" ]; then
-    j=$(echo ${var} | sed 's/^CT_//')
+    j=$(echo ${var} | sed 's/^VM_//')
     general_LIST+=( "$(echo "--${j,,} ${i}")" )
   fi
-done <<< $(printsection VM_GENERAL_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection VM_GENERAL_OPTIONS < ${PRESET_VAR_SRC})
+printf '%s\n' "${general_LIST[@]}"
 
 # scsi0_LIST
 unset scsi0_LIST
@@ -146,7 +150,7 @@ do
     j=$(echo ${var} | sed 's/^VM_SCSI0_//')
     scsi0_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
-done <<< $(printsection VM_SCSI0_OPTIONS < ${VAR_FILELIST} | grep -v '^VM_SCSI0_SIZE.*')
+done <<< $(printsection VM_SCSI0_OPTIONS < ${PRESET_VAR_SRC} | grep -v '^VM_SCSI0_SIZE.*')
 
 # scsi1_LIST
 unset scsi1_LIST
@@ -163,7 +167,7 @@ do
     j=$(echo ${var} | sed 's/^VM_SCSI1_//')
     scsi1_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
-done <<< $(printsection VM_SCSI1_OPTIONS < ${VAR_FILELIST} | grep -v '^VM_SCSI1_SIZE.*')
+done <<< $(printsection VM_SCSI1_OPTIONS < ${PRESET_VAR_SRC} | grep -v '^VM_SCSI1_SIZE.*')
 
 # net_LIST
 unset net_LIST
@@ -178,15 +182,15 @@ do
     fi
     net_LIST+=( "$(echo "${var,,}=${i}")" )
   fi
-done <<< $(printsection COMMON_NET_OPTIONS < ${VAR_FILELIST})
-while IFS== read var value
-do
-  eval i='$'$var
-  if [ -n "${i}" ]; then
-    j=$(echo ${var} | sed 's/^VM_//')
-    net_LIST+=( "$(echo "${j,,}=${i}")" )
-  fi
-done <<< $(printsection VM_NET_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection COMMON_NET_OPTIONS < ${PRESET_VAR_SRC})
+# while IFS== read var value
+# do
+#   eval i='$'$var
+#   if [ -n "${i}" ]; then
+#     j=$(echo ${var} | sed 's/^VM_//')
+#     net_LIST+=( "$(echo "${j,,}=${i}")" )
+#   fi
+# done <<< $(printsection VM_NET_OPTIONS < ${PRESET_VAR_SRC})
 
 # startup_LIST
 unset startup_LIST
@@ -198,7 +202,7 @@ do
     j=$(echo ${var} | sed 's/^VM_//')
     startup_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
-done <<< $(printsection VM_STARTUP_OPTIONS < ${VAR_FILELIST})
+done <<< $(printsection VM_STARTUP_OPTIONS < ${PRESET_VAR_SRC})
 
 # cloudinit_LIST
 unset cloudinit_LIST
@@ -210,7 +214,7 @@ do
     j=$(echo ${var} | sed 's/^CT_//')
     cloudinit_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
-done <<< $(printsection VM_CLOUD_INIT < ${VAR_FILELIST})
+done <<< $(printsection VM_CLOUD_INIT < ${PRESET_VAR_SRC})
 
 # cloudinit_ipconfig_LIST
 unset cloudinit_ipconfig_LIST
@@ -230,7 +234,7 @@ do
     j=$(echo ${var} | sed 's/^CT_//')
     cloudinit_ipconfig_LIST+=( "$(echo "${j,,}=${i}")" )
   fi
-done <<< $(printsection VM_CLOUD_INIT_IPCONFIG < ${VAR_FILELIST})
+done <<< $(printsection VM_CLOUD_INIT_IPCONFIG < ${PRESET_VAR_SRC})
 
 
 #---- Create VM
@@ -259,66 +263,66 @@ if [ ${#scsi1_LIST[@]} -ge '2' ]; then
 fi
 # Set IDE/CDROM
 qm_create_LIST+=( "$(echo "--ide2 ${OS_TMPL},media=cdrom")" )
-# Create VM
-msg "Creating ${HOSTNAME^} VM..."
-qm create $(printf '%s ' "${pct_create_LIST[@]}" | sed 's/$//')
-echo
+# # Create VM
+# msg "Creating ${HOSTNAME^} VM..."
+# qm create $(printf '%s ' "${pct_create_LIST[@]}" | sed 's/$//')
+# echo
+
+
+printf '%s ' "${pct_create_LIST[@]}" | sed 's/$//'
 
 
 
 
 
+# # Create VM
+# msg "Creating PVE ${VM_OSTYPE^} VM..."
+# qm create ${VMID} \
+# --name ${VM_HOSTNAME} \
+# --bios seabios \
+# --sockets ${VM_CPU_SOCKETS} \
+# --cores ${VM_CPU_CORES} \
+# --vcpus ${VM_VCPU} \
+# --cpulimit ${VM_CPU_LIMIT} \
+# --cpuunits ${VM_CPU_UNITS} \
+# --ostype ${VM_OS_TYPE} \
+# --memory ${VM_RAM} \
+# --balloon ${VM_RAM_BALLOON} \
+# --nameserver ${VM_DNS_SERVER} \
+# --net0 ${VM_NET_MODEL},bridge=${VM_NET_BRIDGE},firewall=${VM_NET_FIREWALL}$(if [ ${VM_NET_MAC_ADDRESS} != 'auto' ]; then echo ",macaddr=${VM_NET_MAC_ADDRESS}"; fi)$(if [ ${VM_TAG} -gt 1 ]; then echo ",tag=${VM_TAG}"; fi) \
+# --scsihw virtio-scsi-single \
+# --scsi0 ${STORAGE}:${VM_DISK_SIZE} \
+# --ide2 ${TEMPLATE_STRING},media=cdrom \
+# --autostart ${VM_AUTOSTART} \
+# --onboot ${VM_ONBOOT} \
+# --start ${VM_START} \
+# $(if [ ${VM_STARTUP_ORDER} > 0 ]; then echo "--startup order=${VM_STARTUP_ORDER}"; fi)$(if [ ${VM_STARTUP_ORDER} > 0 ] && [ ${VM_STARTUP_DELAY} -gt 0 ]; then echo ",up=${VM_STARTUP_DELAY}"; fi) >/dev/null
 
+# #qm set --ipconfig0 gw=${VM_GW},ip=${VM_IP}/${VM_IP_SUBNET}
 
-
-# Create VM
-msg "Creating PVE ${VM_OSTYPE^} VM..."
-qm create ${VMID} \
---name ${VM_HOSTNAME} \
---bios seabios \
---sockets ${VM_CPU_SOCKETS} \
---cores ${VM_CPU_CORES} \
---vcpus ${VM_VCPU} \
---cpulimit ${VM_CPU_LIMIT} \
---cpuunits ${VM_CPU_UNITS} \
---ostype ${VM_OS_TYPE} \
---memory ${VM_RAM} \
---balloon ${VM_RAM_BALLOON} \
---nameserver ${VM_DNS_SERVER} \
---net0 ${VM_NET_MODEL},bridge=${VM_NET_BRIDGE},firewall=${VM_NET_FIREWALL}$(if [ ${VM_NET_MAC_ADDRESS} != 'auto' ]; then echo ",macaddr=${VM_NET_MAC_ADDRESS}"; fi)$(if [ ${VM_TAG} -gt 1 ]; then echo ",tag=${VM_TAG}"; fi) \
---scsihw virtio-scsi-single \
---scsi0 ${STORAGE}:${VM_DISK_SIZE} \
---ide2 ${TEMPLATE_STRING},media=cdrom \
---autostart ${VM_AUTOSTART} \
---onboot ${VM_ONBOOT} \
---start ${VM_START} \
-$(if [ ${VM_STARTUP_ORDER} > 0 ]; then echo "--startup order=${VM_STARTUP_ORDER}"; fi)$(if [ ${VM_STARTUP_ORDER} > 0 ] && [ ${VM_STARTUP_DELAY} -gt 0 ]; then echo ",up=${VM_STARTUP_DELAY}"; fi) >/dev/null
-
-#qm set --ipconfig0 gw=${VM_GW},ip=${VM_IP}/${VM_IP_SUBNET}
-
-# Checking VM Status
-n=0
-until [ "$n" -ge 5 ]
-do
-  if [ "$(qm list | grep -w ${VMID} > /dev/null; echo $?)" = 0 ]; then
-    if [ "$(qm status ${VMID})" == "status: stopped" ]; then
-      info "${VM_HOSTNAME^} CT has been created. Current status: ${YELLOW}$(qm status ${VMID} | awk '{print $2}')${NC}"
-      echo
-      break
-    elif [ "$(qm status ${VMID})" == "status: running" ]; then
-      info "${VM_HOSTNAME^} CT has been created. Current status: ${YELLOW}$(qm status ${VMID}| awk '{print $2}')${NC}"
-      echo
-      break
-    fi
-  elif [ "$(qm list | grep -w ${VMID} > /dev/null; echo $?)" != 0 ] && [ "$n" == 4 ]; then
-    warn "Something went wrong creating the PVE VM. ${VM_HOSTNAME^} VM has NOT been created.\nAborting this installation in 2 seconds..."
-    sleep 1
-    echo
-    # exit 0
-  fi
-  n=$((n+1)) 
-  sleep 1
-done
+# # Checking VM Status
+# n=0
+# until [ "$n" -ge 5 ]
+# do
+#   if [ "$(qm list | grep -w ${VMID} > /dev/null; echo $?)" = 0 ]; then
+#     if [ "$(qm status ${VMID})" == "status: stopped" ]; then
+#       info "${VM_HOSTNAME^} CT has been created. Current status: ${YELLOW}$(qm status ${VMID} | awk '{print $2}')${NC}"
+#       echo
+#       break
+#     elif [ "$(qm status ${VMID})" == "status: running" ]; then
+#       info "${VM_HOSTNAME^} CT has been created. Current status: ${YELLOW}$(qm status ${VMID}| awk '{print $2}')${NC}"
+#       echo
+#       break
+#     fi
+#   elif [ "$(qm list | grep -w ${VMID} > /dev/null; echo $?)" != 0 ] && [ "$n" == 4 ]; then
+#     warn "Something went wrong creating the PVE VM. ${VM_HOSTNAME^} VM has NOT been created.\nAborting this installation in 2 seconds..."
+#     sleep 1
+#     echo
+#     # exit 0
+#   fi
+#   n=$((n+1)) 
+#   sleep 1
+# done
 
 # # Test Run
 # VMID='120'
