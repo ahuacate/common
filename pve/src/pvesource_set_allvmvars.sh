@@ -58,7 +58,7 @@ if [ -f /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git ]; then
 fi
 
 # Check PVE SMTP status
-check_pvesmtp_status
+check_smtp_status
 
 #---- Other Files ------------------------------------------------------------------
 #---- Functions --------------------------------------------------------------------

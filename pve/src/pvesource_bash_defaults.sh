@@ -187,7 +187,7 @@ function pct_list() {
 
 
 # Check PVE host SMTP status
-function check_pvesmtp_status() {
+function check_smtp_status() {
   # Host SMTP Option ('0' is inactive, '1' is active)
   var='ahuacate_smtp'
   file='/etc/postfix/main.cf'

@@ -21,7 +21,7 @@ SECTION_HEAD='Postfix Client'
 #---- Prerequisites
 
 # Run SMTP check
-check_pvesmtp_status
+check_smtp_status
 if [ ${SMTP_STATUS} != 1 ]; then
   return
 fi

@@ -14,7 +14,7 @@
 #---- Dependencies -----------------------------------------------------------------
 
 # Check SMTP Status
-check_pvesmtp_status
+check_smtp_status
 
 if [ -n "${CTID}" ]; then
   # Install linux libuser
