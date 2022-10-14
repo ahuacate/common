@@ -67,8 +67,16 @@ if [ ! -d ${OS_TMPL_PATH} ]; then
 	mkdir -p ${OS_TMPL_PATH}
 fi
 
+# OS Name (options are: 'ubuntu', 'debian'. Use "" for no setting forces VM_OTHER_OS_URL)
+VM_OS_DIST=''
+# OS Version (options for ubuntu: '18.04', '20.04', '21.10', '22.04' ; options for debian: '9', '10'. Use "" for no setting forces VM_OTHER_OS_URL)
+VM_OSVERSION=''
+# OS Other URL ()
+VM_OTHER_OS_URL='http://sourceforge.net/projects/openmediavault/files/latest/download?source=files'
+
+
 # Download VM template
-if [ -n ${OS_DIST} ] && [ -n ${OSVERSION} ]; then
+if [ -n "${OS_DIST}" ] && [ -n "${OSVERSION}" ]; then
   echo hello
   # Match download SRC for standard Ubuntu or debian compatible cloud-init images
   eval OS_TMPL_SRC='$'${OS_DIST^^}_${OSVERSION}_URL
@@ -81,7 +89,7 @@ if [ -n ${OS_DIST} ] && [ -n ${OSVERSION} ]; then
   # Download SRC
   msg "Downloading installation iso/img ( be patient, might take a while )..."
   wget -qNLc --show-progress - ${OS_TMPL_SRC} -O ${OS_TMPL}
-elif [ -n ${OTHER_OS_URL} ]; then
+elif [ -n "${OTHER_OS_URL}" ]; then
   # Download SRC custom iso/img
   OS_TMPL_SRC=${OTHER_OS_URL}
   msg "Downloading installation iso/img ( be patient, might take a while )..."
@@ -119,7 +127,7 @@ do
   eval i='$'$var
   if [ -n "${i}" ]; then
     # Wrap Description var in quotes
-    if [ $var == 'DESCRIPTION' ]; then
+    if [ $var = 'DESCRIPTION' ]; then
       i=\"${i}\"
     fi
     general_LIST+=( "$(echo "--${var,,} ${i}")" )
@@ -145,7 +153,7 @@ do
   eval i='$'$var
   if [ -n "${i}" ]; then
     # Ignore VM_SCSI0_SIZE
-    if [ $var == 'VM_SCSI0_SIZE' ]; then 
+    if [ $var = 'VM_SCSI0_SIZE' ]; then 
       continue
     fi
     j=$(echo ${var} | sed 's/^VM_SCSI0_//')
@@ -162,7 +170,7 @@ do
   eval i='$'$var
   if [ -n "${i}" ]; then
     # Ignore VM_SCSI1_SIZE
-    if [ $var == 'VM_SCSI1_SIZE' ]; then 
+    if [ $var = 'VM_SCSI1_SIZE' ]; then 
       continue
     fi
     j=$(echo ${var} | sed 's/^VM_SCSI1_//')
@@ -178,7 +186,7 @@ do
   eval i='$'$var
   if [ -n "${i}" ]; then
     # Ignore of tag=(0|1)
-    if [ $var == 'TAG' ] && [[ ${i} =~ (0|1) ]]; then 
+    if [ $var = 'TAG' ] && [[ ${i} =~ (0|1) ]]; then 
       continue
     fi
     net_LIST+=( "$(echo "${var,,}=${i}")" )
@@ -225,11 +233,11 @@ do
   eval i='$'$var
   if [ -n "${i}" ]; then
     # Add CIDR value to IP/IP6
-    if [ $var == 'IP' ] && [[ $i =~ ${ip4_regex} ]]; then
+    if [ $var = 'IP' ] && [[ $i =~ ${ip4_regex} ]]; then
       i=$(echo ${i} | sed "s/$/\/${CIDR}/")
-    elif [ $var == 'IP' ] || [ $var == 'IP6' ] && [[ $i =~ 'dhcp' ]]; then
+    elif [ $var = 'IP' ] || [ $var = 'IP6' ] && [[ $i =~ 'dhcp' ]]; then
       i=$(echo ${i})
-    elif [ $var == 'IP6' ] && [[ $i =~ ${ip6_regex} ]]; then
+    elif [ $var = 'IP6' ] && [[ $i =~ ${ip6_regex} ]]; then
       i=$(echo ${i} | sed "s/$/\/${CIDR6}/")
     fi
     j=$(echo ${var} | sed 's/^CT_//')
