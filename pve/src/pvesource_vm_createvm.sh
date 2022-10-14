@@ -60,7 +60,8 @@ section "PVE VM Prerequisites"
 pveam update >/dev/null
 
 # Image path
-OS_TMPL_PATH="${TEMP_DIR}/images"
+# OS_TMPL_PATH="${TEMP_DIR}/images"
+OS_TMPL_PATH="${DIR}/images"
 # Check if imgs path exist
 if [ ! -d ${OS_TMPL_PATH} ]; then
 	mkdir -p ${OS_TMPL_PATH}
