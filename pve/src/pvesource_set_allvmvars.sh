@@ -306,7 +306,8 @@ section "Installer Prerequisites"
 if [ ! -n "${VM_TYPE}" ]; then
   warn "Cannot proceed. No VM type set (CT or VM)."
   echo
-  trap cleanup EXIT
+  exit 0
+  # trap cleanup EXIT
 fi
 
 # Confirm VLAN support
