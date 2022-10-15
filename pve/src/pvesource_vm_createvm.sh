@@ -21,13 +21,6 @@ ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
 
-# List of variables
-# PRESET_VAR_SRC="${COMMON_PVE_SRC_DIR}/pvesource_set_allvmvarslist.conf"
-
-# Set file source (path/filename) of preset variables for 'pvesource_ct_createvm.sh'
-PRESET_VAR_SRC="$( dirname "${BASH_SOURCE[0]}" )/$( basename "${BASH_SOURCE[0]}" )"
-echo "the source is $PRESET_VAR_SRC"
-
 # Generic OS URLS - Available compatible cloud-init images to download
 DEBIAN_10_URL="https://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.raw"
 DEBIAN_9_URL="https://cdimage.debian.org/cdimage/openstack/current-9/debian-9-openstack-amd64.raw"
@@ -119,7 +112,6 @@ fi
 if [ -n "${OTHER_OS_URL}" ]; then
   # Download src Custom iso/img
   OS_TMPL_URL=${OTHER_OS_URL}
-  echo hello1
   msg "Downloading installation iso/img ( be patient, might take a while )..."
   while true; do
     wget -qNLc -T 15 --show-progress --content-disposition -c ${OS_TMPL_URL} -P ${OS_TMPL_PATH} && break
