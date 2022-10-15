@@ -26,6 +26,7 @@ ip6_regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
 
 # Set file source (path/filename) of preset variables for 'pvesource_ct_createvm.sh'
 PRESET_VAR_SRC="$( dirname "${BASH_SOURCE[0]}" )/$( basename "${BASH_SOURCE[0]}" )"
+echo "the source is $PRESET_VAR_SRC"
 
 # Generic OS URLS - Available compatible cloud-init images to download
 DEBIAN_10_URL="https://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.raw"
@@ -34,6 +35,7 @@ UBUNTU_1804_URL="https://cloud-images.ubuntu.com/bionic/current/bionic-server-cl
 UBUNTU_2004_URL="https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img"
 UBUNTU_2110_URL="https://cloud-images.ubuntu.com/impish/current/impish-server-cloudimg-amd64.img"
 UBUNTU_2204_URL="https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
+
 
 #---- Functions --------------------------------------------------------------------
 
@@ -51,62 +53,98 @@ printsection() {
     echo "$line" | sed '/^#/d' | sed -r '/^\s*$/d'
   done
 }
+
+# Spinner takes the pid of the process as the first argument and
+# string to display as second argument (default provided) and spins
+# until the process completes.
+# Usage command && spinner $!
+spinner() {
+    local PROC="$1"
+    local str="${2:-Working...}"
+    local delay="0.1"
+    tput civis  # hide cursor
+    while [ -d /proc/$PROC ]; do
+        printf '\033[s\033[u[ / ] %s\033[u' "$str"; sleep "$delay"
+        printf '\033[s\033[u[ — ] %s\033[u' "$str"; sleep "$delay"
+        printf '\033[s\033[u[ \ ] %s\033[u' "$str"; sleep "$delay"
+        printf '\033[s\033[u[ | ] %s\033[u' "$str"; sleep "$delay"
+    done
+    printf '\033[s\033[u%*s\033[u\033[0m' $((${#str}+6)) " "  # return to normal
+    tput cnorm  # restore cursor
+    return 0
+}
+
 #---- Body -------------------------------------------------------------------------
 
 #---- Prerequisites
-section "PVE VM Prerequisites"
+section "Prerequisites"
 
 # Update PVE VM OS template list
 pveam update >/dev/null
 
-# Image path
-# OS_TMPL_PATH="${TEMP_DIR}/images"
-OS_TMPL_PATH="${DIR}/images"
-# Check if imgs path exist
+# Template path
+OS_TMPL_PATH='/var/lib/vz/template/iso'
+# Check template path exists
 if [ ! -d ${OS_TMPL_PATH} ]; then
 	mkdir -p ${OS_TMPL_PATH}
 fi
 
-# OS Name (options are: 'ubuntu', 'debian'. Use "" for no setting forces VM_OTHER_OS_URL)
-VM_OS_DIST=''
-# OS Version (options for ubuntu: '18.04', '20.04', '21.10', '22.04' ; options for debian: '9', '10'. Use "" for no setting forces VM_OTHER_OS_URL)
-VM_OSVERSION=''
-# OS Other URL ()
-VM_OTHER_OS_URL='http://sourceforge.net/projects/openmediavault/files/latest/download?source=files'
-
-
-# Download VM template
+# Check for Generic OS local availability
 if [ -n "${OS_DIST}" ] && [ -n "${OSVERSION}" ]; then
-  echo hello
-  # Match download SRC for standard Ubuntu or debian compatible cloud-init images
-  eval OS_TMPL_SRC='$'${OS_DIST^^}_${OSVERSION}_URL
-  OS_TMPL="${OS_TMPL_PATH}/${OS_TMPL_SRC##*/}"
-  if [ ! -n ${OS_TMPL} ]; then
-    warn "A problem has occurred:\n  - Cannot determine a download URL for ${OS_DIST^} ${OSVERSION} template.\n  - Cannot proceed until the User correctly sets the OS distribution and version.\nAborting installation in 3 seconds..."
-    echo
-    exit 0
-	fi
-  # Download SRC
-  msg "Downloading installation iso/img ( be patient, might take a while )..."
-  wget -qNLc --show-progress - ${OS_TMPL_SRC} -O ${OS_TMPL}
-elif [ -n "${OTHER_OS_URL}" ]; then
-  # Download SRC custom iso/img
-  OS_TMPL_SRC=${OTHER_OS_URL}
-  msg "Downloading installation iso/img ( be patient, might take a while )..."
-  wget -qNL --show-progress --content-disposition -c ${OS_TMPL_SRC} -P ${OS_TMPL_PATH}
-  OS_TMPL="$(find ${OS_TMPL_PATH} -type f)"
+  # Match download SRC for Generic OS compatible images
+  eval OS_TMPL_URL='$'${OS_DIST^^}_${OSVERSION}_URL
+  OS_TMPL_FILENAME="${OS_TMPL_URL##*/}"
+  # Check for existing template
+  while read -r storage; do
+    if [[ $(pvesm list ${storage} | grep "\/${OS_TMPL_FILENAME}") ]]; then
+      # Set existing tmpl location
+      OS_TMPL=$(pvesm list ${storage} | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
+      break
+    fi
+  done <<< $(pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}')
+  # Download Generic OS compatible images
+  if [ -n "${OS_TMPL}" ]; then
+    msg "Downloading installation iso/img ( be patient, might take a while )..."
+    while true; do
+      wget -qNLc -T 15 --show-progress -c ${OS_TMPL_URL} -O ${OS_TMPL_PATH}/${OS_TMPL_FILENAME} && break
+    done
+    if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]; then
+      # Set tmpl location
+      OS_TMPL=$(pvesm list local | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
+    fi
+  fi
 fi
 
+# Check for Custom OS local availability
+if [ -n "${OTHER_OS_URL}" ]; then
+  # Download src Custom iso/img
+  OS_TMPL_URL=${OTHER_OS_URL}
+  echo hello1
+  msg "Downloading installation iso/img ( be patient, might take a while )..."
+  while true; do
+    wget -qNLc -T 15 --show-progress --content-disposition -c ${OS_TMPL_URL} -P ${OS_TMPL_PATH} && break
+  done
+  # Set OS_TMPL filename
+  OS_TMPL_FILENAME=$(wget --spider --server-response ${OS_TMPL_URL} 2>&1 | grep -i content-disposition | awk -F"filename=" '{if ($2) print $2}' | tr -d '"')
+  if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]; then
+    # Set tmpl location
+    OS_TMPL=$(pvesm list local | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
+  fi
+fi
+
+# OS_TMPL="$(find ${OS_TMPL_PATH} -type f)"
+
 # VM Install dir location
-rootdir_LIST=( $(pvesm status -content rootdir -enabled | awk 'NR>1 {print $1}') )
+rootdir_LIST=( $(pvesm status --content rootdir -enabled | awk 'NR>1 {print $1}') )
 if [ ${#rootdir_LIST[@]} -eq '0' ]; then
-  warn "A problem has occurred:\n  - To create a new VM machine PVE requires a\n    valid storage location for to a root volume.\n  - Cannot proceed until the User creates a storage location (i.e local-zfs).\nAborting installation in 3 seconds..."
+  warn "Aborting install. A error has occurred:\n  --  Cannot determine a valid VM image storage location.\n  --  Cannot proceed until the User creates a storage location (i.e local-lvm, local-zfs).\nAborting installation..."
   echo
+  sleep 2
   exit 0
 elif [ ${#rootdir_LIST[@]} -eq '1' ]; then
   VOLUME="${rootdir_LIST[0]}"
 elif [ ${#rootdir_LIST[@]} -gt '1' ]; then
-  msg "More than one PVE storage location has been detected to use as a VM root volume.\n\n$(pvesm status -content rootdir -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection."
+  msg "Multple PVE storage locations have been detected to use as a VM root volume.\n\n$(pvesm status -content rootdir -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection."
   OPTIONS_VALUES_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
   OPTIONS_LABELS_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
   makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
@@ -115,6 +153,7 @@ elif [ ${#rootdir_LIST[@]} -gt '1' ]; then
   info "VM root volume is set: ${YELLOW}${VOLUME}${NC}"
   echo
 fi
+
 
 #---- Validate & set architecture dependent variables
 ARCH=$(dpkg --print-architecture)
@@ -278,7 +317,7 @@ qm_create_LIST+=( "$(echo "--ide2 ${OS_TMPL},media=cdrom")" )
 # echo
 
 
-printf '%s ' "${pct_create_LIST[@]}" | sed 's/$//'
+printf '%s ' "${pct_create_LIST[@]}"
 
 
 
