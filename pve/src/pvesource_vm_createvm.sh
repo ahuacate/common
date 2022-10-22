@@ -240,6 +240,7 @@ if [ -n "${OTHER_OS_URL}" ]; then
     # Set tmpl location
     OS_TMPL=$(pvesm list local | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
   fi
+  echo
 fi
 
 # VM Install dir location
@@ -252,7 +253,7 @@ if [ ${#rootdir_LIST[@]} -eq '0' ]; then
 elif [ ${#rootdir_LIST[@]} -eq '1' ]; then
   VOLUME="${rootdir_LIST[0]}"
 elif [ ${#rootdir_LIST[@]} -gt '1' ]; then
-  msg "Multple PVE storage locations have been detected to use as a VM root volume.\n\n$(pvesm status -content rootdir -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection."
+  msg "Multiple PVE storage locations have been detected to use as a VM root volume.\n\n$(pvesm status -content rootdir -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection."
   OPTIONS_VALUES_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
   OPTIONS_LABELS_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
   makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
@@ -264,7 +265,7 @@ fi
 
 
 #---- Create VM input arrays
-# PRESET_VAR_SRC='/mnt/pve/nas-01-git/ahuacate/pve-nas/src/omv/pve_nas_vm_nas_installer.sh'
+
 # Create default lists
 create_section_category_LIST
 
@@ -284,4 +285,5 @@ done <<< $(printf '%s\n' "${section_category_LIST[@]}")
 # Create VM
 msg "Creating ${HOSTNAME^} VM..."
 qm create $(printf '%s ' "${input_LIST[@]}")
+echo
 #-----------------------------------------------------------------------------------
