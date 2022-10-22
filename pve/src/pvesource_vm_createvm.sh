@@ -264,13 +264,13 @@ fi
 
 
 #---- Create VM input arrays
-PRESET_VAR_SRC='/mnt/pve/nas-01-git/ahuacate/pve-nas/src/omv/pve_nas_vm_nas_installer.sh'
+# PRESET_VAR_SRC='/mnt/pve/nas-01-git/ahuacate/pve-nas/src/omv/pve_nas_vm_nas_installer.sh'
 # Create default lists
 create_section_category_LIST
 
 # Create VM run script
 input_LIST=()
-input_LIST+=( "qm create ${VMID}" )
+input_LIST+=( "${VMID}" )
 while read line
 do
   # Run func 
@@ -280,6 +280,8 @@ do
     input_LIST+=( "$(printf '%s\n' "${results_LIST[@]}")" )
   fi
 done <<< $(printf '%s\n' "${section_category_LIST[@]}")
-printf '%s\n' "${input_LIST[@]}" | sed '$ ! s/$/ \\ /'
 
+# Create VM
+msg "Creating ${HOSTNAME^} VM..."
+qm create $(printf '%s ' "${input_LIST[@]}")
 #-----------------------------------------------------------------------------------
