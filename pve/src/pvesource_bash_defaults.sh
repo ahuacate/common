@@ -191,7 +191,7 @@ function check_smtp_status() {
   # Host SMTP Option ('0' is inactive, '1' is active)
   var='ahuacate_smtp'
   file='/etc/postfix/main.cf'
-  if [ -f $file ]; then
+  if [ -f $file ] && [ "$(systemctl is-active --quiet postfix; echo $?)" == '0' ]; then
     SMTP_STATUS=$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)
   else
     # Set SMTP inactive
