@@ -13,11 +13,11 @@
 
 # Verify IOMMU status
 # Requires variable 'VM_PCI_PT'
-FAIL_MSG='This VM installation requires PCI passthrough. You need to enable the IOMMU for PCI passthrough, by editing all PVE hosts kernel commandline. Perform the required PVE hosts shown here:
+FAIL_MSG='This VM installation requires PCIe pass-through. You need to enable the IOMMU for PCI pass-through, by editing all PVE hosts kernel commandline. Perform the required PVE hosts shown here:
 
   -- https://pve.proxmox.com/wiki/Pci_passthrough
 
-If you "PCI passthrough" a device, the device is not available to the host anymore.'
+If you are creating a "PCI pass-through", the device is not available to the host or any other VM anymore.'
 
 if [ ${VM_PCI_PT} == '1' ] && [[ ! $(dmesg | grep -e DMAR -e IOMMU) =~ ^.*[IOMMU\ enabled]$ ]] || [[ ! $(lsmod | grep vfio) ]]; then
   warn "${FAIL_MSG}"
