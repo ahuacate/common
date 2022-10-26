@@ -1058,7 +1058,7 @@ elif [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp)$ ]] || [[ ${IP} =
 elif [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp6)$ ]] || [[ ${IP6} =~ ${ip6_regex} ]]; then
   # IPv6 Nameserver set to host
   NAMESERVER=''
-elif [ ${TAG} == '0' ]; then
+elif [ "${TAG}" == '0' ]; then
   # Nameserver set to host
   NAMESERVER=''
 fi
