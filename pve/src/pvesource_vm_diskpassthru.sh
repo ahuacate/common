@@ -43,13 +43,13 @@ singleselect SELECTED "$OPTIONS_STRING"
 
 # Set disk access type
 if [ ${RESULTS} == 'TYPE01' ]; then
-  VM_DISK_PT=1
+  VM_DISK_PT='1'
   msg "PCIe card passthrough is manually configured using the Proxmox web management frontend. Perform after the VM is created."
   echo
 if [ ${RESULTS} == 'TYPE02' ]; then
-  VM_DISK_PT=2
+  VM_DISK_PT='2'
 elif [ ${RESULTS} == 'TYPE00' ]; then
-  VM_DISK_PT=0
+  VM_DISK_PT='0'
   msg "You have chosen not to proceed. Aborting this task. Bye..."
   echo
   return
@@ -65,7 +65,7 @@ fi
 #---- Identify available storage disks for pass-through
 if [ "${VM_DISK_PT}" == '2' ]; then
   # Create stor_LIST
-  source ${COMMON_DIR}/nas/nas_identify_storagedisks.sh
+  source ${COMMON_DIR}/nas/src/nas_identify_storagedisks.sh
 
   # Basic storage disk label
   BASIC_DISKLABEL='(.*_hba|.*_usb|.*_onboard)$'
