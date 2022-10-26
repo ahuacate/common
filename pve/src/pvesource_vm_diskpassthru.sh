@@ -46,7 +46,7 @@ if [ ${RESULTS} == 'TYPE01' ]; then
   VM_DISK_PT='1'
   msg "PCIe card passthrough is manually configured using the Proxmox web management frontend. Perform after the VM is created."
   echo
-if [ ${RESULTS} == 'TYPE02' ]; then
+elif [ ${RESULTS} == 'TYPE02' ]; then
   VM_DISK_PT='2'
 elif [ ${RESULTS} == 'TYPE00' ]; then
   VM_DISK_PT='0'
@@ -90,9 +90,9 @@ if [ "${VM_DISK_PT}" == '2' ]; then
     makeselect_input2
     singleselect SELECTED "$OPTIONS_STRING"
 
-    if [ ${RESULTS} =~ 'TYPE01' ]; then
+    if [ ${RESULTS} == 'TYPE01' ]; then
       VM_DISK_PT=2
-    elif [ ${RESULTS} =~ 'TYPE02' ]; then
+    elif [ ${RESULTS} == 'TYPE02' ]; then
       VM_DISK_PT=0
       info "No physical disks will be configured for pass-through to your VM"
       echo
@@ -113,7 +113,7 @@ if [ "${VM_DISK_PT}" == '2' ]; then
     makeselect_input2
     singleselect SELECTED "$OPTIONS_STRING"
 
-    if [ ${RESULTS} =~ 'TYPE01' ]; then
+    if [ ${RESULTS} == 'TYPE01' ]; then
       VM_DISK_PT=0
     elif [ ${RESULTS} == 'TYPE00' ]; then
       VM_DISK_PT=0
@@ -139,13 +139,14 @@ if [ "${VM_DISK_PT}" == '2' ]; then
       echo
       return
     else
-      pt_disk_LIST=( "$(printf '%s\n' "${RESULTS[@]}")" )
+      pt_disk_LIST=()
+      pt_disk_LIST+=( "$(printf '%s\n' "${RESULTS[@]}")" )
       break
     fi
   done
 
   # qm set scsi drive
-  if [ ${#pt_disk_LIST[@]} -ge '1' ]; then
+  if [ "${#pt_disk_LIST[@]}" -ge '1' ]; then
     msg "Creating SCSI pass-through disk(s) conf..."
     # Check VMID scsi disk id
     while IFS=':' read -r dev args; do
@@ -167,7 +168,7 @@ if [ "${VM_DISK_PT}" == '2' ]; then
       fi
       # Add to cnt
       ((j=j+1))
-    done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}")
+    done <<< $(printf '%s\n' "${pt_disk_LIST[@]}")
     echo
   fi
 fi
