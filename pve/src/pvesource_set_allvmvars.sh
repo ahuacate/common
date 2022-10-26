@@ -1052,10 +1052,10 @@ if [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp)$ ]] || [[ ${IP} =~ 
       echo
     fi
   done
-elif [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp)$ ]] || [[ ${IP} =~ ${ip4_regex} ]] && [ $(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }') == ${TAG} ]; then
+elif [ ! "${TAG}" == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp)$ ]] || [[ ${IP} =~ ${ip4_regex} ]] && [ $(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }') == ${TAG} ]; then
   # Set nameserver to match host (same vlan)
   NAMESERVER=$(ip route show default | awk '/default/ {print $3}')
-elif [ ! ${TAG} == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp6)$ ]] || [[ ${IP6} =~ ${ip6_regex} ]]; then
+elif [ ! "${TAG}" == '0' ] && [[ "${NET_DHCP_TYPE}" =~ ^(0|dhcp6)$ ]] || [[ ${IP6} =~ ${ip6_regex} ]]; then
   # IPv6 Nameserver set to host
   NAMESERVER=''
 elif [ "${TAG}" == '0' ]; then
@@ -1136,6 +1136,7 @@ if [ -n "${IP}" ] && [ ! ${IP} == 'dhcp' ] || [ -n "${IP6}" ] && [ ! ${IP6} == '
     fi
   done
 fi
+
 
 #---- Set Root Disk Size
 if [ ${VM_TYPE} == 'ct' ]; then

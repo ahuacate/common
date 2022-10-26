@@ -109,7 +109,9 @@ function make_vm_create_LIST() {
     fi
     # Make array value
     if [ -n "${i}" ]; then
-      j=$(echo ${var} | sed -e "s/^\(VM\|CT\)_//i")
+      # j=$(echo ${var} | sed -e "s/^\(VM\|CT\)_//i")
+      mod_list='QEMU\|VGA'
+      j=$(echo ${var} | sed -e "s/^\(VM\|CT\)_//i" -e "s/^\(${mod_list}\)_//i" )
       if [ -n "${string_name}" ]; then
         # SCSI args
         if [[ "${string_name}" =~ ^scsi[0-9]$ ]] && [[ "${j}" =~ ^SCSI[0-9]_SIZE$ ]]; then
@@ -119,9 +121,9 @@ function make_vm_create_LIST() {
         # CDROM args
         elif [[ "${string_name}" =~ ^cdrom$ ]] && [[ "${j}" =~ ^ISO_SRC$ ]]; then
           arr_LIST+=( "${OS_TMPL}" )
-        # SCSI args
-        elif [[ "${string_name}" =~ ^scsi[0-9]$ ]] && [[ "${j}" =~ ^SCSI[0-9]_SIZE$ ]]; then
-          arr_LIST+=( "${VOLUME}:${i}" )
+        # # SCSI args
+        # elif [[ "${string_name}" =~ ^scsi[0-9]$ ]] && [[ "${j}" =~ ^SCSI[0-9]_SIZE$ ]]; then
+        #   arr_LIST+=( "${VOLUME}:${i}" )
         # IPv4 args
         elif [[ "${string_name}" =~ ^ipconfig[0-9]$ ]] && [[ "${j}" =~ ^IP$ ]] && [[ "${i}" =~ ${ip4_regex} ]]; then
           arr_LIST+=( "${j,,}=${i}/${CIDR}" )
