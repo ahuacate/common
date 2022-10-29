@@ -185,6 +185,10 @@ function pct_list() {
   print join ",", map {s/"/""/g; s/\s+$//; qq($_)} (/$patt/o);'
 }
 
+# QM list
+function qm_list() {
+  pct list | awk 'BEGIN{OFS=","} {print $1,$3,$2}'
+}
 
 # Check PVE host SMTP status
 function check_smtp_status() {

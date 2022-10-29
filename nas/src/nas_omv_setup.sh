@@ -324,10 +324,6 @@ source ${COMMON_DIR}/nas/src/nas_basefoldersetup.sh
 section "Create Storage Shares"
 msg "Creating OVM shares..."
 
-# OMV_CONFIG='/etc/openmediavault/config.xml'
-# dir=fuck
-# DIR_SCHEMA_UUID='ca47f77a-4701-47f6-b121-a7ea8cabdbcc'
-
 # Fail msg
 FAIL_MSG="${RED}[WARNING]${NC}\nThere is a conflict with a existing OMV storage folder setting:
 
@@ -582,7 +578,8 @@ done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt stage run deploy & spinner $!
+# omv-salt stage run deploy & spinner $!
+omv-salt deploy run fstab & spinner $!
 
 
 #---- Setup OVM SMB Shares
