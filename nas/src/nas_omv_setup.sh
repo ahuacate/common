@@ -515,7 +515,6 @@ done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 
 # Create NFS share
 while IFS=',' read -r dir desc grp other; do
-  echo $dir
   # Create new NFS share folder
   info "New OMV NFS share created: ${WHITE}'${dir}'${NC}"
 
