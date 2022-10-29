@@ -581,7 +581,6 @@ msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )...
 # omv-salt stage run deploy & spinner $!
 omv-salt deploy run fstab & spinner $!
 
-
 #---- Setup OVM SMB Shares
 section "Create SMB Shares"
 msg "Creating SMB shares..."
@@ -769,7 +768,7 @@ omv-salt deploy run fail2ban & spinner $!
 #---- Other OMV Plug-ins
 section "Install OMV Plugins"
 
-msg "Installing OMV sftp plugins..."
+msg "Installing OMV plugins..."
 # Required PVESM Storage Mounts for CT ( new version )
 unset plugin_LIST
 plugin_LIST=()
@@ -795,6 +794,8 @@ while IFS=':' read -r plugin desc; do
 done <<< $( printf '%s\n' "${plugin_LIST[@]}" )
 echo
 
+
+#---- Other OMV mods
 
 #---- Set Hostname
 if [ ${HOSTNAME_MOD} == 0 ]; then
@@ -828,7 +829,7 @@ fi
 #---- Set display text
 # Webmin access URL
 display_msg1=( "http://$(hostname).$(hostname -d)" )
-display_msg1+=( "http://$(hostname -I | sed -r 's/\s+//g') (${ip_type})" )
+display_msg1+=( "http://$(hostname -I | sed 's/\s.*$//') (${ip_type})" )
 display_msg1+=( "Username: admin" )
 display_msg1+=( "Password: openmediavault" )
 
@@ -844,7 +845,7 @@ display_msg3+=( "private - UID 1607:Member of privatelab. Supplementary medialab
 
 # File server login
 x='\\\\'
-display_msg4=( "$x$(hostname -I | sed -r 's/\s+//g')\:" )
+display_msg4=( "$x$(hostname -I | sed 's/\s.*$//')\:" )
 display_msg4+=( "$x$(hostname).$(hostname -d)\:" )
 
 # Display msg
