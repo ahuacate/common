@@ -151,7 +151,7 @@ fi
 
 # Update NFS exports file
 msg "Creating new NFS exports..."
-while IFS=',' read -r dir desc group permission user_groups; do
+while IFS=',' read -r dir desc user group permission user_groups; do
   [[ ${dir} =~ 'none' ]] && continue
   # Check for dir
   if [ -d "${DIR_SCHEMA}/$dir" ]; then

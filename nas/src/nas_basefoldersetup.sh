@@ -80,23 +80,23 @@ while true; do
       # Set type
       LEVEL=${RESULTS}
       if [ ${LEVEL} == LEVEL01 ]; then
-        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,0750,65608:rwx,65607:rwx" )
-        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,0750,65608:rwx,65607:rwx" )
+        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,users,0750,65608:rwx,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,users,0750,65608:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Standard User${NC} for folder '${DIR_NAME}'."
         echo
       elif [ ${LEVEL} == LEVEL02 ]; then
-        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,0750,65605:rwx,65607:rwx" )
-        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,0750,65605:rwx,65607:rwx" )
+        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,65605,0750,65605:rwx,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,65605,0750,65605:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Medialab${NC} for folder '${DIR_NAME}'."
         echo
       elif [ ${LEVEL} == LEVEL03 ]; then
-        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,0750,65606:rwx,65607:rwx" )
-        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,0750,65606:rwx,65607:rwx" )
+        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,65606,0750,65606:rwx,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,65606,0750,65606:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Homelab${NC} for folder '${DIR_NAME}'."
         echo
       elif [ ${LEVEL} == LEVEL04 ]; then
-        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,0750,65607:rwx" )
-        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,0750,65607:rwx" )
+        nas_basefolder_LIST+=( "${DIR_NAME},Custom folder,root,65607,0750,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "${DIR_NAME},Custom folder,root,65607,0750,65607:rwx" )
         info "You have selected: ${YELLOW}Privatelab${NC} for folder '${DIR_NAME}'."
         echo
       fi
@@ -116,7 +116,7 @@ done
 msg "Creating ${SECTION_HEAD} base ${PVE_SRC_MNT} folder shares..."
 # msg "Creating ${SECTION_HEAD} base /$POOL/$HOSTNAME folder shares..."
 echo
-while IFS=',' read -r dir desc group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir desc user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
   if [ -d "${DIR_SCHEMA}/${dir}" ]; then
     info "Pre-existing folder: ${UNDERLINE}"${DIR_SCHEMA}/${dir}"${NC}\n  Setting ${group} group permissions for existing folder."
     find "${DIR_SCHEMA}/" -name .foo_protect -exec chattr -i {} \;
@@ -172,7 +172,7 @@ done  <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
   msg "Creating $SECTION_HEAD subfolder shares..."
   echo
-  while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+  while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ -d "${dir}" ]; then
       info "${dir} exists.\n  Setting ${group} group permissions for this folder."
       find ${dir} -name .foo_protect -exec chattr -i {} \;
@@ -218,7 +218,7 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
     fi
   done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
   # Chattr set ZFS share points attributes to +a
-  while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+  while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
     touch ${dir}/.foo_protect
     chattr +i ${dir}/.foo_protect
     # chmod +t ${dir}/.foo_protect

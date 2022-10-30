@@ -68,7 +68,7 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
   section "${HOSTNAME^} Subfolders"
   msg "Creating ${SECTION_HEAD} subfolders required by CT applications..."
   echo
-  while IFS=',' read -r label mnt_protocol remote_mnt sub_dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+  while IFS=',' read -r label mnt_protocol remote_mnt sub_dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ -d "${sub_dir}" ]; then
       info "Pre-existing folder: ${UNDERLINE}"${sub_dir}"${NC}"
       # Check for '.foo_protect' file
@@ -110,7 +110,7 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
   done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
 
   # Chattr set ZFS share points attributes to +a
-  while IFS=',' read -r label mnt_protocol remote_mnt sub_dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+  while IFS=',' read -r label mnt_protocol remote_mnt sub_dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ ! -f ${sub_dir}/.foo_protect ]; then
       touch ${sub_dir}/.foo_protect 2> /dev/null || display_chattr_error_MSG+=( "Linux command: touch\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: touch <foldername>/.foo_protect\n" )
       chattr +i ${sub_dir}/.foo_protect 2> /dev/null || display_chattr_error_MSG+=( "Linux command: chattr\nLocal PVE folder: ${sub_dir}\nRemote NAS folder: $(echo ${remote_mnt} | awk -F':' '{ print $2 }')\nShare protocol: ${mnt_protocol}\nLinux CLI: chattr +i <foldername>/.foo_protect\n" )
