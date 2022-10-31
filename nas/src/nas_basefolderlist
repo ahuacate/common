@@ -13,7 +13,7 @@ audio,Audiobooks and podcasts storage,root,users,0750,:--x,65605:rwx,65607:rwx,6
 backup,Backup storage,root,users,1750,:--x,65606:rwx,65607:rwx
 books,Books and magazine storage,root,users,0755,:--x,65605:rwx,65607:rwx,65608:r-x
 cloudstorage,Cloud data storage,root,users,1750,:--x,65606:rwx,65607:rwx
-docker,Docker storage,root,users,0750,:--x,65605:rwx,65606:rwx,65607:rwx
+docker,Docker storage,root,users,0750,:--x,65606:rwx,65607:rwx
 downloads,Downloads folder,root,users,0755,:--x,65605:rwx,65607:rwx
 git,Git storage,root,users,0750,:--x,65607:rwx
 homes,User homes,root,users,0777
