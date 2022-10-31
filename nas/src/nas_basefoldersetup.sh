@@ -177,6 +177,7 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
     if [ -d "${dir}" ]; then
       info "${dir} exists.\n  Setting ${group} group permissions for this folder."
       find ${dir} -name .foo_protect -exec chattr -i {} \;
+      setfacl -bn "${DIR_SCHEMA}/${dir}"
       chgrp -R "${group}" "${dir}" >/dev/null
       chmod -R "${permission}" "${dir}" >/dev/null
       if [ ! -z ${acl_01} ]; then
