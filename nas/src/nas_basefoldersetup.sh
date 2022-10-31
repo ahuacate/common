@@ -120,6 +120,7 @@ while IFS=',' read -r dir desc user group permission acl_01 acl_02 acl_03 acl_04
   if [ -d "${DIR_SCHEMA}/${dir}" ]; then
     info "Pre-existing folder: ${UNDERLINE}"${DIR_SCHEMA}/${dir}"${NC}\n  Setting ${group} group permissions for existing folder."
     find "${DIR_SCHEMA}/" -name .foo_protect -exec chattr -i {} \;
+    setfacl -bn "${DIR_SCHEMA}/${dir}"
     chgrp -R "${group}" "${DIR_SCHEMA}/${dir}" >/dev/null
     chmod -R "${permission}" "${DIR_SCHEMA}/${dir}" >/dev/null
     if [ ! -z ${acl_01} ]; then
