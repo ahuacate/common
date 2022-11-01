@@ -9,78 +9,78 @@
 # 65608=chrootjail
 
 # Video Folders (Main)
-${DIR_SCHEMA}/video/cctv,root,users,0750,:--x,65605:r-x,65607:rwx,65606:rwx,65608:000
-${DIR_SCHEMA}/video/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
-${DIR_SCHEMA}/video/homevideo,root,users,1750,:--x,65605:rwx,65607:rwx,65606:000,65608:rwx
-${DIR_SCHEMA}/video/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
-${DIR_SCHEMA}/video/musicvideo,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
-${DIR_SCHEMA}/video/pron,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
-${DIR_SCHEMA}/video/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
-${DIR_SCHEMA}/video/transcode,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
+video/cctv,root,users,0750,:--x,65605:r-x,65607:rwx,65606:rwx,65608:000
+video/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/homevideo,root,users,1750,:--x,65605:rwx,65607:rwx,65606:000,65608:rwx
+video/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/musicvideo,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
+video/pron,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
+video/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/transcode,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
 
 # Video Folders (stream is for low bandwidth HEVC video)
-${DIR_SCHEMA}/video/stream,root,users,0750,:--x,65605:rwx,65607:rwx,65608:r-x
-${DIR_SCHEMA}/video/stream/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
-${DIR_SCHEMA}/video/stream/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
-${DIR_SCHEMA}/video/stream/musicvideo,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
-${DIR_SCHEMA}/video/stream/pron,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
-${DIR_SCHEMA}/video/stream/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/stream,root,users,0750,:--x,65605:rwx,65607:rwx,65608:r-x
+video/stream/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/stream/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/stream/musicvideo,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
+video/stream/pron,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
+video/stream/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 
 # Audio Book Folders
-${DIR_SCHEMA}/audio/audiobooks,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
-${DIR_SCHEMA}/audio/podcasts,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+audio/audiobooks,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+audio/podcasts,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 
 # Books Folders
-${DIR_SCHEMA}/books/comics,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
-${DIR_SCHEMA}/books/ebooks,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
-${DIR_SCHEMA}/books/magazines,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+books/comics,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+books/ebooks,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+books/magazines,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 
 # Proxmox Folders
-${DIR_SCHEMA}/proxmox/backup,root,users,1750,:--x,65605:rwx,65607:rwx,65606:rwx,65608:000
+proxmox/backup,root,users,1750,:--x,65605:rwx,65607:rwx,65606:rwx,65608:000
 
 # Public Folders
-${DIR_SCHEMA}/public/autoadd,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
-${DIR_SCHEMA}/public/autoadd/direct_import,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/direct_import/lazylibrarian,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
-${DIR_SCHEMA}/public/autoadd/torrent/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent/flexget-movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent/flexget-series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent/flexget-documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent/books,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent/music,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent/pron,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/torrent/unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
-${DIR_SCHEMA}/public/autoadd/usenet/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet/flexget-movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet/flexget-series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet/flexget-documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet/books,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet/music,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet/pron,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/usenet/unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
+public/autoadd/direct_import,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/direct_import/lazylibrarian,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
+public/autoadd/torrent/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent/flexget-movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent/flexget-series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent/flexget-documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent/books,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent/music,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent/pron,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/torrent/unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
+public/autoadd/usenet/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet/flexget-movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet/flexget-series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet/flexget-documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet/books,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet/music,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet/pron,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/usenet/unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 
 # Vidcoderr Folders
-${DIR_SCHEMA}/public/autoadd/vidcoderr,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
-${DIR_SCHEMA}/public/autoadd/vidcoderr/in_homevideo,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/vidcoderr/in_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/vidcoderr/out_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rwx
-${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
-${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/musicvideo,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/pron,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-${DIR_SCHEMA}/public/autoadd/vidcoderr/in_stream/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/vidcoderr,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
+public/autoadd/vidcoderr/in_homevideo,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/vidcoderr/in_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/vidcoderr/out_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rwx
+public/autoadd/vidcoderr/in_stream,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
+public/autoadd/vidcoderr/in_stream/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/vidcoderr/in_stream/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/vidcoderr/in_stream/musicvideo,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/vidcoderr/in_stream/pron,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/vidcoderr/in_stream/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 
 # Download Folders
-${DIR_SCHEMA}/downloads/torrent,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000
-${DIR_SCHEMA}/downloads/usenet,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000
+downloads/torrent,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000
+downloads/usenet,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000
 
 # Transcode Folders
-${DIR_SCHEMA}/transcode/jellyfin,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
-${DIR_SCHEMA}/transcode/vidcoderr,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
+transcode/jellyfin,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
+transcode/vidcoderr,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000

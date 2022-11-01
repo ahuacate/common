@@ -293,11 +293,13 @@ fi
 source ${COMMON_PVE_SRC_DIR}/pvesource_identify_pvehosts.sh
 
 
-#---- Identify storage
+#---- Identify storage pool
 source ${COMMON_DIR}/nas/src/nas_identify_storagepath.sh
 # Get DIR_SCHEMA volume OMV UUID
 DIR_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
 
+#---- Identify storage volume
+source ${COMMON_DIR}/nas/src/nas_identify_volumedir.sh
 
 #---- Create User & Group lists
 # Group LIST
