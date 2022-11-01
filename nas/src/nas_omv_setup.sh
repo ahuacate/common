@@ -848,6 +848,13 @@ x='\\\\'
 display_msg4=( "$x$(hostname -I | sed 's/\s.*$//')\:" )
 display_msg4+=( "$x$(hostname).$(hostname -d)\:" )
 
+# # File browser login
+# display_msg5=( "http://$(hostname).$(hostname -d):3670" )
+# display_msg5+=( "http://$(hostname -I | sed 's/\s.*$//'):3670 (${ip_type})" )
+# display_msg5+=( "Username: admin" )
+# display_msg5+=( "Password: admin" )
+# OMV is configured with File Browser. Use the admin:admin credentials when logging in for the first time. Please do not forget to change the password immediately.
+
 # Display msg
 msg_box "${HOSTNAME^^} OMV NAS setup was a success. Your NAS is fully configured and is ready to provide NFS and/or SMB/CIFS backend storage mounts to your PVE hosts.
 
