@@ -142,7 +142,7 @@ msg "Creating ${SECTION_HEAD} base folder shares..."
 echo
 while IFS=',' read -r dir desc user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
   if [ -d "${DIR_SCHEMA}/${dir}" ]; then
-    info "Pre-existing folder: ${UNDERLINE}"${dir}"${NC}\n  Setting ${group} group permissions for existing folder."
+    info "Pre-existing folder: ${UNDERLINE}"${DIR_SCHEMA}/${dir}"${NC}\n  Setting ${group} group permissions for existing folder."
     find "${DIR_SCHEMA}/${dir}" -name .foo_protect -exec chattr -i {} \;
     setfacl -bn "${DIR_SCHEMA}/${dir}"
     chgrp -R "${group}" "${DIR_SCHEMA}/${dir}" >/dev/null
@@ -195,7 +195,7 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
   echo
   while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ -d "${DIR_SCHEMA}/${dir}" ]; then
-      info "${dir} exists.\n  Setting ${group} group permissions for this folder."
+      info "${DIR_SCHEMA}/${dir} exists.\n  Setting ${group} group permissions for this folder."
       find "${DIR_SCHEMA}/${dir}" -name .foo_protect -exec chattr -i {} \;
       setfacl -bn "${DIR_SCHEMA}/${dir}"
       chgrp -R "${group}" "${DIR_SCHEMA}/${dir}" >/dev/null
@@ -217,7 +217,7 @@ if [ ! ${#nas_subfolder_LIST[@]} == '0' ]; then
       fi
       echo
     else
-      info "New subfolder created:\n  ${WHITE}"${dir}"${NC}"
+      info "New subfolder created:\n  ${WHITE}"${DIR_SCHEMA}/${dir}"${NC}"
       mkdir -p "${DIR_SCHEMA}/${dir}" >/dev/null
       chgrp -R "${group}" "${DIR_SCHEMA}/${dir}" >/dev/null
       chmod -R "${permission}" "${DIR_SCHEMA}/${dir}" >/dev/null

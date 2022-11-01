@@ -2,7 +2,7 @@
 # ----------------------------------------------------------------------------------
 # Filename:     nas_identify_volumedir.sh
 # Description:  Identify and set Volume dir
-#               Run after 'nas_identify_storagepath.sh' (optional)
+#               Run after 'nas_identify_storagepath.sh' (optional) before 'nas_basefoldersetup'
 #               This script modifies the DIR_SCHEMA to include a volume
 # ----------------------------------------------------------------------------------
 
