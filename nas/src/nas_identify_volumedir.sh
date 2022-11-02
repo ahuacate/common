@@ -79,7 +79,7 @@ elif [ "${#volume_dir_LIST[@]}" -ge '1' ]; then
   # Create new volume dir
   if [ ! -d ${DIR_SCHEMA}/${VOLUME_DIR} ]; then
     mkdir -p ${DIR_SCHEMA}/${VOLUME_DIR}
-    chmod 0750 ${DIR_SCHEMA}/${VOLUME_DIR}
+    chmod 0755 ${DIR_SCHEMA}/${VOLUME_DIR}
     chown root:users ${DIR_SCHEMA}/${VOLUME_DIR}
   fi
 fi

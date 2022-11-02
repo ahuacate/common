@@ -371,7 +371,7 @@ while IFS=',' read -r dir desc grp other; do
   if [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${VOLUME_DIR}/${dir}/' and not(mntentref='${DIR_SCHEMA_UUID}')]" -nl ${OMV_CONFIG}) ]]; then
     # Set fail msg vars
     name=${dir}
-    relative_path="${dir}/"
+    relative_path="${VOLUME_DIR}/${dir}/"
     file_system=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}']/mntentref" -nl ${OMV_CONFIG})
     # Print fail msg
     msg "$FAIL_MSG"
@@ -385,7 +385,7 @@ while IFS=',' read -r dir desc grp other; do
   elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${VOLUME_DIR}/${dir}/' and not (name='${dir}')]" -nl ${OMV_CONFIG}) ]]; then
     # Set fail msg vars
     name=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${VOLUME_DIR}/${dir}/']/name" -nl ${OMV_CONFIG})
-    relative_path="${dir}/"
+    relative_path="${VOLUME_DIR}/${dir}/"
     file_system=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${VOLUME_DIR}/${dir}/']/mntentref" -nl ${OMV_CONFIG})
     # Print fail msg
     msg "$FAIL_MSG"

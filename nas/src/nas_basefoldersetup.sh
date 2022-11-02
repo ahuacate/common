@@ -133,7 +133,7 @@ done
 if [ -n "${VOLUME_DIR}" ]; then
   find ${DIR_SCHEMA}/${VOLUME_DIR} -name .foo_protect -exec chattr -i {} \;
   mkdir -p ${DIR_SCHEMA}/${VOLUME_DIR}
-  chmod 0750 ${DIR_SCHEMA}/${VOLUME_DIR}
+  chmod 0755 ${DIR_SCHEMA}/${VOLUME_DIR}
   chown root:users ${DIR_SCHEMA}/${VOLUME_DIR}
 fi
 
