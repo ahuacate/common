@@ -619,7 +619,7 @@ nas_smbfolder_LIST=()
 while IFS= read -r line; do
   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
   nas_smbfolder_LIST+=( "$line" )
-done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
 
 # Configure SMB Global settings
 xmlstarlet edit -L \
