@@ -343,15 +343,6 @@ Use the OMV WebGUI 'Storage' > 'Shared Folders' to:
 
 Fix the issues and try again. Bye..."
 
-      # <sharedfolder>
-      #   <uuid>4fa32fb9-e04b-4d43-b7e7-8fbc6d8ba980</uuid>
-      #   <name>test</name>
-      #   <comment>The big test</comment>
-      #   <mntentref>d288c8c1-6338-43aa-992e-0e72752570df</mntentref>
-      #   <reldirpath>volume1/</reldirpath>
-      #   <privileges></privileges>
-      # </sharedfolder>
-
 # Create volume dir share
 if [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${VOLUME_DIR}' and reldirpath='${VOLUME_DIR}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
   info "New OMV share folder created: ${WHITE}'${VOLUME_DIR}'${NC}"
@@ -431,7 +422,7 @@ while IFS=',' read -r dir desc grp other; do
     | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
     mv "$TMP_XML" ${OMV_CONFIG}
   fi
-done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
 echo
 
 # Stage config edit
