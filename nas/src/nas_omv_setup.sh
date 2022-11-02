@@ -344,26 +344,28 @@ Use the OMV WebGUI 'Storage' > 'Shared Folders' to:
 Fix the issues and try again. Bye..."
 
 # Create volume dir share
-info "New OMV share folder created: ${WHITE}'${VOLUME_DIR}'${NC}"
-# Create uuid
-SHARE_UUID="$(omv_uuid)"
-# OMV shared folder template
-echo "<sharedfolder>
-  <uuid>${SHARE_UUID}</uuid>
-  <name>${VOLUME_DIR}</name>
-  <comment>Base volume</comment>
-  <mntentref>${DIR_SCHEMA_UUID}</mntentref>
-  <reldirpath>${VOLUME_DIR}/</reldirpath>
-  <privileges></privileges>
-</sharedfolder>" > ${DIR}/shares_sharedfolder.xml
-# Delete subnode if already exist
-xmlstarlet ed -L -d  "//config/system/shares/sharedfolder[name='$VOLUME_DIR' and mntentref='$DIR_SCHEMA_UUID']" ${OMV_CONFIG}
-#Adding a new subnode to certain nodes
-TMP_XML=$(mktemp)
-xmlstarlet edit --subnode "//config/system/shares" --type elem --name "sharedfolder" \
--v "$(xmlstarlet sel -t -c '/sharedfolder/*' ${DIR}/shares_sharedfolder.xml)" ${OMV_CONFIG} \
-| xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
-mv "$TMP_XML" ${OMV_CONFIG}
+if [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${VOLUME_DIR}' and reldirpath='${VOLUME_DIR}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
+  info "New OMV share folder created: ${WHITE}'${VOLUME_DIR}'${NC}"
+  # Create uuid
+  SHARE_UUID="$(omv_uuid)"
+  # OMV shared folder template
+  echo "<sharedfolder>
+    <uuid>${SHARE_UUID}</uuid>
+    <name>${VOLUME_DIR}</name>
+    <comment>Base volume</comment>
+    <mntentref>${DIR_SCHEMA_UUID}</mntentref>
+    <reldirpath>${VOLUME_DIR}/</reldirpath>
+    <privileges></privileges>
+  </sharedfolder>" > ${DIR}/shares_sharedfolder.xml
+  # Delete subnode if already exist
+  xmlstarlet ed -L -d  "//config/system/shares/sharedfolder[name='$VOLUME_DIR' and mntentref='$DIR_SCHEMA_UUID']" ${OMV_CONFIG}
+  #Adding a new subnode to certain nodes
+  TMP_XML=$(mktemp)
+  xmlstarlet edit --subnode "//config/system/shares" --type elem --name "sharedfolder" \
+  -v "$(xmlstarlet sel -t -c '/sharedfolder/*' ${DIR}/shares_sharedfolder.xml)" ${OMV_CONFIG} \
+  | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
+  mv "$TMP_XML" ${OMV_CONFIG}
+fi
 
 
 # Check OMV share and process
@@ -744,9 +746,9 @@ done <<< $( printf '%s\n' "${user_LIST[@]}" )
 #   mv "$TMP_XML" ${OMV_CONFIG}
 # done <<< $( printf '%s\n' "${nas_smbfolder_LIST[@]}" )
 
-# Stage config edit
-msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt deploy run samba & spinner $!
+# # Stage config edit
+# msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+# omv-salt deploy run samba & spinner $!
 
 #---- SSH
 section "SSH Setup"
