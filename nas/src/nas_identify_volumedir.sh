@@ -46,7 +46,7 @@ if [ "${#volume_dir_LIST[@]}" == '0' ]; then
 #   VOLUME_DIR="$(printf '%s\n' "${volume_dir_LIST[@]}" | sed "s|${DIR_SCHEMA}/||")"
 elif [ "${#volume_dir_LIST[@]}" -ge '1' ]; then
   #Create or set storage volume dir
-  msg_box "#### PLEASE READ CAREFULLY - SELECT OR CREATE A VOLUME ####\n\nVolumes provide the basic first level storage space on your NAS. All of your shared folders are created in a volume folder. Therefore, before you start you will need to create at least one volume."
+  msg_box "#### PLEASE READ CAREFULLY - SELECT OR CREATE A VOLUME ####\n\nVolumes provide the basic first level storage space on your NAS. All of your shared folders are created in a volume folder. Therefore, before you start you will need to select or create a volume."
   msg "Select or create a volume from the menu:"
   OPTIONS_VALUES_INPUT=( $(printf '%s\n' "${volume_dir_LIST[@]}") )
   OPTIONS_LABELS_INPUT=( $(printf '%s\n' "${volume_dir_LIST[@]}") )
