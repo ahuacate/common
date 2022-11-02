@@ -471,7 +471,7 @@ section "Create default Users"
 msg "Creating default users..."
 
 # Enable OMV Home Dir
-HOMES_UUID=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='homes']/uuid" -nl /etc/openmediavault/config.xml)
+HOMES_UUID=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${VOLUME_DIR}/homes']/uuid" -nl /etc/openmediavault/config.xml)
 xmlstarlet edit -L \
   --update "//config/system/usermanagement/homedirectory/enable" \
   --value '1' \
