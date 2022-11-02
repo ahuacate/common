@@ -2,8 +2,8 @@
 # ----------------------------------------------------------------------------------
 # Filename:     nas_identify_volumedir.sh
 # Description:  Identify and set Volume dir
-#               Run after 'nas_identify_storagepath.sh' (optional) before 'nas_basefoldersetup'
-#               This script modifies the DIR_SCHEMA to include a volume
+#               Run after 'nas_identify_storagepath.sh' (optional) before 'nas_basefoldersetup.sh'
+#               This script sets var VOLUME_DIR
 # ----------------------------------------------------------------------------------
 
 #---- Bash command to run script ---------------------------------------------------
@@ -45,6 +45,9 @@ if [ "${#volume_dir_LIST[@]}" == '0' ]; then
 #   # Set VOLUME_VAR
 #   VOLUME_DIR="$(printf '%s\n' "${volume_dir_LIST[@]}" | sed "s|${DIR_SCHEMA}/||")"
 elif [ "${#volume_dir_LIST[@]}" -ge '1' ]; then
+  #Create or set storage volume dir
+  msg_box "#### PLEASE READ CAREFULLY - SELECT OR CREATE A VOLUME ####\n\nVolumes provide the basic first level storage space on your NAS. All of your shared folders are created in a volume folder. Therefore, before you start you will need to create at least one volume."
+  msg "Select or create a volume from the menu:"
   OPTIONS_VALUES_INPUT=( $(printf '%s\n' "${volume_dir_LIST[@]}") )
   OPTIONS_LABELS_INPUT=( $(printf '%s\n' "${volume_dir_LIST[@]}") )
   # Add new 'volume[1-9]' option
@@ -70,10 +73,14 @@ elif [ "${#volume_dir_LIST[@]}" -ge '1' ]; then
     exit 0
   fi
 
-  # Set VOLUME_VAR
-  if [ ! -d ${RESULTS} ]; then
-    mkdir -p ${RESULTS}
-  fi
+  # Set volume dir
   VOLUME_DIR=$(printf '%s\n' "${RESULTS[@]}" | sed "s|${DIR_SCHEMA}/||")
+
+  # Create new volume dir
+  if [ ! -d ${DIR_SCHEMA}/${VOLUME_DIR} ]; then
+    mkdir -p ${DIR_SCHEMA}/${VOLUME_DIR}
+    chmod 0750 ${DIR_SCHEMA}/${VOLUME_DIR}
+    chown root:users ${DIR_SCHEMA}/${VOLUME_DIR}
+  fi
 fi
 #-----------------------------------------------------------------------------------
