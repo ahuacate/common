@@ -40,7 +40,6 @@ fi
 if [ "${#volume_dir_LIST[@]}" == '0' ]; then
   # Create volume1
   VOLUME_DIR="${VOLUME_VAR}1"
-  mkdir -p ${DIR_SCHEMA}/${VOLUME_VAR}
 # elif [ "${#volume_dir_LIST[@]}" == '1' ]; then
 #   # Set VOLUME_VAR
 #   VOLUME_DIR="$(printf '%s\n' "${volume_dir_LIST[@]}" | sed "s|${DIR_SCHEMA}/||")"
@@ -56,7 +55,7 @@ elif [ "${#volume_dir_LIST[@]}" -ge '1' ]; then
     while [[ -d ${DIR_SCHEMA}/${VOLUME_VAR}$i ]]; do
       let i++
     done
-    new_dir=${VOLUME_VAR}$i
+    new_dir="${VOLUME_VAR}$i"
   fi
   OPTIONS_VALUES_INPUT+=( "${DIR_SCHEMA}/${new_dir}" )
   OPTIONS_LABELS_INPUT+=( "Create new volume -- ${DIR_SCHEMA}/${new_dir}" )
@@ -75,12 +74,12 @@ elif [ "${#volume_dir_LIST[@]}" -ge '1' ]; then
 
   # Set volume dir
   VOLUME_DIR=$(printf '%s\n' "${RESULTS[@]}" | sed "s|${DIR_SCHEMA}/||")
+fi
 
-  # Create new volume dir
-  if [ ! -d ${DIR_SCHEMA}/${VOLUME_DIR} ]; then
-    mkdir -p ${DIR_SCHEMA}/${VOLUME_DIR}
-    chmod 0755 ${DIR_SCHEMA}/${VOLUME_DIR}
-    chown root:users ${DIR_SCHEMA}/${VOLUME_DIR}
-  fi
+#---- Create new volume dir
+if [ ! -d ${DIR_SCHEMA}/${VOLUME_DIR} ]; then
+  mkdir -p ${DIR_SCHEMA}/${VOLUME_DIR}
+  chmod 0755 ${DIR_SCHEMA}/${VOLUME_DIR}
+  chown root:users ${DIR_SCHEMA}/${VOLUME_DIR}
 fi
 #-----------------------------------------------------------------------------------
