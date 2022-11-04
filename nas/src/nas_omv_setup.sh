@@ -312,9 +312,9 @@ grp_LIST=( "medialab:65605:For media apps (Sonarr, Radar, Jellyfin etc)"
 
 # Username List
 # 1=USERNAME:2=UID:3=HOMEDIR:4=GRP:5=ADD_GRP:6=SHELL:7=COMMENT
-user_LIST=( "media:1605:${DIR_SCHEMA}/${VOLUME_DIR}/homes/media:medialab::/bin/bash:Member of medialab group only"
-"home:1606:${DIR_SCHEMA}/${VOLUME_DIR}/homes/home:homelab:medialab:/bin/bash:Member of homelab group (+ medialab)"
-"private:1607:${DIR_SCHEMA}/${VOLUME_DIR}/homes/private:privatelab:medialab,homelab:/bin/bash:Member of privatelab group (+ medialab,homelab)" )
+user_LIST=( "media:1605:${DIR_SCHEMA}/${VOLUME_DIR}/homes/media:medialab:users:/bin/bash:Member of medialab group only"
+"home:1606:${DIR_SCHEMA}/${VOLUME_DIR}/homes/home:homelab:users,medialab:/bin/bash:Member of homelab group (+ medialab)"
+"private:1607:${DIR_SCHEMA}/${VOLUME_DIR}/homes/private:privatelab:users,medialab,homelab:/bin/bash:Member of privatelab group (+ medialab,homelab)" )
 
 #---- Start Build ------------------------------------------------------------------
 
