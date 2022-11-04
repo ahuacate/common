@@ -520,235 +520,235 @@ while IFS=':' read -r username uid homedir grp add_grp shell comment; do
 done <<< $( printf '%s\n' "${user_LIST[@]}" )
 
 
-# #---- Create OVM 'NFS Shares'
-# section "Create NFS Shares"
-# msg "Creating NFS shares..."
+#---- Create OVM 'NFS Shares'
+section "Create NFS Shares"
+msg "Creating NFS shares..."
 
-# # Enabled NFS
-# xmlstarlet edit -L \
-#   --update "//config/services/nfs/enable" \
-#   --value '1' ${OMV_CONFIG}
+# Enabled NFS
+xmlstarlet edit -L \
+  --update "//config/services/nfs/enable" \
+  --value '1' ${OMV_CONFIG}
 
-# # Create 'nas_nfsfolder_LIST' array
-# rm_match='^\#.*$|^\s*$|^git.*$|^homes.*$|^openvpn.*$|^sshkey.*$'
-# # 'nas_basefolder_LIST' array
-# unset nas_nfsfolder_LIST
-# nas_nfsfolder_LIST=()
-# while IFS= read -r line; do
-#   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
-#   nas_nfsfolder_LIST+=( "$line" )
-# done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
+# Create 'nas_nfsfolder_LIST' array
+rm_match='^\#.*$|^\s*$|^git.*$|^homes.*$|^openvpn.*$|^sshkey.*$'
+# 'nas_basefolder_LIST' array
+unset nas_nfsfolder_LIST
+nas_nfsfolder_LIST=()
+while IFS= read -r line; do
+  [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
+  nas_nfsfolder_LIST+=( "$line" )
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
 
-# # Create NFS share
-# while IFS=',' read -r dir desc grp other; do
-#   # Create new NFS share folder
-#   info "New OMV NFS share created: ${WHITE}'${dir}'${NC}"
+# Create NFS share
+while IFS=',' read -r dir desc grp other; do
+  # Create new NFS share folder
+  info "New OMV NFS share created: ${WHITE}'${dir}'${NC}"
 
-#   # Create uuid(s)
-#   MNTENT_UUID="$(omv_uuid)"
-#   NFS_SHARE_UUID="$(omv_uuid)"
-#   SHARE_FOLDERREF=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='$dir']/uuid" -nl /etc/openmediavault/config.xml)
+  # Create uuid(s)
+  MNTENT_UUID="$(omv_uuid)"
+  NFS_SHARE_UUID="$(omv_uuid)"
+  SHARE_FOLDERREF=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='$dir']/uuid" -nl /etc/openmediavault/config.xml)
 
-#   # OMV fstab mntent template
-#   echo "<mntent>
-#     <uuid>${MNTENT_UUID}</uuid>
-#     <fsname>${DIR_SCHEMA}/${dir}/</fsname>
-#     <dir>/export/${dir}</dir>
-#     <type>none</type>
-#     <opts>bind,nofail</opts>
-#     <freq>0</freq>
-#     <passno>0</passno>
-#     <hidden>0</hidden>
-#     <usagewarnthreshold>0</usagewarnthreshold>
-#     <comment></comment>
-#   </mntent>" > ${DIR}/fstab_mntent.xml
+  # OMV fstab mntent template
+  echo "<mntent>
+    <uuid>${MNTENT_UUID}</uuid>
+    <fsname>${DIR_SCHEMA}/${dir}/</fsname>
+    <dir>/export/${dir}</dir>
+    <type>none</type>
+    <opts>bind,nofail</opts>
+    <freq>0</freq>
+    <passno>0</passno>
+    <hidden>0</hidden>
+    <usagewarnthreshold>0</usagewarnthreshold>
+    <comment></comment>
+  </mntent>" > ${DIR}/fstab_mntent.xml
 
-#   # Delete subnode if already exist
-#   xmlstarlet ed -L -d  "//config/system/fstab/mntent[dir='/export/${dir}' and fsname='${DIR_SCHEMA}/${dir}/']" ${OMV_CONFIG}
+  # Delete subnode if already exist
+  xmlstarlet ed -L -d  "//config/system/fstab/mntent[dir='/export/${dir}' and fsname='${DIR_SCHEMA}/${dir}/']" ${OMV_CONFIG}
 
-#   # Adding a new subnode to fstab mntent
-#   TMP_XML=$(mktemp)
-#   xmlstarlet edit --subnode "//config/system/fstab" --type elem --name "mntent" \
-#   -v "$(xmlstarlet sel -t -c '/mntent/*' ${DIR}/fstab_mntent.xml)" ${OMV_CONFIG} \
-#   | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
-#   mv "$TMP_XML" ${OMV_CONFIG}
+  # Adding a new subnode to fstab mntent
+  TMP_XML=$(mktemp)
+  xmlstarlet edit --subnode "//config/system/fstab" --type elem --name "mntent" \
+  -v "$(xmlstarlet sel -t -c '/mntent/*' ${DIR}/fstab_mntent.xml)" ${OMV_CONFIG} \
+  | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
+  mv "$TMP_XML" ${OMV_CONFIG}
 
-#   # Create NFS share template
-#   while IFS=',' read -r host_id host_ip other; do
-#     # NFS client IP
-#     NFS_CLIENT="${host_ip}/32"
+  # Create NFS share template
+  while IFS=',' read -r host_id host_ip other; do
+    # NFS client IP
+    NFS_CLIENT="${host_ip}/32"
 
-#     # OMV nfs share template
-#     echo "<share>
-#       <uuid>${NFS_SHARE_UUID}</uuid>
-#       <sharedfolderref>${SHARE_FOLDERREF}</sharedfolderref>
-#       <mntentref>${MNTENT_UUID}</mntentref>
-#       <client>${NFS_CLIENT}</client>
-#       <options>rw</options>
-#       <comment>${desc}</comment>
-#       <extraoptions>${NFS_STRING}</extraoptions>
-#     </share>" > ${DIR}/nfs_share.xml
+    # OMV nfs share template
+    echo "<share>
+      <uuid>${NFS_SHARE_UUID}</uuid>
+      <sharedfolderref>${SHARE_FOLDERREF}</sharedfolderref>
+      <mntentref>${MNTENT_UUID}</mntentref>
+      <client>${NFS_CLIENT}</client>
+      <options>rw</options>
+      <comment>${desc}</comment>
+      <extraoptions>${NFS_STRING}</extraoptions>
+    </share>" > ${DIR}/nfs_share.xml
 
-#     # Delete subnode if already exist
-#     xmlstarlet ed -L -d  "//config/services/nfs/shares/share[sharedfolderref='${SHARE_FOLDERREF}' and client='${NFS_CLIENT}']" ${OMV_CONFIG}
+    # Delete subnode if already exist
+    xmlstarlet ed -L -d  "//config/services/nfs/shares/share[sharedfolderref='${SHARE_FOLDERREF}' and client='${NFS_CLIENT}']" ${OMV_CONFIG}
 
-#     #Adding a new subnode to nfs share
-#     TMP_XML=$(mktemp)
-#     xmlstarlet edit --subnode "//config/services/nfs/shares" --type elem --name "share" \
-#     -v "$(xmlstarlet sel -t -c '/share/*' ${DIR}/nfs_share.xml)" ${OMV_CONFIG} \
-#     | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
-#     mv "$TMP_XML" ${OMV_CONFIG} 
-#   done <<< $( printf '%s\n' "${pve_node_LIST[@]}" )
+    #Adding a new subnode to nfs share
+    TMP_XML=$(mktemp)
+    xmlstarlet edit --subnode "//config/services/nfs/shares" --type elem --name "share" \
+    -v "$(xmlstarlet sel -t -c '/share/*' ${DIR}/nfs_share.xml)" ${OMV_CONFIG} \
+    | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
+    mv "$TMP_XML" ${OMV_CONFIG} 
+  done <<< $( printf '%s\n' "${pve_node_LIST[@]}" )
 
-# done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
+done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
 
-# # Stage config edit
-# msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-# # omv-salt stage run deploy & spinner $!
-# omv-salt deploy run fstab & spinner $!
+# Stage config edit
+msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+# omv-salt stage run deploy & spinner $!
+omv-salt deploy run fstab & spinner $!
 
-# #---- Setup OVM SMB Shares
-# section "Create SMB Shares"
-# msg "Creating SMB shares..."
+#---- Setup OVM SMB Shares
+section "Create SMB Shares"
+msg "Creating SMB shares..."
 
-# # Create 'nas_smbfolder_LIST' array
-# rm_match='^\#.*$|^\s*$|^homes.*$'
-# # 'nas_basefolder_LIST' array
-# unset nas_smbfolder_LIST
-# nas_smbfolder_LIST=()
-# while IFS= read -r line; do
-#   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
-#   nas_smbfolder_LIST+=( "$line" )
-# done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
+# Create 'nas_smbfolder_LIST' array
+rm_match='^\#.*$|^\s*$|^homes.*$'
+# 'nas_basefolder_LIST' array
+unset nas_smbfolder_LIST
+nas_smbfolder_LIST=()
+while IFS= read -r line; do
+  [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
+  nas_smbfolder_LIST+=( "$line" )
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
 
-# # Configure SMB Global settings
-# xmlstarlet edit -L \
-#   --update "//config/services/smb/enable" \
-#   --value '1' \
-#   --update "//config/services/smb/usesendfile" \
-#   --value '1' \
-#   --update "//config/services/smb/aio" \
-#   --value '1' \
-#   --update "//config/services/smb/timeserver" \
-#   --value '0' \
-#   --update "//config/services/smb/homesenable" \
-#   --value '1' \
-#   --update "//config/services/smb/homesbrowseable" \
-#   --value '0' \
-#   --update "//config/services/smb/homesrecyclebin" \
-#   --value '1' \
-#   ${OMV_CONFIG}
-# # Global extra options
-# xmlstarlet edit -L \
-#   --update "//config/services/smb/extraoptions" \
-#   --value "map to guest = bad user
-#   usershare allow guests = yes
-#   inherit permissions = yes
-#   inherit acls = yes
-#   vfs objects = acl_xattr
-#   follow symlinks = yes
-#   hosts allow = ${HOSTS_ALLOW}
-#   hosts deny = 0.0.0.0/0
-#   min protocol = SMB2
-#   max protocol = SMB3" \
-#   ${OMV_CONFIG}
+# Configure SMB Global settings
+xmlstarlet edit -L \
+  --update "//config/services/smb/enable" \
+  --value '1' \
+  --update "//config/services/smb/usesendfile" \
+  --value '1' \
+  --update "//config/services/smb/aio" \
+  --value '1' \
+  --update "//config/services/smb/timeserver" \
+  --value '0' \
+  --update "//config/services/smb/homesenable" \
+  --value '1' \
+  --update "//config/services/smb/homesbrowseable" \
+  --value '0' \
+  --update "//config/services/smb/homesrecyclebin" \
+  --value '1' \
+  ${OMV_CONFIG}
+# Global extra options
+xmlstarlet edit -L \
+  --update "//config/services/smb/extraoptions" \
+  --value "map to guest = bad user
+  usershare allow guests = yes
+  inherit permissions = yes
+  inherit acls = yes
+  vfs objects = acl_xattr
+  follow symlinks = yes
+  hosts allow = ${HOSTS_ALLOW}
+  hosts deny = 0.0.0.0/0
+  min protocol = SMB2
+  max protocol = SMB3" \
+  ${OMV_CONFIG}
 
-# # Configure SMB shares (dirs)
-# while IFS=',' read -r dir desc grp other; do
-#   # Create new NFS share folder
-#   info "New OMV SMB share created: ${WHITE}'${dir}'${NC}"
+# Configure SMB shares (dirs)
+while IFS=',' read -r dir desc grp other; do
+  # Create new NFS share folder
+  info "New OMV SMB share created: ${WHITE}'${dir}'${NC}"
 
-#   # Create uuid
-#   SMB_UUID="$(omv_uuid)"
+  # Create uuid
+  SMB_UUID="$(omv_uuid)"
 
-#   # Get DIR_SCHEMA volume OMV UUID
-#   SHARE_FOLDERREF=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='$dir']/uuid" -nl /etc/openmediavault/config.xml)
-#   [[ ${SHARE_FOLDERREF} == "" ]] && continue
+  # Get DIR_SCHEMA volume OMV UUID
+  SHARE_FOLDERREF=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='$dir']/uuid" -nl /etc/openmediavault/config.xml)
+  [[ ${SHARE_FOLDERREF} == "" ]] && continue
 
-#   # SMB share vars
-#   if [ ${dir} == 'public' ]; then
-#     # SMB vars
-#     GUEST=allow
-#     ENABLE=1
-#     READONLY=0
-#     BROWSEABLE=1
-#     RECYCLEBIN=0
-#     BINMAXSIZE=0
-#     BINMAXAGE=0
-#     HIDEDOT=1
-#     INHERITACLS=1
-#     INHERITPERMISSIONS=1
-#     EASUPPORT=0
-#     STOREDOSATTRIBUTES=0
-#     HOSTSALLOW=""
-#     HOSTSDENY=""
-#     AUDIT=0
-#     TIMEMACHINE=0
-#     # SMB extra options
-#     EXTRAOPTIONS='create mask = 0664
-#     force create mode = 0664
-#     directory mask = 0775
-#     force directory mode = 0775'
-#   else
-#     # SMB vars (default all)
-#     GUEST=no
-#     ENABLE=1
-#     READONLY=0
-#     BROWSEABLE=1
-#     RECYCLEBIN=0
-#     BINMAXSIZE=0
-#     BINMAXAGE=0
-#     HIDEDOT=1
-#     INHERITACLS=1
-#     INHERITPERMISSIONS=1
-#     EASUPPORT=0
-#     STOREDOSATTRIBUTES=0
-#     HOSTSALLOW=""
-#     HOSTSDENY=""
-#     AUDIT=0
-#     TIMEMACHINE=0
-#     # SMB extra options
-#     EXTRAOPTIONS=""
-#   fi
+  # SMB share vars
+  if [ ${dir} == 'public' ]; then
+    # SMB vars
+    GUEST=allow
+    ENABLE=1
+    READONLY=0
+    BROWSEABLE=1
+    RECYCLEBIN=0
+    BINMAXSIZE=0
+    BINMAXAGE=0
+    HIDEDOT=1
+    INHERITACLS=1
+    INHERITPERMISSIONS=1
+    EASUPPORT=0
+    STOREDOSATTRIBUTES=0
+    HOSTSALLOW=""
+    HOSTSDENY=""
+    AUDIT=0
+    TIMEMACHINE=0
+    # SMB extra options
+    EXTRAOPTIONS='create mask = 0664
+    force create mode = 0664
+    directory mask = 0775
+    force directory mode = 0775'
+  else
+    # SMB vars (default all)
+    GUEST=no
+    ENABLE=1
+    READONLY=0
+    BROWSEABLE=1
+    RECYCLEBIN=0
+    BINMAXSIZE=0
+    BINMAXAGE=0
+    HIDEDOT=1
+    INHERITACLS=1
+    INHERITPERMISSIONS=1
+    EASUPPORT=0
+    STOREDOSATTRIBUTES=0
+    HOSTSALLOW=""
+    HOSTSDENY=""
+    AUDIT=0
+    TIMEMACHINE=0
+    # SMB extra options
+    EXTRAOPTIONS=""
+  fi
 
-#   # OMV smb share template
-#   echo "<share>
-#     <uuid>${SMB_UUID}</uuid>
-#     <enable>${ENABLE}</enable>
-#     <sharedfolderref>${SHARE_FOLDERREF}</sharedfolderref>
-#     <comment>${desc}</comment>
-#     <guest>${GUEST}</guest>
-#     <readonly>${READONLY}</readonly>
-#     <browseable>${BROWSEABLE}</browseable>
-#     <recyclebin>${RECYCLEBIN}</recyclebin>
-#     <recyclemaxsize>${BINMAXSIZE}</recyclemaxsize>
-#     <recyclemaxage>${BINMAXAGE}</recyclemaxage>
-#     <hidedotfiles>${HIDEDOT}</hidedotfiles>
-#     <inheritacls>${INHERITACLS}</inheritacls>
-#     <inheritpermissions>${INHERITPERMISSIONS}</inheritpermissions>
-#     <easupport>${EASUPPORT}</easupport>
-#     <storedosattributes>${STOREDOSATTRIBUTES}</storedosattributes>
-#     <hostsallow>${HOSTSALLOW}</hostsallow>
-#     <hostsdeny>${HOSTSDENY}</hostsdeny>
-#     <audit>${AUDIT}</audit>
-#     <timemachine>${TIMEMACHINE}</timemachine>
-#     <extraoptions>${EXTRAOPTIONS}</extraoptions>
-#   </share>" > ${DIR}/smb_share.xml
+  # OMV smb share template
+  echo "<share>
+    <uuid>${SMB_UUID}</uuid>
+    <enable>${ENABLE}</enable>
+    <sharedfolderref>${SHARE_FOLDERREF}</sharedfolderref>
+    <comment>${desc}</comment>
+    <guest>${GUEST}</guest>
+    <readonly>${READONLY}</readonly>
+    <browseable>${BROWSEABLE}</browseable>
+    <recyclebin>${RECYCLEBIN}</recyclebin>
+    <recyclemaxsize>${BINMAXSIZE}</recyclemaxsize>
+    <recyclemaxage>${BINMAXAGE}</recyclemaxage>
+    <hidedotfiles>${HIDEDOT}</hidedotfiles>
+    <inheritacls>${INHERITACLS}</inheritacls>
+    <inheritpermissions>${INHERITPERMISSIONS}</inheritpermissions>
+    <easupport>${EASUPPORT}</easupport>
+    <storedosattributes>${STOREDOSATTRIBUTES}</storedosattributes>
+    <hostsallow>${HOSTSALLOW}</hostsallow>
+    <hostsdeny>${HOSTSDENY}</hostsdeny>
+    <audit>${AUDIT}</audit>
+    <timemachine>${TIMEMACHINE}</timemachine>
+    <extraoptions>${EXTRAOPTIONS}</extraoptions>
+  </share>" > ${DIR}/smb_share.xml
 
-#   # Delete subnode if already exist
-#   xmlstarlet ed -L -d  "//config/services/smb/shares/share[sharedfolderref='${SHARE_FOLDERREF}']" ${OMV_CONFIG}
+  # Delete subnode if already exist
+  xmlstarlet ed -L -d  "//config/services/smb/shares/share[sharedfolderref='${SHARE_FOLDERREF}']" ${OMV_CONFIG}
 
-#   #Adding a new subnode to smb share
-#   TMP_XML=$(mktemp)
-#   xmlstarlet edit --subnode "//config/services/smb/shares" --type elem --name "share" \
-#   -v "$(xmlstarlet sel -t -c '/share/*' ${DIR}/smb_share.xml)" ${OMV_CONFIG} \
-#   | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
-#   mv "$TMP_XML" ${OMV_CONFIG}
-# done <<< $( printf '%s\n' "${nas_smbfolder_LIST[@]}" )
+  #Adding a new subnode to smb share
+  TMP_XML=$(mktemp)
+  xmlstarlet edit --subnode "//config/services/smb/shares" --type elem --name "share" \
+  -v "$(xmlstarlet sel -t -c '/share/*' ${DIR}/smb_share.xml)" ${OMV_CONFIG} \
+  | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
+  mv "$TMP_XML" ${OMV_CONFIG}
+done <<< $( printf '%s\n' "${nas_smbfolder_LIST[@]}" )
 
-# # Stage config edit
-# msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-# omv-salt deploy run samba & spinner $!
+# Stage config edit
+msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+omv-salt deploy run samba & spinner $!
 
 #---- SSH
 section "SSH Setup"
@@ -804,7 +804,6 @@ while IFS= read -r line; do
 done << EOF
 # Example
 # name:description
-openmediavault-sftp:sftp
 openmediavault-usbbackup:usb backup
 openmediavault-remotemount:remote mount
 EOF
