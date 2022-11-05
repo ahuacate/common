@@ -753,6 +753,7 @@ done <<< $( printf '%s\n' "${nas_smbfolder_LIST[@]}" )
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+omv-salt stage run prepare & spinner $!
 omv-salt deploy run samba & spinner $!
 
 #---- SSH
