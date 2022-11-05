@@ -606,7 +606,11 @@ done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
 # omv-salt stage run deploy & spinner $!
+omv-salt stage run prepare & spinner $!
 omv-salt deploy run fstab & spinner $!
+omv-salt deploy run nfs & spinner $!
+omv-salt deploy run avahi & spinner $!
+
 
 #---- Setup OVM SMB Shares
 section "Create SMB Shares"
