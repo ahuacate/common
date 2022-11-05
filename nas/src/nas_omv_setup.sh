@@ -427,7 +427,8 @@ echo
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt deploy run fstab
+omv-salt stage run prepare & spinner $!
+omv-salt deploy run fstab & spinner $!
 
 
 #---- Create Groups
@@ -599,9 +600,7 @@ while IFS=',' read -r dir desc user grp other; do
     | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
     mv "$TMP_XML" ${OMV_CONFIG} 
   done <<< $( printf '%s\n' "${pve_node_LIST[@]}" )
-
 done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
-
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
@@ -609,7 +608,6 @@ msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )...
 omv-salt stage run prepare & spinner $!
 omv-salt deploy run fstab & spinner $!
 omv-salt deploy run nfs & spinner $!
-omv-salt deploy run avahi & spinner $!
 
 
 #---- Setup OVM SMB Shares
@@ -776,6 +774,7 @@ xmlstarlet edit -L \
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+omv-salt stage run prepare & spinner $!
 omv-salt deploy run ssh & spinner $!
 
 #---- Fail2ban
@@ -794,6 +793,7 @@ xmlstarlet edit -L \
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+omv-salt stage run prepare & spinner $!
 omv-salt deploy run fail2ban & spinner $!
 
 
@@ -840,6 +840,7 @@ if [ ${HOSTNAME_MOD} == 0 ]; then
 
   # Stage config edit
   msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+  omv-salt stage run prepare & spinner $!
   omv-salt deploy run hostname & spinner $!
   echo
 fi
@@ -878,13 +879,6 @@ display_msg3+=( "private - UID 1607:Member of privatelab. Supplementary medialab
 x='\\\\'
 display_msg4=( "$x$(hostname -I | sed 's/\s.*$//')\:" )
 display_msg4+=( "$x$(hostname).$(hostname -d)\:" )
-
-# # File browser login
-# display_msg5=( "http://$(hostname).$(hostname -d):3670" )
-# display_msg5+=( "http://$(hostname -I | sed 's/\s.*$//'):3670 (${ip_type})" )
-# display_msg5+=( "Username: admin" )
-# display_msg5+=( "Password: admin" )
-# OMV is configured with File Browser. Use the admin:admin credentials when logging in for the first time. Please do not forget to change the password immediately.
 
 # Display msg
 msg_box "${HOSTNAME^^} OMV NAS setup was a success. Your NAS is fully configured and is ready to provide NFS and/or SMB/CIFS backend storage mounts to your PVE hosts.
