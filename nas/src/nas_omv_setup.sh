@@ -909,6 +909,4 @@ A backup file of your OMV configuration (pre-modification) is available here:
 $(echo "/etc/${file_bak}" | indent2)
 
 We recommend the User now reboots the OMV NAS."
-
-printf '%s\n' "${nas_basefolder_LIST[@]}"
 #-----------------------------------------------------------------------------------
