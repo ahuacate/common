@@ -537,9 +537,7 @@ nas_nfsfolder_LIST=()
 while IFS= read -r line; do
   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
   nas_nfsfolder_LIST+=( "$line" )
-done <<< $( echo 'audio,Audiobooks and podcasts storage,root,users,0750,:--x,65605:rwx,65607:rwx,65608:r-x' )
-
-#printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||"
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
 
 # Create NFS share
 while IFS=',' read -r dir desc user grp other; do
@@ -603,6 +601,7 @@ while IFS=',' read -r dir desc user grp other; do
   done <<< $( printf '%s\n' "${pve_node_LIST[@]}" )
 
 done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
+
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
