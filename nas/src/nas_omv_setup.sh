@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------------------------------
 # Filename:     nas_omv_setup.sh
-# Description:  Setup script for OMV NAS
+# Description:  Setup script for OMV NAS (full build setup)
 #
-# Usage:        SSH into OMV. Login as 'root'.
+# Usage:        Use from 'nas-hardmetal_installer.sh'
+#               Run anytime to fix share permissions.
 # ----------------------------------------------------------------------------------
-# # # OMV config file
-# DIR='/tmp'
-# OMV_CONFIG='/etc/openmediavault/config.xml'
-# # OMV_CONFIG='/etc/openmediavault/test.xml'
-# COMMON_DIR='/srv/9a0b0119-e833-42df-9131-4ee98920edec/ahuacate/common'
-# COMMON_PVE_SRC_DIR="${COMMON_DIR}/pve/src"
-# DIR_SCHEMA='/srv/dev-disk-by-uuid-0508acf1-5612-4990-80ac-00543db8c712'
-# # OMV Helper functions
-# source /usr/share/openmediavault/scripts/helper-functions
+
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
 
@@ -173,9 +166,9 @@ xmlstarlet edit -L \
   ${OMV_CONFIG}
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
+omv-salt stage run prepare & spinner $!
 omv-salt deploy run apt & spinner $!
 omv-salt deploy run timezone & spinner $!
-# omv-salt stage run deploy & spinner $!
 
 # Perform OMV update
 msg "Performing OMV OS update ( be patient, might take a long, long time )..."
@@ -188,6 +181,7 @@ sed -i 's|^GID_MAX.*|GID_MAX                 70000|g' /etc/login.defs
 
 # Setup Skel
 sudo mkdir -p /etc/skel/{audio,backup,books,documents,downloads,templates,video,music,photo,public,.ssh}
+
 
 #---- Search Domain
 # Check DNS Search domain setting compliance with Ahuacate default options
@@ -366,7 +360,6 @@ if [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${VOLU
   | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
   mv "$TMP_XML" ${OMV_CONFIG}
 fi
-
 
 # Check OMV share and process
 while IFS=',' read -r dir desc grp other; do
