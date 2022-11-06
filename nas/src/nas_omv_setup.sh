@@ -166,9 +166,9 @@ xmlstarlet edit -L \
   ${OMV_CONFIG}
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt stage run prepare & spinner $!
-omv-salt deploy run apt & spinner $!
-omv-salt deploy run timezone & spinner $!
+sudo omv-salt stage run prepare & spinner $!
+sudo omv-salt deploy run apt & spinner $!
+sudo omv-salt deploy run timezone & spinner $!
 
 # Perform OMV update
 msg "Performing OMV OS update ( be patient, might take a long, long time )..."
@@ -420,8 +420,8 @@ echo
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt stage run prepare & spinner $!
-omv-salt deploy run fstab & spinner $!
+sudo omv-salt stage run prepare & spinner $!
+sudo omv-salt deploy run fstab & spinner $!
 
 
 #---- Create Groups
@@ -598,9 +598,9 @@ done <<< $( printf '%s\n' "${nas_nfsfolder_LIST[@]}" )
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
 # omv-salt stage run deploy & spinner $!
-omv-salt stage run prepare & spinner $!
-omv-salt deploy run fstab & spinner $!
-omv-salt deploy run nfs & spinner $!
+sudo omv-salt stage run prepare & spinner $!
+sudo omv-salt deploy run fstab & spinner $!
+sudo omv-salt deploy run nfs & spinner $!
 
 
 #---- Setup OVM SMB Shares
@@ -744,8 +744,8 @@ done <<< $( printf '%s\n' "${nas_smbfolder_LIST[@]}" )
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt stage run prepare & spinner $!
-omv-salt deploy run samba & spinner $!
+sudo omv-salt stage run prepare & spinner $!
+sudo omv-salt deploy run samba & spinner $!
 
 #---- SSH
 section "SSH Setup"
@@ -767,8 +767,8 @@ xmlstarlet edit -L \
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt stage run prepare & spinner $!
-omv-salt deploy run ssh & spinner $!
+sudo omv-salt stage run prepare & spinner $!
+sudo omv-salt deploy run ssh & spinner $!
 
 #---- Fail2ban
 
@@ -786,8 +786,8 @@ xmlstarlet edit -L \
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-omv-salt stage run prepare & spinner $!
-omv-salt deploy run fail2ban & spinner $!
+sudo omv-salt stage run prepare & spinner $!
+sudo omv-salt deploy run fail2ban & spinner $!
 
 
 #---- Other OMV Plug-ins
@@ -833,8 +833,8 @@ if [ ${HOSTNAME_MOD} == 0 ]; then
 
   # Stage config edit
   msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
-  omv-salt stage run prepare & spinner $!
-  omv-salt deploy run hostname & spinner $!
+  sudo omv-salt stage run prepare & spinner $!
+  sudo omv-salt deploy run hostname & spinner $!
   echo
 fi
 
@@ -880,7 +880,7 @@ OMV NAS has a WebGUI management interface. Your login credentials are user 'admi
 
 $(printf '%s\n' "${display_msg1[@]}" | indent2)
 
-The NAS is installed with Ahuacate default User accounts, Groups and file sharing permission. These new Users and Groups are a required for all our PVE containers (Sonarr, Radarr etc). We recommend the User uses our preset NAS Groups for new user management.
+The NAS is installed with Ahuacate default Linux User accounts, Groups and file sharing permission. These new Users and Groups are a required by our PVE containers (Sonarr, Radarr etc). We recommend the User uses our preset NAS Groups for new user management.
 
 $(printf '%s\n' "${display_msg2[@]}" | column -s ":" -t -N "GROUP NAME,DESCRIPTION" | indent2)
 
@@ -895,5 +895,5 @@ NFSv4 is enabled and ready for creating PVE host storage mounts.
 A backup file of your OMV configuration (pre-modification) is available here:
 $(echo "/etc/${file_bak}" | indent2)
 
-We recommend the User now reboots the OMV NAS."
+We recommend you now reboot the OMV NAS."
 #-----------------------------------------------------------------------------------
