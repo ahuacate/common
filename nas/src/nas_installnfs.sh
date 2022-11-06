@@ -45,7 +45,7 @@ if [ ! $(nslookup ${PVE_HOSTNAME} >/dev/null 2>&1; echo $?) == '0' ]; then
   unset OPTIONS_LABELS_INPUT
   OPTIONS_VALUES_INPUT+=( "OPTION_01" "OPTION_02" )
   OPTIONS_LABELS_INPUT+=( "NFS by Hostnames - NFS exports by hostnames" \
-  "NFS by Static IP - NFS exports by IP address." )
+  "NFS by Static IP - NFS exports by IP address (Recommended)" )
   makeselect_input2
   singleselect SELECTED "$OPTIONS_STRING"
   if [ ${RESULTS} == 'OPTION_01' ]; then
