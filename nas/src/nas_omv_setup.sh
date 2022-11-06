@@ -884,7 +884,7 @@ The NAS is installed with Ahuacate default Linux User accounts, Groups and file 
 
 $(printf '%s\n' "${display_msg2[@]}" | column -s ":" -t -N "GROUP NAME,DESCRIPTION" | indent2)
 
-$(printf '%s\n' "${display_msg3[@]}" | column -s ":" -t -N "NEW APP USERS,DESCRIPTION" | indent2)
+$(printf '%s\n' "${display_msg3[@]}" | column -s ":" -t -N "APP USER ACC ONLY,DESCRIPTION" | indent2)
 
 To access ${HOSTNAME^^} files use SMB.
 
@@ -895,5 +895,5 @@ NFSv4 is enabled and ready for creating PVE host storage mounts.
 A backup file of your OMV configuration (pre-modification) is available here:
 $(echo "/etc/${file_bak}" | indent2)
 
-We recommend you now reboot the OMV NAS."
+We recommend you now reboot your OMV NAS."
 #-----------------------------------------------------------------------------------
