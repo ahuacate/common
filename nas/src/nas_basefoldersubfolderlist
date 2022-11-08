@@ -42,7 +42,7 @@ proxmox/backup,root,users,1750,:--x,65605:rwx,65607:rwx,65606:rwx,65608:000
 public/autoadd,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
 public/autoadd/direct_import,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/direct_import/lazylibrarian,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-public/autoadd/torrent,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
+public/autoadd/torrent,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
 public/autoadd/torrent/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/torrent/flexget-movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/torrent/flexget-series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
@@ -53,7 +53,7 @@ public/autoadd/torrent/music,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,
 public/autoadd/torrent/pron,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/torrent/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/torrent/unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-public/autoadd/usenet,root,users,0750,:--x,65605:r-x,65607:r--,65606:000,65608:r--
+public/autoadd/usenet,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
 public/autoadd/usenet/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/usenet/flexget-movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/usenet/flexget-series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-

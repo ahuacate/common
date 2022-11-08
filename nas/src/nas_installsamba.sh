@@ -78,11 +78,23 @@ writable = yes
 browsable =yes
 public = yes
 read only = no
-create mode = 0775
-directory mode = 0775
-force user = nobody
+create mode = 0777
+directory mode = 0777
+#force user = nobody
 guest ok = yes
 hide dot files = yes
+EOF
+
+# autoadd.conf
+cat << EOF > autoadd.conf.tmp
+[autoadd]
+path = /srv/nas-06/public/autoadd
+browseable = no
+read only = no
+create mask = 0775
+directory mask = 0775
+valid users = %S,:--x,@medialab,@privatelab
+#force group = medialab
 EOF
 
 # Create nas_basefolderlist-xtra
@@ -115,6 +127,7 @@ msg "Creating default SMB folder shares ( global, homes, public )..."
 cp ${TEMP_DIR}/smb.conf.tmp ${SMB_CONF}
 cp ${TEMP_DIR}/homes.conf.tmp ${SMB_CONF_DIR}/homes.conf
 cp ${TEMP_DIR}/public.conf.tmp ${SMB_CONF_DIR}/public.conf
+cp ${TEMP_DIR}/autoadd.conf.tmp ${SMB_CONF_DIR}/autoadd.conf
 
 # Create new Samba share list
 cat nas_basefolderlist nas_basefolderlist_extra \
