@@ -68,7 +68,7 @@ echo
 nas_basefolder_extra_LIST=()
 while true; do
   if [ ${#nas_basefolder_extra_LIST[@]} == '0' ]; then
-    read -p "Do you want to create a additional custom shared folder [y/n]? " -n 1 -r YN
+    read -p "Do you want to create a additional custom shared folder (default 'Nn') [y/n]? " -n 1 -r YN
   else
     read -p "Do you want to another custom shared folder [y/n]? " -n 1 -r YN
   fi
