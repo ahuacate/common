@@ -19,7 +19,7 @@ video/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 video/transcode,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
 
 # Video Folders (stream is for low bandwidth HEVC video)
-video/stream,root,users,0750,:--x,65605:--x,65607:--x,65608:--x
+video/stream,root,users,0750,:--x,65605:r-x,65607:r-x,65608:--x
 video/stream/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 video/stream/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 video/stream/musicvideo,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
@@ -39,10 +39,10 @@ books/magazines,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 proxmox/backup,root,users,1750,:--x,65605:rwx,65607:rwx,65606:rwx,65608:000
 
 # Public Folders
-public/autoadd,root,users,0750,:--x,65605:--x,65607:--x,65606:000,65608:r--
+public/autoadd,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
 public/autoadd/direct_import,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/direct_import/lazylibrarian,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-public/autoadd/torrent,root,users,0750,:--x,65605:--x,65607:--x,65606:000,65608:r--
+public/autoadd/torrent,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
 public/autoadd/torrent/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/torrent/flexget-movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/torrent/flexget-series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
@@ -53,7 +53,7 @@ public/autoadd/torrent/music,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,
 public/autoadd/torrent/pron,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/torrent/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/torrent/unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
-public/autoadd/usenet,root,users,0750,:--x,65605:--x,65607:--x,65606:000,65608:r--
+public/autoadd/usenet,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
 public/autoadd/usenet/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/usenet/flexget-movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/usenet/flexget-series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
@@ -66,11 +66,11 @@ public/autoadd/usenet/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,
 public/autoadd/usenet/unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 
 # Vidcoderr Folders
-public/autoadd/vidcoderr,root,users,0750,:--x,65605:--x,65607:--x,65606:000,65608:r--
+public/autoadd/vidcoderr,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
 public/autoadd/vidcoderr/in_homevideo,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/vidcoderr/in_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/vidcoderr/out_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rwx
-public/autoadd/vidcoderr/in_stream,root,users,0750,:--x,65605:--x,65607:--x,65606:000,65608:r--
+public/autoadd/vidcoderr/in_stream,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
 public/autoadd/vidcoderr/in_stream/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/vidcoderr/in_stream/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 public/autoadd/vidcoderr/in_stream/musicvideo,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
