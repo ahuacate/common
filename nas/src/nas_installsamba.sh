@@ -99,6 +99,7 @@ directory mask = 0775
 valid users = %S,:--x,@medialab,@privatelab
 #force group = medialab
 EOF
+fi
 
 # Create nas_basefolderlist-xtra
 if [ ! -f ${TEMP_DIR}/nas_basefolderlist_extra ]; then
@@ -173,3 +174,4 @@ msg "Starting SMB service..."
 service smbd start 2>/dev/null
 systemctl is-active smbd >/dev/null 2>&1 && info "SMB server status: ${GREEN}active (running).${NC}" || info "SMB server status: ${RED}inactive (dead).${NC} Your intervention is required."
 echo
+#-----------------------------------------------------------------------------------
