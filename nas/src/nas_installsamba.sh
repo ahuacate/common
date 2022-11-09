@@ -88,7 +88,7 @@ EOF
 # autoadd.conf
 cat << EOF > autoadd.conf.tmp
 [autoadd]
-path = /srv/nas-06/public/autoadd
+path = ${DIR_SCHEMA}/public/autoadd
 browseable = no
 read only = no
 create mask = 0775
