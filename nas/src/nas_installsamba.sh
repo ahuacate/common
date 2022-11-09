@@ -70,6 +70,7 @@ valid users = %S
 EOF
 
 # public.conf
+if [ -d ${DIR_SCHEMA}/public ]; then
 cat << EOF > public.conf.tmp
 [public]
 comment = public anonymous access
@@ -84,8 +85,10 @@ directory mode = 0777
 guest ok = yes
 hide dot files = yes
 EOF
+fi
 
 # autoadd.conf
+if [ -d ${DIR_SCHEMA}/public/autoadd ]; then
 cat << EOF > autoadd.conf.tmp
 [autoadd]
 path = ${DIR_SCHEMA}/public/autoadd
@@ -171,4 +174,4 @@ service smbd start 2>/dev/null
 systemctl is-active smbd >/dev/null 2>&1 && info "SMB server status: ${GREEN}active (running).${NC}" || info "SMB server status: ${RED}inactive (dead).${NC} Your intervention is required."
 echo
 
-#---- Finish Line ------------------------------------------------------------------
+#-----------------------------------------------------------------------------------
