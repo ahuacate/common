@@ -173,4 +173,3 @@ msg "Starting SMB service..."
 service smbd start 2>/dev/null
 systemctl is-active smbd >/dev/null 2>&1 && info "SMB server status: ${GREEN}active (running).${NC}" || info "SMB server status: ${RED}inactive (dead).${NC} Your intervention is required."
 echo
-#-----------------------------------------------------------------------------------
