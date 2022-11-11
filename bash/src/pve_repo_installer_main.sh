@@ -45,7 +45,7 @@ while IFS=':' read name build_type vm_type desc; do
   installer_filename="$(echo ${GIT_REPO} | sed 's/-/_/')_${vm_type}_${name}_installer.sh"
   # Check installer filename exists
   if [ -f "${SRC_DIR}/${build_type}/${installer_filename}" ]; then
-    vm_input_LIST+( "${name}:${build_type}:${vm_type}:${desc}" )
+    vm_input_LIST+=( "${name}:${build_type}:${vm_type}:${desc}" )
   fi
 done < <( printf '%s\n' "${vm_LIST[@]}" )
 
