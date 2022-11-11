@@ -41,6 +41,8 @@ source ${COMMON_PVE_SRC_DIR}/pvesource_bash_defaults.sh
 #---- Check and Create vm installer list
 vm_input_LIST=()
 while IFS=':' read name build_type vm_type desc; do
+  # Skip # lines
+  [[ "$name" =~ ^\#.*$ ]] && continue
   # Set installer filename
   installer_filename="$(echo ${GIT_REPO} | sed 's/-/_/')_${vm_type}_${name}_installer.sh"
   # Check installer filename exists
