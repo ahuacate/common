@@ -53,24 +53,30 @@ done < <( printf '%s\n' "${vm_LIST[@]}" )
 
 #---- Run Installer
 while true; do
-  section "Select a Product"
+  section "Select a Installer"
 
-  msg_box "#### SELECT A PRODUCT INSTALLER ####\n\nSelect a application installer or service from the list or 'None - Exit this installer' to leave.\n\nAny terminal inactivity is caused by background tasks being run, system updating or downloading of Linux files. So be patient because some tasks can be slow."
+  msg_box "#### SELECT A INSTALLER ####\n\nSelect a application installer or service from the list or 'None - Exit this installer' to leave.\n\nAny terminal inactivity is caused by background tasks being run, system updating or downloading of Linux files. So be patient because some tasks can be slow."
   echo
   # Create menu list
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
   while IFS=':' read name build_type vm_type desc; do
+    # Set name var
+    if [[ ${build_type,,} =~ ${name,,} ]]; then 
+      name_var="${name^}"
+    else
+      name_var="${build_type^} ${name^}"
+    fi
     # Check for existing CT/VM
     if [[ $(pct list | awk 'NR > 1 { OFS = ":"; print $3 }' | grep "^${name,,}(.\|-)\?[0-9]\+\?$") ]] && [ "${vm_type}" = 'ct' ]; then
       OPTIONS_VALUES_INPUT+=( "${name,,}:${build_type,,}:ct" )
-      OPTIONS_LABELS_INPUT+=( "${build_type^} ${name^} - ${desc^} ( '${name^} CT' already exists )" )
+      OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^} ( '${name^} CT' already exists )" )
     elif [[ $(qm list | awk '{ if (NR!=1) { print $2 }}' 2> /dev/null | grep "^${name,,}(.\|-)\?[0-9]\+\?$") ]] && [ "${vm_type}" = 'vm' ]; then
       OPTIONS_VALUES_INPUT+=( "${name,,}:${build_type,,}:vm" )
-      OPTIONS_LABELS_INPUT+=( "${build_type^} ${name^} - ${desc^} ( '${name^} VM' already exists )" )
+      OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^} ( '${name^} VM' already exists )" )
     else
       OPTIONS_VALUES_INPUT+=( "${name,,}:${build_type,,}:${vm_type,,}" )
-      OPTIONS_LABELS_INPUT+=( "${build_type^} ${name^} - ${desc^}" ) 
+      OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^}" ) 
     fi
   done < <( printf '%s\n' "${vm_input_LIST[@]}" )
   # Add exit option to menu
