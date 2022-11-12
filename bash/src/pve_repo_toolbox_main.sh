@@ -32,20 +32,25 @@ source ${COMMON_PVE_SRC_DIR}/pvesource_bash_defaults.sh
 
 #---- Check and Create vm toolbox list
 vm_input_LIST=()
-vm_input_LIST=( $(find "${SRC_DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_toolbox\.sh$"  | sed "/^.*\/$(echo ${GIT_REPO} | sed 's/-/_/')\_installer\.sh$/d" | awk -F'_' '{print $(NF-1)}') )
+while read -r line; do
+  var1=$(awk -F'_' '{print $(NF-1)}' <<< $line)
+  var2=$(awk -F'/' '{print $(NF-1)}' <<< $line)
+  vm_input_LIST+=( "${var1}:${var2}" )
+done < <( find "${SRC_DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_toolbox\.sh$" | sed "/^.*\/$(echo ${GIT_REPO} | sed 's/-/_/')\_installer\.sh$/d" )
+
 
 #---- Run Installer
 while true; do
   section "Select a Toolbox"
 
-  msg_box "#### SELECT A PRODUCT TOOLBOX ####\n\nSelect a product toolbox from the list or 'None - Exit this installer' to leave.\n\nAny terminal inactivity is caused by background tasks be run, system updating or downloading of Linux files. So be patient because some tasks can be slow."
+  msg_box "#### SELECT A PRODUCT TOOLBOX ####\n\nSelect a product toolbox from the list or 'None - Exit this installer' to leave.\n\nAny terminal inactivity is caused by background tasks be run, system updating or downloading of Linux files. So be patient because some tasks can be slow.\n\nIf no Toolbox options are available its because no Toolbox exists for any of your PVE CTs."
   echo
   # Create menu list
   pct_LIST=( $(pct list | awk 'NR > 1 { OFS = ":"; print $NF,$1 }') )
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
-  while IFS=':' read name; do
-    if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${name,,}/$(echo ${GIT_REPO} | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]; then
+  while IFS=':' read name build; do
+    if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${build,,}/$(echo ${GIT_REPO} | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]; then
       OPTIONS_VALUES_INPUT+=( "${name,,}:$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[_-]?[0-9]?:[0-9]+$" | awk -F':' '{ print $2 }')" )
       OPTIONS_LABELS_INPUT+=( "${name^} Toolbox" )
     fi
