@@ -86,6 +86,13 @@ function load_module() {
       die "Failed to add '$1' module to load at boot."
   fi
 }
+# Installer cleanup
+function installer_cleanup() {
+rm -R ${REPO_TEMP}/${GIT_REPO} &> /dev/null
+if [ -f ${REPO_TEMP}/${GIT_REPO}.tar.gz ]; then
+  rm ${REPO_TEMP}/${GIT_REPO}.tar.gz > /dev/null
+fi
+}
 
 #---- User and Password Functions
 # Make a USERNAME with validation

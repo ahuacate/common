@@ -2,6 +2,7 @@
 # ----------------------------------------------------------------------------------
 # Filename:     pve_repo_installer_main.sh
 # Description:  Main installer script
+# Note:         Works with PVE CTs only
 # ----------------------------------------------------------------------------------
 
 #---- Bash command to run script ---------------------------------------------------
@@ -29,55 +30,33 @@ TEMP_DIR="${DIR}/tmp"
 # Run Bash Header
 source ${COMMON_PVE_SRC_DIR}/pvesource_bash_defaults.sh
 
-#---- Check and Create vm installer list
+#---- Check and Create vm toolbox list
 vm_input_LIST=()
-while IFS=':' read name build_type vm_type desc; do
-  # Skip # lines
-  [[ "$name" =~ ^\#.*$ ]] && continue
-  # Set installer filename
-  installer_filename="$(echo ${GIT_REPO} | sed 's/-/_/')_${vm_type}_${name}_installer.sh"
-  # Check installer filename exists
-  if [ -f "${SRC_DIR}/${build_type}/${installer_filename}" ]; then
-    vm_input_LIST+=( "${name}:${build_type}:${vm_type}:${desc}" )
-  fi
-done < <( printf '%s\n' "${vm_LIST[@]}" )
+vm_input_LIST=( $(find "${SRC_DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_toolbox\.sh$"  | sed "/^.*\/$(echo ${GIT_REPO} | sed 's/-/_/')\_installer\.sh$/d" | awk -F'_' '{print $(NF-1)}') )
 
 #---- Run Installer
 while true; do
-  section "Select a Installer"
+  section "Select a Toolbox"
 
-  msg_box "#### SELECT A INSTALLER ####\n\nSelect a application installer or service from the list or 'None - Exit this installer' to leave.\n\nAny terminal inactivity is caused by background tasks being run, system updating or downloading of Linux files. So be patient because some tasks can be slow."
+  msg_box "#### SELECT A PRODUCT TOOLBOX ####\n\nSelect a product toolbox from the list or 'None - Exit this installer' to leave.\n\nAny terminal inactivity is caused by background tasks be run, system updating or downloading of Linux files. So be patient because some tasks can be slow."
   echo
   # Create menu list
+  pct_LIST=( $(pct list | awk 'NR > 1 { OFS = ":"; print $NF,$1 }') )
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
-  while IFS=':' read name build_type vm_type desc; do
-    # Set name var
-    if [[ ${build_type,,} =~ ${name,,} ]]; then 
-      name_var="${name^}"
-    else
-      name_var="${build_type^} ${name^}"
-    fi
-    # Check for existing CT/VM
-    if [[ $(pct list | awk 'NR > 1 { OFS = ":"; print $3 }' | grep "^${name,,}(.\|-)\?[0-9]\+\?$") ]] && [ "${vm_type}" = 'ct' ]; then
-      OPTIONS_VALUES_INPUT+=( "${name,,}:${build_type,,}:ct" )
-      OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^} ( '${name^} CT' already exists )" )
-    elif [[ $(qm list | awk '{ if (NR!=1) { print $2 }}' 2> /dev/null | grep "^${name,,}(.\|-)\?[0-9]\+\?$") ]] && [ "${vm_type}" = 'vm' ]; then
-      OPTIONS_VALUES_INPUT+=( "${name,,}:${build_type,,}:vm" )
-      OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^} ( '${name^} VM' already exists )" )
-    else
-      OPTIONS_VALUES_INPUT+=( "${name,,}:${build_type,,}:${vm_type,,}" )
-      OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^}" ) 
+  while IFS=':' read name; do
+    if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${name,,}/pve_homelab_ct_${name,,}_toolbox.sh" ]; then
+      OPTIONS_VALUES_INPUT+=( "${name,,}:$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[_-]?[0-9]?:[0-9]+$" | awk -F':' '{ print $2 }')" )
+      OPTIONS_LABELS_INPUT+=( "${name^} Toolbox" )
     fi
   done < <( printf '%s\n' "${vm_input_LIST[@]}" )
-  # Add exit option to menu
   OPTIONS_VALUES_INPUT+=( "TYPE00" )
   OPTIONS_LABELS_INPUT+=( "None - Exit this installer" ) 
   # Menu options
   makeselect_input2
   singleselect SELECTED "$OPTIONS_STRING"
 
-  # Run the CT installer
+  # Set App name
   if [ ${RESULTS} == 'TYPE00' ]; then
     # Exit installation
     msg "You have chosen not to proceed. Aborting. Bye..."
@@ -88,17 +67,17 @@ while true; do
     # Set Hostname
     APP_NAME=$(echo ${RESULTS} | awk -F':' '{ print $1 }')
 
-    # App dir
-    APP_DIR=$(echo ${RESULTS} | awk -F':' '{ print $2 }')
+    # Set CTID
+    CTID=$(echo ${RESULTS} | awk -F':' '{ print $2 }')
 
-    # VM type
-    VM_TYPE=$(echo ${RESULTS} | awk -F':' '{ print $3 }')
+    # Check CT run status
+    pct_start_waitloop
 
-    # Set Installer App script name
-    GIT_APP_SCRIPT="$(echo ${GIT_REPO} | sed 's/-/_/')_${VM_TYPE}_${APP_NAME}_installer.sh"
+    # Set Toolbox App script name
+    GIT_APP_SCRIPT="pve_homelab_ct_${APP_NAME}_toolbox.sh"
 
     # Run Toolbox
-    source ${SRC_DIR}/${APP_DIR}/${GIT_APP_SCRIPT}
+    source ${SRC_DIR}/${APP_NAME}/${GIT_APP_SCRIPT}
   fi
 
   # Reset Section Head
