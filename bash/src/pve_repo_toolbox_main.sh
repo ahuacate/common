@@ -45,7 +45,7 @@ while true; do
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
   while IFS=':' read name; do
-    if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${name,,}/pve_homelab_ct_${name,,}_toolbox.sh" ]; then
+    if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${name,,}/$(echo ${GIT_REPO} | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]; then
       OPTIONS_VALUES_INPUT+=( "${name,,}:$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[_-]?[0-9]?:[0-9]+$" | awk -F':' '{ print $2 }')" )
       OPTIONS_LABELS_INPUT+=( "${name^} Toolbox" )
     fi
