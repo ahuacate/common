@@ -56,7 +56,7 @@ while true; do
     # fi
     if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${build,,}/$(echo ${GIT_REPO} | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]; then
       OPTIONS_VALUES_INPUT+=( "$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $1 }'):${build}:ct:$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $2 }'):${name}" )
-      OPTIONS_LABELS_INPUT+=( "${name^} Toolbox" )
+      OPTIONS_LABELS_INPUT+=( "${name^} Toolbox ( CTID $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $2 }') )" )
     fi
   done < <( printf '%s\n' "${vm_input_LIST[@]}" )
   OPTIONS_VALUES_INPUT+=( "TYPE00" )
