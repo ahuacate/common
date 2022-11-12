@@ -38,7 +38,6 @@ while read -r line; do
   vm_input_LIST+=( "${var1}:${var2}" )
 done < <( find "${SRC_DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_toolbox\.sh$" | sed "/^.*\/$(echo ${GIT_REPO} | sed 's/-/_/')\_installer\.sh$/d" )
 
-
 #---- Run Installer
 while true; do
   section "Select a Toolbox"
@@ -50,13 +49,9 @@ while true; do
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
   while IFS=':' read name build; do
-    # if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${build,,}/$(echo ${GIT_REPO} | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]; then
-    #   OPTIONS_VALUES_INPUT+=( "${name,,}:$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[_-]?[0-9]?:[0-9]+$" | awk -F':' '{ print $2 }')" )
-    #   OPTIONS_LABELS_INPUT+=( "${name^} Toolbox" )
-    # fi
     if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${build,,}/$(echo ${GIT_REPO} | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]; then
       OPTIONS_VALUES_INPUT+=( "$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $1 }'):${build}:ct:$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $2 }'):${name}" )
-      OPTIONS_LABELS_INPUT+=( "${name^} Toolbox ( CTID $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $2 }') )" )
+      OPTIONS_LABELS_INPUT+=( "${name^} Toolbox - CTID $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $2 }')" )
     fi
   done < <( printf '%s\n' "${vm_input_LIST[@]}" )
   OPTIONS_VALUES_INPUT+=( "TYPE00" )
@@ -96,21 +91,6 @@ while true; do
 
     # Run Toolbox
     source ${SRC_DIR}/${APP_BUILD}/${GIT_APP_SCRIPT}
-
-    # # Set Hostname
-    # APP_NAME=$(echo ${RESULTS} | awk -F':' '{ print $1 }')
-
-    # # Set CTID
-    # CTID=$(echo ${RESULTS} | awk -F':' '{ print $2 }')
-
-    # # Check CT run status
-    # pct_start_waitloop
-
-    # # Set Toolbox App script name
-    # GIT_APP_SCRIPT="pve_homelab_ct_${APP_NAME}_toolbox.sh"
-
-    # # Run Toolbox
-    # source ${SRC_DIR}/${APP_NAME}/${GIT_APP_SCRIPT}
   fi
 
   # Reset Section Head
