@@ -50,12 +50,12 @@ while true; do
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
   while IFS=':' read name build; do
-    if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${build,,}/$(echo ${GIT_REPO} | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]; then
-      OPTIONS_VALUES_INPUT+=( "${name,,}:$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[_-]?[0-9]?:[0-9]+$" | awk -F':' '{ print $2 }')" )
-      OPTIONS_LABELS_INPUT+=( "${name^} Toolbox" )
-    fi
+  echo "$name $build"
+    # if [[ $(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${build,,}/$(echo ${GIT_REPO} | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]; then
+    #   OPTIONS_VALUES_INPUT+=( "${name,,}:$(printf '%s\n' "${pct_LIST[@]}" | grep -Po "^${name,,}[_-]?[0-9]?:[0-9]+$" | awk -F':' '{ print $2 }')" )
+    #   OPTIONS_LABELS_INPUT+=( "${name^} Toolbox" )
+    # fi
   done < <( printf '%s\n' "${vm_input_LIST[@]}" )
-  echo hello
   OPTIONS_VALUES_INPUT+=( "TYPE00" )
   OPTIONS_LABELS_INPUT+=( "None - Exit this installer" ) 
   # Menu options

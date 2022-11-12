@@ -31,14 +31,14 @@ source ${COMMON_PVE_SRC_DIR}/pvesource_bash_defaults.sh
 
 #---- Check and Create vm installer list
 vm_input_LIST=()
-while IFS=':' read name build_type vm_type desc; do
+while IFS=':' read name build vm_type desc; do
   # Skip # lines
   [[ "$name" =~ ^\#.*$ ]] && continue
   # Set installer filename
   installer_filename="$(echo ${GIT_REPO} | sed 's/-/_/')_${vm_type}_${name}_installer.sh"
   # Check installer filename exists
-  if [ -f "${SRC_DIR}/${build_type}/${installer_filename}" ]; then
-    vm_input_LIST+=( "${name}:${build_type}:${vm_type}:${desc}" )
+  if [ -f "${SRC_DIR}/${build}/${installer_filename}" ]; then
+    vm_input_LIST+=( "${name}:${build}:${vm_type}:${desc}" )
   fi
 done < <( printf '%s\n' "${vm_LIST[@]}" )
 
@@ -51,22 +51,22 @@ while true; do
   # Create menu list
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
-  while IFS=':' read name build_type vm_type desc; do
+  while IFS=':' read name build vm_type desc; do
     # Set name var
-    if [[ ${build_type,,} =~ ${name,,} ]]; then 
+    if [[ ${build,,} =~ ${name,,} ]]; then 
       name_var="${name^}"
     else
-      name_var="${build_type^} ${name^}"
+      name_var="${build^} ${name^}"
     fi
     # Check for existing CT/VM
     if [[ $(pct list | awk 'NR > 1 { OFS = ":"; print $3 }' | grep "^${name,,}(.\|-)\?[0-9]\+\?$") ]] && [ "${vm_type}" = 'ct' ]; then
-      OPTIONS_VALUES_INPUT+=( "${name,,}:${build_type,,}:ct" )
+      OPTIONS_VALUES_INPUT+=( "${name,,}:${build,,}:ct" )
       OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^} ( '${name^} CT' already exists )" )
     elif [[ $(qm list | awk '{ if (NR!=1) { print $2 }}' 2> /dev/null | grep "^${name,,}(.\|-)\?[0-9]\+\?$") ]] && [ "${vm_type}" = 'vm' ]; then
-      OPTIONS_VALUES_INPUT+=( "${name,,}:${build_type,,}:vm" )
+      OPTIONS_VALUES_INPUT+=( "${name,,}:${build,,}:vm" )
       OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^} ( '${name^} VM' already exists )" )
     else
-      OPTIONS_VALUES_INPUT+=( "${name,,}:${build_type,,}:${vm_type,,}" )
+      OPTIONS_VALUES_INPUT+=( "${name,,}:${build,,}:${vm_type,,}" )
       OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^}" ) 
     fi
   done < <( printf '%s\n' "${vm_input_LIST[@]}" )
