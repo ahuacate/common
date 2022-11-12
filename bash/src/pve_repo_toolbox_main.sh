@@ -47,6 +47,7 @@ while true; do
   echo
   # Create menu list
   pct_LIST=( $(pct list | awk 'NR > 1 { OFS = ":"; print $NF,$1 }') )
+  echo hello
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
   while IFS=':' read name build; do
