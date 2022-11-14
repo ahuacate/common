@@ -55,7 +55,7 @@ done
 
 #---- Create 'auto-dater' service
 # Push updater script to CT
-pct push $CTID ${SRC_DIR}/${APP_BUILD}/update-ct.sh /usr/local/sbin/update-ct.sh
+pct push $CTID ${SRC_DIR}/${APP_DIR}/update-ct.sh /usr/local/sbin/update-ct.sh
 pct exec $CTID -- bash -c 'sudo chmod a+x /usr/local/sbin/update-ct.sh'
 
 # Create a systemd service for the updater
