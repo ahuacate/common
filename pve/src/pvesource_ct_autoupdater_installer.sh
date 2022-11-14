@@ -15,7 +15,7 @@
 #---- Prerequisites
 
 # Check for CT updater script
-if [ ! -f "${SRC_DIR}/${APP_BUILD}/update-ct.sh" ]; then
+if [ ! -f "${SRC_DIR}/${APP_DIR}/update-ct.sh" ]; then
   return
 fi
 
