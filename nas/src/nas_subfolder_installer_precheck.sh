@@ -45,7 +45,6 @@ while IFS=',' read -r pve_mnt ct_mnt; do
   mnt_protocol=$(pvesm status | grep "^${pve_mnt}" | awk '{ print $2 }')
   # Combine to list
   while IFS= read -r sub_dir; do
-    echo $sub_dir
     remote_mnt_sub=$(echo $sub_dir | awk -F',' '{ print $1}' | sed "s|.*${pve_mnt}||")
     dir_check_LIST+=( "${label},${mnt_protocol},${remote_mnt}${remote_mnt_sub},${sub_dir}" )
   done <<< $(cat ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist | awk -F',' -v var="${label}" '{ if ($1 ~ var) print $0 }' | sed "s/${label}/\/mnt\/pve\/${pve_mnt}/")
