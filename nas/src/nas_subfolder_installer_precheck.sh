@@ -47,9 +47,8 @@ while IFS=',' read -r pve_mnt ct_mnt; do
   while IFS= read -r sub_dir; do
     remote_mnt_sub=$(echo $sub_dir | awk -F',' '{ print $1}' | sed "s|.*${pve_mnt}||")
     dir_check_LIST+=( "${label},${mnt_protocol},${remote_mnt}${remote_mnt_sub},${sub_dir}" )
-  done <<< $(cat ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist | awk -F',' -v var="${label}" '{ if ($1 ~ var) print $0 }' | sed "s/${label}/\/mnt\/pve\/${pve_mnt}/")
+  done <<< $(cat ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist | awk -F',' -v var="${label}" '{ if ($1 ~ "^" var) print $0 }' | sed "s/${label}/\/mnt\/pve\/${pve_mnt}/")
 done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}" | sed '/\/mnt\/backup$/d' | sed '/\/mnt\/music$/d' | sed '/\/mnt\/photo$/d')
-
 
 # Create required SubFolder list
 unset nas_subfolder_LIST
@@ -58,7 +57,6 @@ while IFS=',' read -r label mnt_protocol remote_mnt sub_dir other; do
     nas_subfolder_LIST+=( "${label},${mnt_protocol},${remote_mnt},${sub_dir},${other}" )
   fi
 done <<< $(printf '%s\n' "${dir_check_LIST[@]}")
-
 
 # Create SubFolders required by CT
 unset display_dir_error_MSG
