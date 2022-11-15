@@ -15,7 +15,7 @@ msg_box "${HOSTNAME^} supports hardware acceleration of video encoding/decoding/
 
 This script ONLY supports Proxmox hosts installed with a AMD/Intel CPU with integrated graphics GPU. If your Proxmox host is installed with a NVIDIA Graphics Card you must manually configure video passthrough at a later stage.
 
-In the next steps we will check if your PVE host hardware supports VA-API video encoding. If the check passes we will configure your ${CT_HOSTNAME_VAR^} CT for VA-API passthrough encoding/decoding/transcoding."
+In the next steps we will check if your PVE host hardware supports VA-API video encoding. If the check passes we will configure your CT for VA-API passthrough encoding/decoding/transcoding."
 
 # Checking for PVE host VA-API support
 msg "Checking PVE host support for VA-API..."

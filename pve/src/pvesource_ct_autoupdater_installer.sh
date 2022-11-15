@@ -37,7 +37,7 @@ while true; do
   echo
   case $YN in
     [Yy]*)
-      info "Proceeding with the installation."
+      info "Configured for 'auto-updater'."
       echo
       break
       ;;

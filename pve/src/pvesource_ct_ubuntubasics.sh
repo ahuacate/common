@@ -48,17 +48,18 @@ pct exec $CTID -- apt-get -qqy autoremove > /dev/null
 
 # Configuring Ubuntu for unattended upgrades
 msg "Setting ${OSTYPE^} CT for unattended upgrades..."
-pct exec $CTID -- apt-get install -qqy unattended-upgrades > /dev/null
-# Enable Updates
-pct exec $CTID -- sed -i 's|//\t"${distro_id}:${distro_codename}-updates";|\t"${distro_id}:${distro_codename}-updates";|' /etc/apt/apt.conf.d/50unattended-upgrades
-# Enable Removal of unused files
-pct exec $CTID -- sed -i 's|//Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";|Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";|' /etc/apt/apt.conf.d/50unattended-upgrades
-pct exec $CTID -- sed -i 's|//Unattended-Upgrade::Remove-New-Unused-Dependencies "true";|Unattended-Upgrade::Remove-New-Unused-Dependencies "true";|' /etc/apt/apt.conf.d/50unattended-upgrades
-# Auto reboot CT if required
-pct exec $CTID -- sed -i 's|//Unattended-Upgrade::Automatic-Reboot "false";|Unattended-Upgrade::Automatic-Reboot "true";|' /etc/apt/apt.conf.d/50unattended-upgrades
-pct exec $CTID -- sed -i 's|//Unattended-Upgrade::Automatic-Reboot-Time "02:00";|Unattended-Upgrade::Automatic-Reboot-Time "03:00";|' /etc/apt/apt.conf.d/50unattended-upgrades
-# Start Unattended Upgrade
-pct exec $CTID -- unattended-upgrade > /dev/null
+pct exec $CTID -- systemctl enable unattended-upgrades
+# pct exec $CTID -- apt-get install -qqy unattended-upgrades > /dev/null
+# # Enable Updates
+# pct exec $CTID -- sed -i 's|//\t"${distro_id}:${distro_codename}-updates";|\t"${distro_id}:${distro_codename}-updates";|' /etc/apt/apt.conf.d/50unattended-upgrades
+# # Enable Removal of unused files
+# pct exec $CTID -- sed -i 's|//Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";|Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";|' /etc/apt/apt.conf.d/50unattended-upgrades
+# pct exec $CTID -- sed -i 's|//Unattended-Upgrade::Remove-New-Unused-Dependencies "true";|Unattended-Upgrade::Remove-New-Unused-Dependencies "true";|' /etc/apt/apt.conf.d/50unattended-upgrades
+# # Auto reboot CT if required
+# pct exec $CTID -- sed -i 's|//Unattended-Upgrade::Automatic-Reboot "false";|Unattended-Upgrade::Automatic-Reboot "true";|' /etc/apt/apt.conf.d/50unattended-upgrades
+# pct exec $CTID -- sed -i 's|//Unattended-Upgrade::Automatic-Reboot-Time "02:00";|Unattended-Upgrade::Automatic-Reboot-Time "03:00";|' /etc/apt/apt.conf.d/50unattended-upgrades
+# # Start Unattended Upgrade
+# pct exec $CTID -- unattended-upgrade > /dev/null
 
 # Installing HTTPS transport
 msg "Installing HTTPS transport for APT..."
