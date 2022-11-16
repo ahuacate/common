@@ -26,9 +26,9 @@ msg_box "#### PLEASE READ CAREFULLY ####
 You have the option to install our Application & OS 'auto-updater' service. The 'auto-updater' will perform the following tasks weekly:
 
 \t-- Update & Upgrade CT OS
-\t-- Update & Upgrade all installed software
+\t-- Upgrade installed software
 
-The tasks will be performed on calendar Sundays after 0300hr at randomized intervals. The 'auto-updater' uses a systemd timer unit."
+The tasks will be performed on calendar Sundays after 0300hr at randomized intervals. The 'auto-updater' uses a systemd timer unit. For Servarr applications (radarr, sonarr, prowlarr etc) use the application WebGUI to perform SW upgrades."
 sleep 1
 
 echo
