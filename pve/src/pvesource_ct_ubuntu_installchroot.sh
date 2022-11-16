@@ -143,7 +143,7 @@ msg "Configuring sshd settings for chrootjail..."
 sed -i 's/^[#]*\s*PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
 sed -i 's|^[#]*\s*AuthorizedKeysFile.*|AuthorizedKeysFile     ~/.ssh/authorized_keys|g' /etc/ssh/sshd_config
 sed -i 's|^[#]*\s*PasswordAuthentication.*|PasswordAuthentication no|g' /etc/ssh/sshd_config
-sed -i "s/^[#]*\s*Port.*/Port $SSH_PORT/g" /etc/ssh/sshd_config
+sed -i "s/^[#]*\s*Port.*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config
 # Configure sshd for chroot jail
 sed -i 's|Subsystem.*sftp.*|Subsystem       sftp    internal-sftp|g' /etc/ssh/sshd_config # Sets sftp to use proFTP #Subsystem sftp /usr/libexec/openssh/sftp-server
 cat <<EOF >> /etc/ssh/sshd_config
@@ -167,24 +167,24 @@ if [ $SSHD_STATUS = 0 ]; then
   # Starting SSHd
   msg "Enabling SSHD server..."
   systemctl stop ssh 2>/dev/null
-  sed -i "s/^[#]*\s*Port.*/Port $SSH_PORT/g" /etc/ssh/sshd_config
-  ufw allow $SSH_PORT 2>/dev/null
+  sed -i "s/^[#]*\s*Port.*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config
+  ufw allow ${SSH_PORT} 2>/dev/null
   systemctl restart ssh 2>/dev/null
-  systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - ${YELLOW}port $SSH_PORT${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead).${NC} - port $SSH_PORT"
+  systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - ${YELLOW}port ${SSH_PORT}${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead).${NC} - port ${SSH_PORT}"
 else
   while true; do
     read -p "Enable SSH Server (Recommended) [y/n]? " -n 1 -r YN
     echo
     case $YN in
       [Yy]*)
-        read -p "Confirm SSH Port number: " -e -i $SSH_PORT SSH_PORT
+        read -p "Confirm SSH Port number: " -e -i ${SSH_PORT} SSH_PORT
         msg "Enabling SSHD server..."
         SSHD_STATUS=0
         systemctl stop ssh 2>/dev/null
-        ufw allow $SSH_PORT 2>/dev/null
+        ufw allow ${SSH_PORT} 2>/dev/null
         systemctl enable ssh 2>/dev/null
         systemctl start ssh 2>/dev/null
-        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - ${YELLOW}port $SSH_PORT${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port $SSH_PORT"
+        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - ${YELLOW}port ${SSH_PORT}${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port ${SSH_PORT}"
         echo
         break
         ;;
@@ -192,9 +192,9 @@ else
         SSHD_STATUS=1
         systemctl stop ssh 2>/dev/null
         systemctl disable ssh 2>/dev/null
-        sed -i "s/^[#]*\s*Port.*/Port $SSH_PORT/g" /etc/ssh/sshd_config
+        sed -i "s/^[#]*\s*Port.*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config
         msg "Disabling SSHD server..."
-        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running).${NC} - ${YELLOW}port $SSH_PORT${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port $SSH_PORT"
+        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running).${NC} - ${YELLOW}port ${SSH_PORT}${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port ${SSH_PORT}"
         echo
         break
         ;;
@@ -209,7 +209,7 @@ fi
 #---- Finish
 section "Completion Status"
 
-info "${WHITE}Success.${NC} Chroot Jail has been configured.\n  --  SSHd Status: $(if [ $SSHD_STATUS = 0 ]; then echo "${GREEN}active (running)${NC}"; else echo "${RED}inactive (dead)${NC}"; fi)\n  --  Monitored SSH Port: ${YELLOW}$SSH_PORT${NC}\n"
+info "${WHITE}Success.${NC} Chroot Jail has been configured.\n  --  SSHd Status: $(if [ $SSHD_STATUS = 0 ]; then echo "${GREEN}active (running)${NC}"; else echo "${RED}inactive (dead)${NC}"; fi)\n  --  Monitored SSH Port: ${YELLOW}${SSH_PORT}${NC}\n"
 
 # Cleanup
 if [ -z "${PARENT_EXEC+x}" ]; then
