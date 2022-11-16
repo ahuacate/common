@@ -28,7 +28,7 @@ function copy_binary() {
 
 if ! [ -z "${PARENT_EXEC_INSTALL_KODI_RSYNC+x}" ]; then
   # Set command library source
-  CHROOT_APP_LIST="${DIR}/pve_medialab_ct_kodirsync_chrootapplist"
+  CHROOT_APP_LIST="${DIR}/pvesource_ct_kodirsync_chrootapplist"
   # Chroot Home
   CHROOT='/home/chrootjail'
   # Enable/Disable SSHd
