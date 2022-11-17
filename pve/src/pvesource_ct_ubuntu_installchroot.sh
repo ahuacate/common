@@ -9,16 +9,16 @@
 #---- Dependencies -----------------------------------------------------------------
 #---- Static Variables -------------------------------------------------------------
 
-if ! [ -z "${PARENT_EXEC_INSTALL_KODI_RSYNC+x}" ]; then
+if [[ $(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_chrootapplist$") ]]; then
   # Set command library source
-  CHROOT_APP_LIST="${DIR}/pvesource_ct_kodirsync_chrootapplist"
+  CHROOT_APP_LIST="$(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_chrootapplist$")t"
   # Chroot Home
   CHROOT='/home/chrootjail'
   # Enable/Disable SSHd
   SSHD_STATUS=0
 else
   # Set command library source
-  CHROOT_APP_LIST="${DIR}/pvesource_ct_ubuntu_chrootapplist_default"
+  CHROOT_APP_LIST="${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntu_chrootapplist_default"
   # Chroot Home
   CHROOT="/srv/${HOSTNAME}/homes/chrootjail"
   # Enable/Disable SSHd
@@ -202,11 +202,5 @@ else
 fi
 
 #---- Finish
-section "Completion Status"
-
 info "${WHITE}Success.${NC} Chroot Jail has been configured.\n  --  SSHd Status: $(if [ $SSHD_STATUS = 0 ]; then echo "${GREEN}active (running)${NC}"; else echo "${RED}inactive (dead)${NC}"; fi)\n  --  Monitored SSH Port: ${YELLOW}${SSH_PORT}${NC}\n"
-
-# Cleanup
-if [ -z "${PARENT_EXEC+x}" ]; then
-  trap cleanup EXIT
-fi
+#-----------------------------------------------------------------------------------
