@@ -11,7 +11,7 @@
 
 if [[ $(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_chrootapplist$") ]]; then
   # Set command library source
-  CHROOT_APP_LIST="$(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_chrootapplist$")t"
+  CHROOT_APP_LIST="$(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_chrootapplist$")"
   # Chroot Home
   CHROOT='/home/chrootjail'
   # Enable/Disable SSHd
