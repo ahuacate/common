@@ -9,9 +9,9 @@
 #---- Dependencies -----------------------------------------------------------------
 #---- Static Variables -------------------------------------------------------------
 
-if [[ $(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_chrootapplist$") ]]; then
+if [[ $(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_${APP_NAME}_chrootapplist$") ]]; then
   # Set command library source
-  CHROOT_APP_LIST="$(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_chrootapplist$")"
+  CHROOT_APP_LIST="$(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_${APP_NAME}_chrootapplist$")"
   # Chroot Home
   CHROOT='/home/chrootjail'
   # Enable/Disable SSHd
@@ -26,10 +26,6 @@ else
 fi
 
 #---- Other Variables --------------------------------------------------------------
-
-# # Easy Script Section Header Body Text
-# SECTION_HEAD='Chroot Jail'
-
 #---- Other Files ------------------------------------------------------------------
 #---- Functions --------------------------------------------------------------------
 
@@ -179,7 +175,7 @@ else
         ufw allow ${SSH_PORT} 2>/dev/null
         systemctl enable ssh 2>/dev/null
         systemctl start ssh 2>/dev/null
-        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - ${YELLOW}port ${SSH_PORT}${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port ${SSH_PORT}"
+        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - port ${SSH_PORT}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port ${SSH_PORT}"
         echo
         break
         ;;
@@ -189,7 +185,7 @@ else
         systemctl disable ssh 2>/dev/null
         sed -i "s/^[#]*\s*Port.*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config
         msg "Disabling SSHD server..."
-        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running).${NC} - ${YELLOW}port ${SSH_PORT}${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port ${SSH_PORT}"
+        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running).${NC} - port ${SSH_PORT}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port ${SSH_PORT}"
         echo
         break
         ;;
@@ -202,5 +198,5 @@ else
 fi
 
 #---- Finish
-info "${WHITE}Success.${NC} Chroot Jail has been configured.\n  --  SSHd Status: $(if [ $SSHD_STATUS = 0 ]; then echo "${GREEN}active (running)${NC}"; else echo "${RED}inactive (dead)${NC}"; fi)\n  --  Monitored SSH Port: ${YELLOW}${SSH_PORT}${NC}\n"
+info "Success. Chroot Jail has been configured.\n  --  SSHd Status: $(if [ $SSHD_STATUS = 0 ]; then echo "${GREEN}active (running)${NC}"; else echo "${RED}inactive (dead)${NC}"; fi)\n  --  Monitored SSH Port: ${YELLOW}${SSH_PORT}${NC}\n"
 #-----------------------------------------------------------------------------------
