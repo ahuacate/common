@@ -6,7 +6,24 @@
 
 #---- Bash command to run script ---------------------------------------------------
 #---- Source -----------------------------------------------------------------------
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
 #---- Dependencies -----------------------------------------------------------------
+
+# Run Bash Header
+source ${DIR}/pvesource_bash_defaults.sh
+
+# Copy Binary & Dependents
+function copy_binary() {
+  set +Ee
+  for i in $(ldd $* 2> /dev/null | grep -v dynamic | cut -d " " -f 3 | sed 's/://' | sort | uniq); do
+    cp --parents $i $CHROOT
+    #echo $i
+  done
+  set -Ee
+}
+
 #---- Static Variables -------------------------------------------------------------
 
 if ! [ -z "${PARENT_EXEC_INSTALL_KODI_RSYNC+x}" ]; then
@@ -27,22 +44,10 @@ fi
 
 #---- Other Variables --------------------------------------------------------------
 
-# # Easy Script Section Header Body Text
-# SECTION_HEAD='Chroot Jail'
+# Easy Script Section Header Body Text
+SECTION_HEAD='Chroot Jail'
 
 #---- Other Files ------------------------------------------------------------------
-#---- Functions --------------------------------------------------------------------
-
-# Copy Binary & Dependents
-function copy_binary() {
-  set +Ee
-  for i in $(ldd $* 2> /dev/null | grep -v dynamic | cut -d " " -f 3 | sed 's/://' | sort | uniq); do
-    cp --parents $i $CHROOT
-    #echo $i
-  done
-  set -Ee
-}
-
 #---- Body -------------------------------------------------------------------------
 
 #---- Create SSH Chroot jail Environment
