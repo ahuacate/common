@@ -112,6 +112,33 @@ function input_username_val() {
   done
 }
 
+# Input a user Email Address with validation.
+function input_emailaddress_val() {
+  while true
+  do
+    read -p "Enter a valid email address for the user: " EMAIL_VAR
+    USER_EMAIL=$(echo "${EMAIL_VAR}" | sed 's/\s//g')
+    i=$(echo "${EMAIL_VAR}" | sed 's/\s//g')
+    IFS="@"
+    set -- $i
+    msg "Validating email..."
+    if [ "${#@}" -ne 2 ]; then
+      warn "Your email address '$USER_EMAIL' was rejected. Possible non-conforming input. Try again..."
+    else
+      # Check domain
+      domain="$2"
+      dig $domain | grep "ANSWER: 0" 1>/dev/null && domain_check=0
+      if [ "${domain_check}" == '0' ]; then
+        warn "Your email address '$USER_EMAIL' was rejected. Email domain $domain check failed. Try again..."
+      else
+        info "User email is set is set : ${YELLOW}${USER_EMAIL}${NC}"
+        echo
+        break
+      fi
+    fi
+  done
+}
+
 # Input a USER_PWD with validation. Requires libcrack2
 function input_userpwd_val() {
   # Install libcrack2
@@ -287,7 +314,7 @@ function multiselect () {
   # Modded version of this persons work: https://stackoverflow.com/a/54261882/317605 (by https://stackoverflow.com/users/8207842/dols3m)
   # To run: multiselect SELECTED "$OPTIONS_STRING"
   # To get output results: printf '%s\n' "${RESULTS[@]}"
-  echo -e "Select menu items (multiple) with 'arrow keys \U2191\U2193', 'space bar' to select or deselect, and confirm/done with 'Enter key'. You can select multiple menu items. Your options are:" | fmt -s -w 80
+  echo -e "Select menu items (multiple) with 'arrow keys \U2191\U2193', 'space bar' to select or deselect, and confirm/done with 'Enter key'. You can select multiple menu items or nothing. Your options are:" | fmt -s -w 80
   ESC=$( printf "\033")
   cursor_blink_on()   { printf "$ESC[?25h"; }
   cursor_blink_off()  { printf "$ESC[?25l"; }
