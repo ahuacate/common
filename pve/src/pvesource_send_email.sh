@@ -10,7 +10,7 @@
 #   -s --subject
 #   -h --html
 #   -a --attach
-#   ./pvesource_send_email.sh -t "hello@gmail.com" -c CC -b BCC -s
+#   ./pvesource_send_email.sh -t "hello@gmail.com" -c "postmaster"
 #
 # ----------------------------------------------------------------------------------
 
@@ -52,7 +52,7 @@ then
 fi
 
 #---- Body
-
+ 
 # Parse the command line arguments
 while getopts ":t:c:b:s:h:a:" opt
 do
@@ -75,8 +75,8 @@ then
     exit 1
 fi
 
-# Set the content type to HTML
-content_type="Content-Type: text/html; charset=UTF-8"
+# Set boundary id
+boundary="unique-boundary-$RANDOM"
 
 # Begin constructing the message
 message=$(cat <<EOF
@@ -85,26 +85,34 @@ Cc: $cc
 Bcc: $bcc
 Subject: $subject
 MIME-Version: 1.0
-$content_type
+Content-Type: multipart/mixed; boundary=$boundary
 
 EOF
 )
 
 # Add the HTML body to the message
-message=$message$(cat $html_file)
+message=$message$(cat <<EOF
+
+--$boundary
+Content-Type: text/html; charset=UTF-8
+Content-Disposition: inline
+$(cat $html_file)
+--$boundary
+EOF
+)
+
 
 # If there are attachments, add them to the message
 if [ ${#attachments[@]} -gt 0 ]
 then
-    boundary="unique-boundary-$RANDOM"
+  # Add the attachments to the message
+  for attachment in "${attachments[@]}"; do
+      # Encode the attachment as base64
+      encoded_attachment=$(base64 "$attachment" | tr -d '\n')
+      attachment_name=$(basename "$attachment")
 
-    # Add the attachments to the message
-    for attachment in "${attachments[@]}"; do
-        # Encode the attachment as base64
-        encoded_attachment=$(base64 "$attachment" | tr -d '\n')
-        attachment_name=$(basename "$attachment")
+      message=$message$(cat <<EOF
 
-        message=$message$(cat <<EOF
 --$boundary
 Content-Type: application/octet-stream; name="$attachment_name"
 Content-Disposition: attachment; filename="$attachment_name"
@@ -113,15 +121,27 @@ Content-Transfer-Encoding: base64
 $encoded_attachment
 EOF
 )
-    done
+  done
 
-    # Add the closing boundary to the message
-    message=$message"--$boundary--"
+  # Add a boundary to the attachment message
+  message=$message$(cat <<EOF
+
+--$boundary
+EOF
+)
 fi
+
+# Add the closing boundary to the message
+message=$message$(cat <<EOF
+
+--$boundary--
+EOF
+)
 
 # Send the email using sendmail
 echo "$message" | sendmail -t
+
+# Unset variables & arrays
+unset encoded_attachment to cc bcc subject html attach
+attachments=()
 #-----------------------------------------------------------------------------------
-
-
-

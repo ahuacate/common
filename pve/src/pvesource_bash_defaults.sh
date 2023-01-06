@@ -778,6 +778,144 @@ function matchselect () {
   done
 }
 
+#---- Get, Add or Modify configuration file values
+
+# Get a Variable value
+function get_config_value() {
+  # Get a key value in a conf/cfg file
+  # Example line of conf/cfg file:
+  #   pf_enable=0 # This variable sets the 'pf_enable' variable
+  #   pf_enable="0"
+  #   pf_enable="once upon a time" # This variable sets the 'pf_enable' variable
+  # Usage:
+  #   get_var "/usr/local/bin/kodirsync/kodirsync.conf" "pf_enable"
+  # Output:
+  #   get_var=0 or get_var="once upon a time"
+
+  # Check if all mandatory arguments have been provided
+  if [ -z "$1" ] || [ -z "$2" ]
+  then
+    echo "Error: missing mandatory argument(s)"
+    exit 1
+  fi
+
+  # Function arguments
+  local config_file="$1"
+  local key="$2"
+
+  unset get_var
+  get_var=$(awk -F "=" -v VAR="$key" '
+    # Split the line into fields
+    { split($0, fields, "=") }
+    # Check if the first field matches the variable name
+    fields[1] == VAR {
+      # Set the value of the variable to the second field
+      value = fields[2]
+      # Remove any text after the # character
+      gsub(/#.*/, "", value)
+      # Print the value of the variable
+      print value
+    }' "${config_file}" | tr -d '"')
+  # Check the exit status
+  if [ -z "$get_var" ]; then
+    # Print a message if the command failed
+    echo "No variable found."
+  fi
+}
+
+# Edit or Add a Conf file key pair
+function edit_config_value() {
+  # Edit or Add key value pair in a conf/cfg file
+  # Matches hashed-out # key-pairs and removes #
+  # Usage:
+  #   edit_config_value "/path/to/src/file" "key" "value" "comment"
+  #   edit_config_value "/usr/local/bin/kodirsync/kodirsync.conf" "pf_enable" "1"
+  # Output:
+  #   variable="1" # Comment line here (optional)
+
+  # Check if all three mandatory arguments have been provided
+  # $4 (Comment) is optional
+  if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+    echo "Error: missing mandatory argument(s)"
+    exit 1
+  fi
+
+  # Function arguments
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local comment=$4
+
+  # Escape any special characters in the value and comment
+  value=$(echo "$value" | sed 's/[\/&]/\\&/g')
+  comment=$(echo "$comment" | sed 's/[\/&]/\\&/g')
+
+  # Check if the key exists in the config file
+  if egrep -q "^(#)?(\s)?$key(\s)?=" "$config_file"; then
+    # Extract the existing comment line, if it exists
+    existing_comment=$(egrep "^(#)?(\s)?$key(\s)?=" "$config_file" | sed -n "s/^\(\s*\)#\{0,1\}\(\s*\)$key\(\s*\)= *\([^#]*\) *#\(.*\)/#\2/p")
+
+    # Replace the value in the config file
+    if [ -z "$comment" ]; then
+      # If no comment is provided, use the existing comment line
+      sed -i "s/^\(\s*\)#\{0,1\}\(\s*\)$key\(\s*\)=.*/$key=\"$value\" $existing_comment/" "$config_file"
+    else
+      # If a comment is provided, use the new comment line
+      sed -i "s/^\(\s*\)#\{0,1\}\(\s*\)$key\(\s*\)=.*/$key=\"$value\" # $comment/" "$config_file"
+    fi
+  else
+    # Add the key-value pair to the end of the config file
+    if [ -z "$comment" ]; then
+      # If no comment is provided, don't include a comment line
+      echo "$key=\"$value\"" >> "$config_file"
+    else
+      # If a comment is provided, include the comment line
+      echo "$key=\"$value\" # $comment" >> "$config_file"
+    fi
+  fi
+}
+
+#---- SMTP checks
+
+# Check PVE host SMTP status
+function check_smtp_status() {
+  # Host SMTP Option ('0' is inactive, '1' is active)
+  var='ahuacate_smtp'
+  file='/etc/postfix/main.cf'
+  if [ -f $file ] && [ "$(systemctl is-active --quiet postfix; echo $?)" == '0' ]; then
+    SMTP_STATUS=$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)
+  else
+    # Set SMTP inactive
+    SMTP_STATUS=0
+fi
+}
+
+
+#---- SW Systemctl checks
+# Check Install CT SW status (active or abort script)
+function pct_check_systemctl() {
+  # Usage: check_systemctl_sw "jellyfin.service"
+  local service_name="$1"
+  msg "Checking '${service_name}' service status..."
+  FAIL_MSG='Systemctl '${service_name}' has failed. Reason unknown.\nExiting installation script in 2 second.'
+  i=0
+  while true; do
+    if [ $(pct exec $CTID -- systemctl is-active ${service_name}) = 'active' ]; then
+      info "Systemctl '${service_name}' status: ${YELLOW}active${NC}"
+      echo
+      break
+    elif [ $(pct exec $CTID -- systemctl is-active ${service_name}) != 'active' ] && [ "$i" = '5' ]; then
+      warn "$FAIL_MSG"
+      echo
+      trap error_exit EXIT
+    fi
+    ((i=i+1))
+    sleep 1
+  done
+}
+
+
+
 #---- Bash Messaging Functions
 if [ $(dpkg -s boxes > /dev/null 2>&1; echo $?) = 1 ]; then
   apt-get install -y boxes > /dev/null
