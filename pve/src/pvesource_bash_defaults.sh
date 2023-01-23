@@ -835,28 +835,31 @@ function edit_config_value() {
 
   # Check if all three mandatory arguments have been provided
   # $4 (Comment) is optional
-  if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+  if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]
+  then
     echo "Error: missing mandatory argument(s)"
     exit 1
   fi
 
   # Function arguments
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local comment=$4
+  local config_file="$1"
+  local key="$2"
+  local value="$3"
+  local comment="${4:-}"
 
   # Escape any special characters in the value and comment
   value=$(echo "$value" | sed 's/[\/&]/\\&/g')
   comment=$(echo "$comment" | sed 's/[\/&]/\\&/g')
 
   # Check if the key exists in the config file
-  if egrep -q "^(#)?(\s)?$key(\s)?=" "$config_file"; then
+  if egrep -q "^(#)?(\s)?$key(\s)?=" "$config_file"
+  then
     # Extract the existing comment line, if it exists
     existing_comment=$(egrep "^(#)?(\s)?$key(\s)?=" "$config_file" | sed -n "s/^\(\s*\)#\{0,1\}\(\s*\)$key\(\s*\)= *\([^#]*\) *#\(.*\)/#\2/p")
 
     # Replace the value in the config file
-    if [ -z "$comment" ]; then
+    if [ -z "$comment" ]
+    then
       # If no comment is provided, use the existing comment line
       sed -i "s/^\(\s*\)#\{0,1\}\(\s*\)$key\(\s*\)=.*/$key=\"$value\" $existing_comment/" "$config_file"
     else
@@ -865,7 +868,8 @@ function edit_config_value() {
     fi
   else
     # Add the key-value pair to the end of the config file
-    if [ -z "$comment" ]; then
+    if [ -z "$comment" ]
+    then
       # If no comment is provided, don't include a comment line
       echo "$key=\"$value\"" >> "$config_file"
     else
