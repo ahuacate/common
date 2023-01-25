@@ -15,7 +15,8 @@
 #---- Prerequisites
 
 # Check for CT updater script
-if [ ! -f "${SRC_DIR}/${APP_DIR}/update-ct.sh" ]; then
+if [ ! -f "$SRC_DIR/$APP_DIR/update-ct.sh" ]
+then
   return
 fi
 
@@ -26,13 +27,14 @@ msg_box "#### PLEASE READ CAREFULLY ####
 You have the option to install our Application & OS 'auto-updater' service. The 'auto-updater' will perform the following tasks weekly:
 
 \t-- Update & Upgrade CT OS
-\t-- Upgrade installed software
+\t-- Upgrade installed software (if available)
 
-The tasks will be performed on calendar Sundays after 0300hr at randomized intervals. The 'auto-updater' uses a systemd timer unit. For Servarr applications (radarr, sonarr, prowlarr etc) use the application WebGUI to perform SW upgrades."
+The tasks will be performed on calendar Sundays after 0300hr at randomized intervals. The 'auto-updater' uses a systemd timer unit. For Servarr applications (radarr, sonarr, prowlarr etc) use the application WebGUI to perform SW application upgrades."
 sleep 1
 
 echo
-while true; do
+while true
+do
   read -p "Install 'auto-updater' (Recommended) [y/n]? " -n 1 -r YN
   echo
   case $YN in
@@ -54,8 +56,13 @@ while true; do
 done
 
 #---- Create 'auto-dater' service
+
+# Push basic bash utility script to CT
+pct push $CTID $COMMON_DIR/bash/src/basic_bash_utility.sh /usr/local/sbin/basic_bash_utility.sh
+pct exec $CTID -- bash -c 'sudo chmod a+x /usr/local/sbin/basic_bash_utility.sh'
+
 # Push updater script to CT
-pct push $CTID ${SRC_DIR}/${APP_DIR}/update-ct.sh /usr/local/sbin/update-ct.sh
+pct push $CTID $SRC_DIR/$APP_DIR/update-ct.sh /usr/local/sbin/update-ct.sh
 pct exec $CTID -- bash -c 'sudo chmod a+x /usr/local/sbin/update-ct.sh'
 
 # Create a systemd service for the updater
@@ -68,7 +75,7 @@ After=network-online.target
 Type=oneshot
 ExecStart=/usr/local/sbin/update-ct.sh
 EOF
-pct push $CTID ${DIR}/update-ct.service /etc/systemd/system/update-ct.service
+pct push $CTID $DIR/update-ct.service /etc/systemd/system/update-ct.service
 
 # Create a systemd timer
 # Default time is Monday 03:00
@@ -87,7 +94,7 @@ Persistent=true
 [Install]
 WantedBy=timers.target
 EOF
-pct push $CTID ${DIR}/update-ct.timer /etc/systemd/system/update-ct.timer
+pct push $CTID $DIR/update-ct.timer /etc/systemd/system/update-ct.timer
 
 # Enable systemd timer
 pct exec $CTID -- bash -c 'sudo systemctl --quiet daemon-reload'

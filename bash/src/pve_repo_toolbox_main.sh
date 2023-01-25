@@ -11,15 +11,15 @@
 #---- Static Variables -------------------------------------------------------------
 
 #---- Easy Script Section Header Body Text
-SECTION_HEAD="$(echo ${GIT_REPO} | sed -E 's/(\-|\.|\_)/ /' | awk '{print toupper($0)}')"
+SECTION_HEAD="$(echo "$GIT_REPO" | sed -E 's/(\-|\.|\_)/ /' | awk '{print toupper($0)}')"
 
 #---- Script path variables
-DIR="${REPO_TEMP}/${GIT_REPO}"
-SRC_DIR="${DIR}/src"
-COMMON_DIR="${DIR}/common"
-COMMON_PVE_SRC_DIR="${DIR}/common/pve/src"
-SHARED_DIR="${DIR}/shared"
-TEMP_DIR="${DIR}/tmp"
+DIR="$REPO_TEMP/$GIT_REPO"
+SRC_DIR="$DIR/src"
+COMMON_DIR="$DIR/common"
+COMMON_PVE_SRC_DIR="$DIR/common/pve/src"
+SHARED_DIR="$DIR/shared"
+TEMP_DIR="$DIR/tmp"
 
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
@@ -28,18 +28,20 @@ TEMP_DIR="${DIR}/tmp"
 #---- Prerequisites
 
 # Run Bash Header
-source ${COMMON_PVE_SRC_DIR}/pvesource_bash_defaults.sh
+source $COMMON_PVE_SRC_DIR/pvesource_bash_defaults.sh
 
 #---- Check and Create vm toolbox list
 vm_input_LIST=()
-while read -r line; do
+while read -r line
+do
   var1=$(awk -F'_' '{print $(NF-1)}' <<< $line)
   var2=$(awk -F'/' '{print $(NF-1)}' <<< $line)
   vm_input_LIST+=( "${var1}:${var2}" )
-done < <( find "${SRC_DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_toolbox\.sh$" | sed "/^.*\/$(echo ${GIT_REPO} | sed 's/-/_/')\_installer\.sh$/d" )
+done < <( find "$SRC_DIR/" -type f -regex "^.*/$(echo "$GIT_REPO" | sed 's/-/_/').*\_toolbox\.sh$" | sed "/^.*\/$(echo "$GIT_REPO" | sed 's/-/_/')\_installer\.sh$/d" )
 
 #---- Run Installer
-while true; do
+while true
+do
   section "Select a Toolbox"
 
   msg_box "#### SELECT A PRODUCT TOOLBOX ####\n\nSelect a product toolbox from the list or 'None - Exit this installer' to leave.\n\nAny terminal inactivity is caused by background tasks be run, system updating or downloading of Linux files. So be patient because some tasks can be slow.\n\nIf no Toolbox options are available its because no Toolbox exists for any of your installed PVE CTs."
@@ -48,8 +50,10 @@ while true; do
   pct_LIST=( $(pct list | awk 'NR > 1 { OFS = ":"; print $NF,$1 }') )
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
-  while IFS=':' read name build; do
-    if [[ $(printf '%s\n' "${pct_LIST[@]}" | egrep -o "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "${SRC_DIR}/${build,,}/$(echo ${GIT_REPO} | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]; then
+  while IFS=':' read name build
+  do
+    if [[ $(printf '%s\n' "${pct_LIST[@]}" | egrep -o "^${name,,}[.-]?[0-9]+?:[0-9]+$") ]] && [ -f "$SRC_DIR/${build,,}/$(echo "$GIT_REPO" | sed 's/-/_/')_ct_${name,,}_toolbox.sh" ]
+    then
       OPTIONS_VALUES_INPUT+=( "$(printf '%s\n' "${pct_LIST[@]}" | egrep -o "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $1 }'):${build}:ct:$(printf '%s\n' "${pct_LIST[@]}" | egrep -o "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $2 }'):${name}" )
       OPTIONS_LABELS_INPUT+=( "${name^} Toolbox - CTID $(printf '%s\n' "${pct_LIST[@]}" | egrep -o "^${name,,}[.-]?[0-9]+?:[0-9]+$" | awk -F':' '{ print $2 }')" )
     fi
@@ -61,7 +65,8 @@ while true; do
   singleselect SELECTED "$OPTIONS_STRING"
 
   # Set App name
-  if [ "${RESULTS}" == 'TYPE00' ]; then
+  if [ "$RESULTS" = 'TYPE00' ]
+  then
     # Exit installation
     msg "You have chosen not to proceed. Aborting. Bye..."
     echo
@@ -69,19 +74,19 @@ while true; do
     break
   else
     # Set Hostname
-    APP_HOSTNAME=$(echo ${RESULTS} | awk -F':' '{ print $1 }')
+    APP_HOSTNAME=$(echo "$RESULTS" | awk -F':' '{ print $1 }')
 
     # App dir
-    APP_BUILD=$(echo ${RESULTS} | awk -F':' '{ print $2 }')
+    APP_BUILD=$(echo "$RESULTS" | awk -F':' '{ print $2 }')
 
     # VM type
-    VM_TYPE=$(echo ${RESULTS} | awk -F':' '{ print $3 }')
+    VM_TYPE=$(echo "$RESULTS" | awk -F':' '{ print $3 }')
 
     # Set CTID
-    CTID=$(echo ${RESULTS} | awk -F':' '{ print $4 }')
+    CTID=$(echo "$RESULTS" | awk -F':' '{ print $4 }')
 
     # App Name
-    APP_NAME=$(echo ${RESULTS} | awk -F':' '{ print $5 }')
+    APP_NAME=$(echo "$RESULTS" | awk -F':' '{ print $5 }')
 
     # Check CT run status
     pct_start_waitloop
@@ -90,11 +95,11 @@ while true; do
     GIT_APP_SCRIPT="$(echo ${GIT_REPO} | sed 's/-/_/')_${VM_TYPE}_${APP_NAME}_toolbox.sh"
 
     # Run Toolbox
-    source ${SRC_DIR}/${APP_BUILD}/${GIT_APP_SCRIPT}
+    source $SRC_DIR/$APP_BUILD/$GIT_APP_SCRIPT
   fi
 
   # Reset Section Head
-  SECTION_HEAD="$(echo ${GIT_REPO} | sed -E 's/(\-|\.|\_)/ /' | awk '{print toupper($0)}')"
+  SECTION_HEAD="$(echo "$GIT_REPO" | sed -E 's/(\-|\.|\_)/ /' | awk '{print toupper($0)}')"
 done
 
 #---- Cleanup

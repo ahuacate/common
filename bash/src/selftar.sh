@@ -35,16 +35,19 @@
 #     installer_pkg.tar.gz.run --> installer.run
 # ----------------------------------------------------------------------------------
 
-if [ $# -eq 0 ]; then
+if [ $# -eq 0 ]
+then
   echo "This script creates self extractable executable"
   echo Usage: $0 TAR.GZ [COMMAND]
   exit;
 fi
-if [ $# -gt 0 ]; then
+if [ $# -gt 0 ]
+then
   TAR_FILE=$1
 fi
 EXIT_COMMAND=exit
-if [ $# -gt 1 ]; then
+if [ $# -gt 1 ]
+then
   EXIT_COMMAND="exec $2"
 fi
 

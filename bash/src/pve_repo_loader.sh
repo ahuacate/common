@@ -6,23 +6,31 @@
 
 #---- Dependencies -----------------------------------------------------------------
 
+# Check host is PVE
+if [[ ! $(command -v pveversion) ]]
+then
+  echo "This application is for Proxmox IS only. This host OS not supported.\nBye..."
+  exit 0
+fi
+
 # Check for Git SW
-if [ ! $(dpkg -s git >/dev/null 2>&1; echo $?) == 0 ] && ! [[ $(uname -a | grep 'synology') ]]; then
+if [[ ! $(dpkg -s git 2>/dev/null) ]]
+then
   apt-get install git -yqq
 fi
 
+#---- Functions --------------------------------------------------------------------
+
 # Installer cleanup
 function installer_cleanup () {
-rm -R ${REPO_TEMP}/${GIT_REPO} &> /dev/null
-rm ${REPO_TEMP}/${GIT_REPO}.tar.gz &> /dev/null
+  rm -R "$REPO_TEMP/$GIT_REPO" &> /dev/null
+  rm "$REPO_TEMP/${GIT_REPO}.tar.gz" &> /dev/null
 }
 
 #---- Body -------------------------------------------------------------------------
 
 #---- Clean old copies
-rm -R ${REPO_TEMP}/${GIT_REPO} &> /dev/null
-rm ${REPO_TEMP}/${GIT_REPO}.tar.gz &> /dev/null
-
+installer_cleanup
 
 #---- Local repo (developer)
 # if [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ]; then
@@ -31,11 +39,12 @@ rm ${REPO_TEMP}/${GIT_REPO}.tar.gz &> /dev/null
 #   # Create tmp dir
 #   mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
 # fi
-if [ -d ${REPO_PATH}/${GIT_REPO} ]; then
-  cp -R ${REPO_PATH}/${GIT_REPO} ${REPO_TEMP}
-  tar --exclude=".*" -czf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP} ${GIT_REPO}/ &> /dev/null
+if [ -d "$REPO_PATH/$GIT_REPO" ]
+then
+  cp -R "$REPO_PATH/$GIT_REPO" $REPO_TEMP
+  tar --exclude=".*" -czf $REPO_TEMP/${GIT_REPO}.tar.gz -C $REPO_TEMP $GIT_REPO/ &> /dev/null
   # Create tmp dir
-  mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
+  mkdir -p "$REPO_TEMP/$GIT_REPO/tmp"
 fi
 
 
@@ -62,9 +71,10 @@ fi
 #   # Create tmp dir
 #   mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
 # fi
-if [ ! -d ${REPO_PATH}/${GIT_REPO} ]; then
+if [ ! -d "$REPO_PATH/$GIT_REPO" ]
+then
   # Git clone
-  git clone --recurse-submodules https://github.com/${GIT_USER}/${GIT_REPO}.git
+  git clone --recurse-submodules https://github.com/$GIT_USER/${GIT_REPO}.git
   # # Download Repo packages
   # wget -qL - ${GIT_SERVER}/${GIT_USER}/${GIT_REPO}/archive/${GIT_BRANCH}.tar.gz -O ${REPO_TEMP}/${GIT_REPO}.tar.gz
   # tar -zxf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP}
@@ -78,8 +88,9 @@ if [ ! -d ${REPO_PATH}/${GIT_REPO} ]; then
   # chmod -R 777 ${REPO_TEMP}/${GIT_REPO}/common
   # Create new tar files
   # rm ${REPO_TEMP}/${GIT_REPO}.tar.gz
-  chmod -R 777 ${REPO_TEMP}/${GIT_REPO}
-  tar --exclude=".*" -czf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP} ${GIT_REPO}/
+  chmod -R 777 "$REPO_TEMP/$GIT_REPO"
+  tar --exclude=".*" -czf $REPO_TEMP/${GIT_REPO}.tar.gz -C $REPO_TEMP $GIT_REPO/
   # Create tmp dir
-  mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
+  mkdir -p "$REPO_TEMP/$GIT_REPO/tmp"
 fi
+#-----------------------------------------------------------------------------------
