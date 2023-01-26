@@ -879,6 +879,24 @@ function edit_config_value() {
   fi
 }
 
+#---- Get, Add or Modify JSON configuration file values
+
+# Edit json file value
+edit_json_value() {
+  # Usage: edit_json_value config.json name "Jane"
+  # Check for jq SW
+  if [[ ! $(dpkg -s jq 2>/dev/null) ]]
+  then
+    apt-get install jq -yqq
+  fi
+
+  local file=$1
+  local key=$2
+  local value=$3
+  tmp_file=$(mktemp)
+  jq ".$key = \"$value\"" $file > $tmp_file && mv $tmp_file $file
+}
+
 #---- SMTP checks
 
 # Check PVE host SMTP status
