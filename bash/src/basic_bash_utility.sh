@@ -32,7 +32,7 @@ printf '\033[8;40;120t'
 function pct_stop_systemctl() {
   # Usage: pct_stop_systemctl "name.service"
   local service_name="$1"
-  if [ "$(systemctl is-active $service_name)" = 'inactive' ]
+  if [ "$(systemctl is-active $service_name)" = 'active' ]
   then
     # Stop service
     sudo systemctl stop $service_name
