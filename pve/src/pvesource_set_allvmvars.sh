@@ -156,37 +156,7 @@ function valid_gw() {
   return $stat
 }
 
-# Check Hostname availability status
-# function valid_hostname() {
-#   local  name=$1
-#   local  stat=1
-#   # Run function
-#   if [[ $name =~ ${hostname_regex} ]] && [[ ! $name =~ ^(pve).*$ ]] && [[ ! $(grep -h -Po 'hostname: \K[^/]*' /etc/pve/lxc/* 2> /dev/null | grep "^${name}$") ]] && [[ ! $(grep -h -Po 'name: \K[^/]*' /etc/pve/qemu-server/* 2> /dev/null | grep "^${name}$") ]] && [[ ! $name == $(echo $(hostname) | awk '{ print tolower($0) }') ]] && [ ! $(ping -s 1 -c 2 ${name} > /dev/null; echo $?) == '0' ]; then
-#     stat=$?
-#   fi
-#   return $stat
-# }
-
-function valid_hostname() {
-  local  name=$1
-  local  stat=1
-  # Check if hostname is set
-  if [ ! -n "${HOSTNAME}" ]; then
-    local  HOSTNAME=$(echo $name | sed -E 's/(\-|\.)[0-9]+$//')
-  fi
-  # Run function
-  if [[ $name =~ ${hostname_regex} ]] && \
-  [[ $(echo $name | sed -E 's/(\-|\.)[0-9]+$//') =~ $(echo $HOSTNAME | sed -E 's/(\-|\.)[0-9]+$//') ]] && \
-  [[ ! $name =~ ^(pve).*$ ]] && \
-  [[ ! $(pct list | awk '{if (NR!=1) { print $NF }}' 2> /dev/null | grep "^${name}$") ]] && \
-  [[ ! $(qm list | awk '{ if (NR!=1) { print $2 }}' 2> /dev/null | grep "^${name}$") ]] && \
-  [[ ! $name == $(echo $(hostname) | awk '{ print tolower($0) }') ]] && \
-  [ ! $(ping -s 1 -c 2 ${name} 2> /dev/null; echo $?) == '0' ]; then
-    stat=$?
-  fi
-  return $stat
-}
-
+# Check hostname availability
 function valid_hostname() {
   local name="$1"
   local stat=1
@@ -837,7 +807,8 @@ while true; do
   --  a name that begins with 'pve' is not allowed.\n
   Try again..."
   PASS_MSG="Hostname is set: ${YELLOW}${NEW_HOSTNAME}${NC}"
-  result=$(valid_hostname ${NEW_HOSTNAME} > /dev/null 2>&1)
+  # result=$(valid_hostname ${NEW_HOSTNAME} > /dev/null 2>&1)
+  valid_hostname "$NEW_HOSTNAME"
   if [ $? == 0 ]; then
 		info "$PASS_MSG"
     HOSTNAME=${NEW_HOSTNAME,,}
