@@ -187,6 +187,32 @@ function valid_hostname() {
   return $stat
 }
 
+function valid_hostname() {
+  local name="$1"
+  local stat=1
+  # Usage: valid_hostname "deluge"
+  # Results: '0' means hostname is available, '1' means it already exists
+
+  # Check if hostname is set. If not substitute func arg
+  if [ ! -n "$HOSTNAME" ]
+  then
+    local HOSTNAME=$(echo "$name" | sed -E 's/(\-|\.)[0-9]+$//')
+  fi
+
+  # Run function
+  if [[ "$name" =~ ${hostname_regex} ]] && \
+  [[ "$(echo "$name" | sed -E 's/(\-|\.)[0-9]+$//')" =~ $(echo "$HOSTNAME" | sed -E 's/(\-|\.)[0-9]+$//') ]] && \
+  [[ ! "$name" =~ ^(pve).*$ ]] && \
+  [[ ! $(pct list | awk '{if (NR!=1) { print $NF }}' 2> /dev/null | grep "^${name}$") ]] && \
+  [[ ! $(qm list | awk '{ if (NR!=1) { print $2 }}' 2> /dev/null | grep "^${name}$") ]] && \
+  [[ ! "$name" == $(echo $(hostname) | awk '{ print tolower($0) }') ]] && \
+  [[ ! "$(ping -s 1 -c 2 $name &> /dev/null; echo $?)" == 0 ]]
+  then
+    stat=$?
+  fi
+  return $stat
+}
+
 # Check DNS status
 function valid_dns() {
   local  ip=$1
@@ -487,7 +513,8 @@ while true; do
   msg "Performing 'Easy Script' installation..."
 
   # Hostname validation
-  result=$(valid_hostname ${HOSTNAME} > /dev/null 2>&1)
+  # result=$(valid_hostname ${HOSTNAME} > /dev/null 2>&1)
+  valid_hostname "$HOSTNAME"
   if [ $? -ne 0 ]; then
 		info "$FAIL_MSG"
     echo
