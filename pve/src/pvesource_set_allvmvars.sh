@@ -163,7 +163,7 @@ function valid_hostname() {
   # Usage: valid_hostname "deluge"
   # Results: '0' means hostname is available, '1' means it already exists
 
-  # Check if hostname is set. If not substitute func arg
+  # # Check if hostname is set. If not substitute func arg
   if [ ! -n "$HOSTNAME" ]
   then
     local HOSTNAME=$(echo "$name" | sed -E 's/(\-|\.)[0-9]+$//')
@@ -171,10 +171,10 @@ function valid_hostname() {
 
   # Run function
   if [[ "$name" =~ ${hostname_regex} ]] && \
-  [[ "$(echo "$name" | sed -E 's/(\-|\.)[0-9]+$//')" =~ $(echo "$HOSTNAME" | sed -E 's/(\-|\.)[0-9]+$//') ]] && \
   [[ ! "$name" =~ ^(pve).*$ ]] && \
   [[ ! $(pct list | awk '{if (NR!=1) { print $NF }}' 2> /dev/null | grep "^${name}$") ]] && \
   [[ ! $(qm list | awk '{ if (NR!=1) { print $2 }}' 2> /dev/null | grep "^${name}$") ]] && \
+  [[ "$(echo "$name" | sed -E 's/(\-|\.)[0-9]+$//')" =~ $(echo "$HOSTNAME" | sed -E 's/(\-|\.)[0-9]+$//') ]] && \
   [[ ! "$name" == $(echo $(hostname) | awk '{ print tolower($0) }') ]] && \
   [[ ! "$(ping -s 1 -c 2 $name &> /dev/null; echo $?)" == 0 ]]
   then
@@ -182,6 +182,7 @@ function valid_hostname() {
   fi
   return $stat
 }
+
 
 # Check DNS status
 function valid_dns() {
@@ -790,14 +791,17 @@ section "Manual variable setting"
 
 msg "Setting hostname..."
 # Check if hostname is a ES preset
-if [ -n "${HOSTNAME}" ]; then
-  PRESET_HOSTNAME=$HOSTNAME
+if [ -n "${HOSTNAME}" ]
+then
+  preset_hostname=$HOSTNAME
 fi
-while true; do
-  read -p "Enter a Hostname: " -e -i ${PRESET_HOSTNAME} NEW_HOSTNAME
-  NEW_HOSTNAME=${NEW_HOSTNAME,,}
+# Set a new hostname
+while true
+do
+  read -p "Enter a Hostname: " -e -i $preset_hostname new_hostname
+  new_hostname=${new_hostname,,}
   FAIL_MSG="The hostname is not valid. A valid hostname is when all of the following constraints are satisfied:
-  $(if [ -n "${PRESET_HOSTNAME}" ]; then echo -e "\n  --  it begins with our repo name '$(echo ${PRESET_HOSTNAME} | sed -E 's/(\-|\.)[0-9]+$//')'."; else echo -e "\n"; fi)
+  $(if [ -n "${preset_hostname}" ]; then echo -e "\n  --  it begins with our repo name '$(echo "$preset_hostname" | sed -E 's/(\-|\.)[0-9]+$//')'."; else echo -e "\n"; fi)
   --  it does not exist on the network.
   --  it contains only lowercase characters.
   --  it may include numerics, hyphens (-) and periods (.) but not start or end with them.
@@ -806,22 +810,22 @@ while true; do
   --  it doesn't contain any white space.
   --  a name that begins with 'pve' is not allowed.\n
   Try again..."
-  PASS_MSG="Hostname is set: ${YELLOW}${NEW_HOSTNAME}${NC}"
-  # result=$(valid_hostname ${NEW_HOSTNAME} > /dev/null 2>&1)
-  valid_hostname "$NEW_HOSTNAME"
-  if [ $? == 0 ]; then
+  PASS_MSG="Hostname is set: ${YELLOW}$new_hostname${NC}"
+  # Validate hostname
+  valid_hostname "$new_hostname"
+  if [ $? = 0 ]; then
 		info "$PASS_MSG"
-    HOSTNAME=${NEW_HOSTNAME,,}
+    HOSTNAME="$new_hostname"
     echo
     break
-  elif [ $? != 0 ]; then
+  elif [ ! $? = 0 ]; then
 		warn "$FAIL_MSG"
     echo
 	fi
 done
 
 #---- Select a network bridge
-unset vmbr_LIST
+vmbr_LIST=()
 vmbr_LIST=($(grep -E '^\s?\iface vmbr[0-9].*' /etc/network/interfaces | grep -oP 'vmbr[0-9]'))
 if [ -n "${BRIDGE}" ]; then
   BRIDGE='vmbr0'
