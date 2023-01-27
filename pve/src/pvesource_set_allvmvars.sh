@@ -1061,7 +1061,7 @@ then
       warn "The IPv4 address '$IP_VAR' is set for VLAN $(echo "$IP_VAR" | awk -F'.' '{print $3}'). Network VLAN is currently set as disabled. Try again..."
       echo
       break
-    elif [[ "$IP_VAR "=~ ${ip4_regex} ]] && [ ! "$TAG" = 0 ] && [ ! "$(echo "$IP_VAR" | awk -F'.' '{print $3}')" = $TAG ]
+    elif [[ "$IP_VAR" =~ ${ip4_regex} ]] && [ ! "$TAG" = 0 ] && [ ! "$(echo "$IP_VAR" | awk -F'.' '{print $3}')" = $TAG ]
     then
       warn "The IPv4 address '$IP_VAR' third octet '$(echo "$IP_VAR" | awk -F'.' '{print $3}')' does not match your VLAN ID ${TAG}. This installer script always sets the third IPv4 octet to match the VLAN number. Try again..."
       echo
