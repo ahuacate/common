@@ -8,11 +8,13 @@
 #---- Dependencies -----------------------------------------------------------------
 
 function pct_start_waitloop () {
-  if [ "$(pct status $CTID)" == "status: stopped" ]; then
+  if [ "$(pct status $CTID)" = 'status: stopped' ]
+  then
     msg "Starting CT $CTID..."
     pct start $CTID
     msg "Waiting to hear from CT $CTID..."
-    while ! ping -s 1 -c 2 "$CT_IP" > /dev/null; do
+    while ! ping -s 1 -c 2 "$CT_IP" > /dev/null
+    do
         echo -n .
     done
     sleep 1
@@ -42,3 +44,4 @@ msg "Creating ${OSTYPE^} CT default users..."
 pct exec $CTID -- bash -c 'if [ $(id -u media &>/dev/null; echo $?) = 1 ]; then useradd -u 1605 -g medialab -s /bin/bash -m media >/dev/null; fi'
 info "User created: ${YELLOW}'media'${NC} of Group 'medialab'"
 echo
+#-----------------------------------------------------------------------------------

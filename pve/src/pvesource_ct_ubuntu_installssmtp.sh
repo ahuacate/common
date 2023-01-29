@@ -7,13 +7,13 @@
 #---- Source -----------------------------------------------------------------------
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-COMMON_PVE_SOURCE="${DIR}"
+COMMON_PVE_SOURCE="$DIR"
 
 
 #---- Dependencies -----------------------------------------------------------------
 
 # Run Bash Header
-source ${DIR}/pvesource_bash_defaults.sh
+source $DIR/pvesource_bash_defaults.sh
 
 ipvalid() {
   # Set up local variables
@@ -63,7 +63,8 @@ SSMTP is a simple Mail Transfer Agent (MTA). SSMTP is not a mail server. While e
       
 If you choose to proceed have your smtp server credentials available."
 echo
-while true; do
+while true
+do
   read -p "Install and configure Postfix SSMTP [y/n]?: " -n 1 -r YN
   echo
   case $YN in
@@ -87,19 +88,22 @@ while true; do
 done
 
 #---- Installing SSMTP
-if [ ${INSTALL_SSMTP} = 0 ]; then
+if [ "$INSTALL_SSMTP" = 0 ]
+then
 #---- Checking Prerequisites
 section "Checking Prerequisites."
 
 msg "Checking SSMTP status..."
-if [ $(dpkg -s ssmtp >/dev/null 2>&1; echo $?) = 0 ]; then
+if [ "$(dpkg -s ssmtp >/dev/null 2>&1; echo $?)" = 0 ]
+then
   info "SSMTP status: ${GREEN}active (running).${NC}"
 else
   msg "Installing SSMTP (be patient, might take a long, long time)..."
   apt-get install ssmtp -y >/dev/null
   apt-get install sharutils -y >/dev/null
   sleep 1
-  if [ $(dpkg -s ssmtp >/dev/null 2>&1; echo $?) = 0 ]; then
+  if [ "$(dpkg -s ssmtp >/dev/null 2>&1; echo $?)" = 0 ]
+  then
     info "SSMTP status: ${GREEN}active (running).${NC}"
   else
     warn "SSMTP status: ${RED}inactive or cannot install (dead).${NC}.\nUser intervention is required.\nExiting installation script in 3 seconds..."
@@ -165,7 +169,8 @@ done
 
 # Notification about SMTP server settings
 msg "In the next steps the User must enter the ( $SSMTP_ADDRESS ) server authorised username and password credentials."
-if [[ ${SSMTP_ADDRESS,,} == *"gmail"* ]]; then
+if [[ ${SSMTP_ADDRESS,,} == *"gmail"* ]]
+then
   msg "Required actions when using GMail SMTP servers:
 
     1. Open your Google Account.
@@ -173,7 +178,8 @@ if [[ ${SSMTP_ADDRESS,,} == *"gmail"* ]]; then
     3. A pop-up window will appear to confirm that you want to turn off 2-Step Verification. Select 'Turn off'.
     4. Allow Less secure app access. If you do not use 2-Step Verification, you might need to allow less secure apps to access your account."
   echo
-elif [[ ${SSMTP_ADDRESS,,} == *"mailgun"* ]]; then
+elif [[ ${SSMTP_ADDRESS,,} == *"mailgun"* ]]
+then
   msg "Required actions when using MailGun SMTP servers:
 
     1. Do NOT use your MailGun account username and passwords.
@@ -196,15 +202,18 @@ info "SMTP authorised user is set: ${YELLOW}$SSMTP_AUTHUSER${NC}."
 echo
 
 # SMTP server authorised password
-while true; do
+while true
+do
   read -p "Enter SMTP server password: " SSMTP_AUTHPASS
   echo
   read -p "Confirmation. Retype SMTP server password (again): " SSMTP_AUTHPASS_CHECK
   msg "Validating your SMTP server password..."
-  if [ "$SSMTP_AUTHPASS" = "$SSMTP_AUTHPASS_CHECK" ];then
+  if [ "$SSMTP_AUTHPASS" = "$SSMTP_AUTHPASS_CHECK" ]
+  then
     info "SMTP server password is set: ${YELLOW}$SSMTP_AUTHPASS${NC}."
     break
-  elif [ "$SSMTP_AUTHPASS" != "$SSMTP_AUTHPASS_CHECK" ]; then
+  elif [ "$SSMTP_AUTHPASS" != "$SSMTP_AUTHPASS_CHECK" ]
+  then
     warn "Your inputs ${RED}$SSMTP_AUTHPASS${NC} and ${RED}$SSMTP_AUTHPASS_CHECK${NC} do NOT match.\nTry again..."
   fi
 done
@@ -262,23 +271,27 @@ AuthPass=$SSMTP_AUTHPASS
 
 EOF
 msg "Configuring /etc/ssmtp/revaliases..."
-if [ $(grep -q "root:$SSMTP_EMAIL:$SSMTP_ADDRESS:$SSMTP_PORT" /etc/ssmtp/revaliases; echo $?) -eq 1 ]; then
+if [ "$(grep -q "root:$SSMTP_EMAIL:$SSMTP_ADDRESS:$SSMTP_PORT" /etc/ssmtp/revaliases; echo $?)" = 1 ]
+then
   echo "root:$SSMTP_EMAIL:$SSMTP_ADDRESS:$SSMTP_PORT" >> /etc/ssmtp/revaliases
 fi
 
 # Modify /etc/ssmtp/ssmtp.conf for gmail smtp servers
-if [[ ${SSMTP_ADDRESS,,} == *"gmail"* ]]; then
+if [[ ${SSMTP_ADDRESS,,} == *"gmail"* ]]
+then
   msg "Modifying /etc/ssmtp/ssmtp.conf for GMail servers..."
   sed -i 's|rewritedomain.*|rewriteDomain=gmail.com|g' /etc/ssmtp/ssmtp.conf
   sed -i 's|#AuthMethod.*|AuthMethod=LOGIN|g' /etc/ssmtp/ssmtp.conf
 fi
 # Modify /etc/ssmtp/ssmtp.conf for amazonaws smtp servers
-if [[ ${SSMTP_ADDRESS,,} == *"amazon"* ]]; then
+if [[ ${SSMTP_ADDRESS,,} == *"amazon"* ]]
+then
   msg "Modifying /etc/ssmtp/ssmtp.conf for AmazonAWS servers..."
   sed -i 's|UseSTARTTLS.*|#UseSTARTTLS=yes|g' /etc/ssmtp/ssmtp.conf
 fi
 # Modify /etc/ssmtp/ssmtp.conf for godaddy smtp servers
-if [[ ${SSMTP_ADDRESS,,} == *"secureserver.net"* ]]; then
+if [[ ${SSMTP_ADDRESS,,} == *"secureserver.net"* ]]
+then
   msg "Modifying /etc/ssmtp/ssmtp.conf for GoDaddy servers..."
   sed -i 's|UseSTARTTLS.*|#UseSTARTTLS=yes|g' /etc/ssmtp/ssmtp.conf
 fi
@@ -301,7 +314,8 @@ Any $SSMTP_EMAIL email found in your spam folder must be whitelisted as 'safe'. 
 
 If you choose NOT to send a test email then: (1) SSMTP settings are configured but not tested; and, (2) Any edits must be done by the system administrator (i.e edit  /etc/ssmtp/ssmtp.conf )."
 echo
-while true; do
+while true
+do
   read -p "Do you want to send a test email to $SSMTP_EMAIL [y/n]?: "  -n 1 -r YN
   echo
   case $YN in
@@ -313,7 +327,8 @@ while true; do
       echo
       msg "Check the administrators mailbox ( $SSMTP_EMAIL ) to ensure the test email was delivered. Note: check the administrators spam folder and whitelist any test email found there."
       echo
-      while true; do
+      while true
+      do
         read -p "Confirm receipt of the test email message [y/n]?: " -n 1 -r YN
         echo
         case $YN in
@@ -322,7 +337,8 @@ while true; do
             break 3
             ;;
           [Nn]*)
-            while true; do
+            while true
+            do
               read -p "Do you want to re-input your credentials (again) [y/n]?: " -n 1 -r YN
               echo
               case $YN in
@@ -364,76 +380,89 @@ echo
 
 #---- Setup Webmin Email Service
 # First check if Webmin is installed
-if [ $(dpkg -s webmin >/dev/null 2>&1; echo $?) = 0 ]; then
+if [ "$(dpkg -s webmin >/dev/null 2>&1; echo $?)" = 0 ]
+then
   section "Configure Webmin SendMail"
   echo
   # Configuring Webmin mail send mode
-  if [ $(grep -q "send_mode=" /etc/webmin/mailboxes/config; echo $?) -eq 0 ]; then
+  if [ "$(grep -q "send_mode=" /etc/webmin/mailboxes/config; echo $?)" = 0 ]
+  then
     msg "Configuring Webmin mail send mode /etc/webmin/mailboxes/config..."
     sed -i "s|send_mode=.*|send_mode=$SSMTP_ADDRESS|g" /etc/webmin/mailboxes/config
     info "Webmin mail send mode status : ${GREEN}Set${NC}"
     echo
-  elif [ $(grep -q "send_mode=" /etc/webmin/mailboxes/config; echo $?) -eq 1 ]; then
+  elif [ "$(grep -q "send_mode=" /etc/webmin/mailboxes/config; echo $?)" = 1 ]
+  then
     msg "Configuring Webmin mail send mode /etc/webmin/mailboxes/config..."
     echo "send_mode=$SSMTP_ADDRESS" >> /etc/webmin/mailboxes/config
     info "Webmin mail send mode status : ${GREEN}Set${NC}"
     echo
   fi
   # Configuring Webmin mail ssl
-  if [ $(grep -q "smtp_ssl=1" /etc/webmin/mailboxes/config; echo $?) -eq 0 ]; then
+  if [ "$(grep -q "smtp_ssl=1" /etc/webmin/mailboxes/config; echo $?)" = 0 ]
+  then
     msg "Configuring Webmin mail ssl /etc/webmin/mailboxes/config..."
     sed -i "s|smtp_ssl=.*|smtp_ssl=1|g" /etc/webmin/mailboxes/config
     info "Webmin mail ssl status : ${GREEN}Enabled${NC}"
     echo
-  elif [ $(grep -q "smtp_ssl=1" /etc/webmin/mailboxes/config; echo $?) -eq 1 ]; then
+  elif [ "$(grep -q "smtp_ssl=1" /etc/webmin/mailboxes/config; echo $?)" = 1 ]
+  then
     msg "Configuring Webmin mail ssl /etc/webmin/mailboxes/config..."
     echo "smtp_ssl=1" >> /etc/webmin/mailboxes/config
     info "Webmin mail ssl status : ${GREEN}Enabled${NC}"
     echo
   fi
   # Configuring Webmin mail smtp port
-  if [ $(grep -q "smtp_port=465" /etc/webmin/mailboxes/config; echo $?) -eq 0 ]; then
+  if [ "$(grep -q "smtp_port=465" /etc/webmin/mailboxes/config; echo $?)" = 0 ]
+  then
     msg "Configuring Webmin mail smtp port /etc/webmin/mailboxes/config..."
     sed -i "s|smtp_port=.*|smtp_port=465|g" /etc/webmin/mailboxes/config
     info "Webmin mail smtp port : ${GREEN}465${NC}"
     echo
-  elif [ $(grep -q "smtp_port=465" /etc/webmin/mailboxes/config; echo $?) -eq 1 ]; then
+  elif [ "$(grep -q "smtp_port=465" /etc/webmin/mailboxes/config; echo $?)" = 1 ]
+  then
     msg "Configuring Webmin mail smtp port /etc/webmin/mailboxes/config..."
     echo "smtp_port=465" >> /etc/webmin/mailboxes/config
     info "Webmin mail smtp port : ${GREEN}465${NC}"
     echo
   fi
   # Configuring Webmin smtp username
-  if [ $(grep -q "smtp_user=$SSMTP_AUTHUSER" /etc/webmin/mailboxes/config; echo $?) -eq 0 ]; then
+  if [ "$(grep -q "smtp_user=$SSMTP_AUTHUSER" /etc/webmin/mailboxes/config; echo $?)" = 0 ]
+  then
     msg "Configuring Webmin smtp username /etc/webmin/mailboxes/config..."
     sed -i "s|smtp_user=.*|smtp_user=$SSMTP_AUTHUSER|g" /etc/webmin/mailboxes/config
     info "Webmin mail smtp username : ${GREEN}Set${NC}"
     echo
-  elif [ $(grep -q "smtp_user=$SSMTP_AUTHUSER" /etc/webmin/mailboxes/config; echo $?) -eq 1 ]; then
+  elif [ "$(grep -q "smtp_user=$SSMTP_AUTHUSER" /etc/webmin/mailboxes/config; echo $?)" = 1 ]
+  then
     msg "Configuring Webmin smtp username /etc/webmin/mailboxes/config..."
     echo "smtp_user=$SSMTP_AUTHUSER" >> /etc/webmin/mailboxes/config
     info "Webmin mail smtp username : ${GREEN}Set${NC}"
     echo
   fi
   # Configuring Webmin smtp authorised password
-  if [ $(grep -q "smtp_pass=$SSMTP_AUTHPASS" /etc/webmin/mailboxes/config; echo $?) -eq 0 ]; then
+  if [ "$(grep -q "smtp_pass=$SSMTP_AUTHPASS" /etc/webmin/mailboxes/config; echo $?)" = 0 ]
+  then
     msg "Configuring Webmin smtp authorised password /etc/webmin/mailboxes/config..."
     sed -i "s|smtp_pass=.*|smtp_pass=$SSMTP_AUTHPASS|g" /etc/webmin/mailboxes/config
     info "Webmin mail smtp authorised password : ${GREEN}Set${NC}"
     echo
-  elif [ $(grep -q "smtp_pass=$SSMTP_AUTHPASS" /etc/webmin/mailboxes/config; echo $?) -eq 1 ]; then
+  elif [ "$(grep -q "smtp_pass=$SSMTP_AUTHPASS" /etc/webmin/mailboxes/config; echo $?)" = 1 ]
+  then
     msg "Configuring Webmin smtp authorised password /etc/webmin/mailboxes/config..."
     echo "smtp_pass=$SSMTP_AUTHPASS" >> /etc/webmin/mailboxes/config
     info "Webmin mail smtp authorised password : ${GREEN}Set${NC}"
     echo
   fi
   # Configuring Webmin smtp authentication method
-  if [ $(grep -q "smtp_auth=Login" /etc/webmin/mailboxes/config; echo $?) -eq 0 ]; then
+  if [ "$(grep -q "smtp_auth=Login" /etc/webmin/mailboxes/config; echo $?)" = 0 ]
+  then
     msg "Configuring Webmin smtp authentication method /etc/webmin/mailboxes/config..."
     sed -i "s|smtp_auth=.*|smtp_auth=Login|g" /etc/webmin/mailboxes/config
     info "Webmin mail smtp authentication method : ${GREEN}Login${NC}"
     echo
-  elif [ $(grep -q "smtp_auth=Login" /etc/webmin/mailboxes/config; echo $?) -eq 1 ]; then
+  elif [ "$(grep -q "smtp_auth=Login" /etc/webmin/mailboxes/config; echo $?)" = 1 ]
+  then
     msg "Configuring Webmin smtp authentication method /etc/webmin/mailboxes/config..."
     echo "smtp_auth=Login" >> /etc/webmin/mailboxes/config
     info "Webmin mail smtp authentication method : ${GREEN}Login${NC}"
@@ -446,13 +475,16 @@ fi
 fi
 
 #---- Finish Line ------------------------------------------------------------------
-if [ ${INSTALL_SSMTP} == 0 ]; then
+if [ "$INSTALL_SSMTP" = 0 ]
+then
   section "Completion Status."
 
   msg "${WHITE}Success.${NC}"
   echo
 fi
 
-if [ -z "${PARENT_EXEC+x}" ]; then
+if [ -z "${PARENT_EXEC+x}" ]
+then
   trap cleanup EXIT
 fi
+#-----------------------------------------------------------------------------------

@@ -9,18 +9,19 @@
 #---- Dependencies -----------------------------------------------------------------
 #---- Static Variables -------------------------------------------------------------
 
-if [[ $(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_${APP_NAME}_chrootapplist$") ]]; then
+if [[ $(find "$DIR/" -type f -regex "^.*/$(echo "$GIT_REPO" | sed 's/-/_/').*\_${APP_NAME}_chrootapplist$") ]]
+then
   # Set command library source
-  CHROOT_APP_LIST="$(find "${DIR}/" -type f -regex "^.*/$(echo ${GIT_REPO} | sed 's/-/_/').*\_${APP_NAME}_chrootapplist$")"
+  CHROOT_APP_LIST="$(find "$DIR/" -type f -regex "^.*/$(echo "$GIT_REPO" | sed 's/-/_/').*\_${APP_NAME}_chrootapplist$")"
   # Chroot Home
   CHROOT='/home/chrootjail'
   # Enable/Disable SSHd
   SSHD_STATUS=0
 else
   # Set command library source
-  CHROOT_APP_LIST="${COMMON_PVE_SRC_DIR}/pvesource_ct_ubuntu_chrootapplist_default"
+  CHROOT_APP_LIST="$COMMON_PVE_SRC_DIR/pvesource_ct_ubuntu_chrootapplist_default"
   # Chroot Home
-  CHROOT="/srv/${HOSTNAME}/homes/chrootjail"
+  CHROOT="/srv/$HOSTNAME/homes/chrootjail"
   # Enable/Disable SSHd
   SSHD_STATUS=1
 fi
@@ -32,7 +33,8 @@ fi
 # Copy Binary & Dependents
 function copy_binary() {
   set +Ee
-  for i in $(ldd $* 2> /dev/null | grep -v dynamic | cut -d " " -f 3 | sed 's/://' | sort | uniq); do
+  for i in $(ldd $* 2> /dev/null | grep -v dynamic | cut -d " " -f 3 | sed 's/://' | sort | uniq)
+  do
     cp --parents $i $CHROOT
     #echo $i
   done
@@ -44,7 +46,8 @@ function copy_binary() {
 #---- Create SSH Chroot jail Environment
 section "Create SSH chroot environment"
 
-if [ $(grep -q "^chrootjail:" /etc/group >/dev/null; echo $?) -ne 0 ]; then
+if [ "$(grep -q "^chrootjail:" /etc/group >/dev/null; echo $?)" -ne 0 ]
+then
   msg "Creating CT default chrootjail group..."
 	groupadd -g 65608 chrootjail
   info "Default user group created: ${YELLOW}chrootjail${NC}"
@@ -62,7 +65,8 @@ ${CHROOT}/lib64
 ${CHROOT}/etc
 ${CHROOT}/usr
 )
-for dir in "${array1[@]}"; do
+for dir in "${array1[@]}"
+do
   [[ -d "$dir" ]] && rm -R "$dir"
 done
 mkdir -p $CHROOT/{homes,dev,bin,lib,lib/x86_64-linux-gnu,lib64,etc,lib/terminfo/x,usr,usr/bin}
@@ -87,14 +91,17 @@ cp -f -r /usr/lib/locale/* $CHROOT/usr/lib/locale >/dev/null
 
 # Copy binary libraries
 APPS="$(cat $CHROOT_APP_LIST | sed 's|$| |' | tr -d '\r\n' | sed 's/ *$//')"
-for prog in $APPS;  do
+for prog in $APPS
+do
   cp $prog $CHROOT/$prog
 
   # Obtain a list of related libraries
   ldd $prog > /dev/null
-  if [ "$?" = 0 ] ; then
+  if [ $? = 0 ]
+  then
     LIBS=`ldd $prog | awk '{ print $3 }'`
-    for l in $LIBS; do
+    for l in $LIBS
+    do
       mkdir -p $CHROOT/`dirname $l` > /dev/null 2>&1
       cp $l $CHROOT/$l
     done
@@ -106,15 +113,18 @@ done
 # done
 
 # ARCH amd64
-if [ -f /lib64/ld-linux-x86-64.so.2 ]; then
+if [ -f "/lib64/ld-linux-x86-64.so.2" ]
+then
    cp -f --parents /lib64/ld-linux-x86-64.so.2 $CHROOT >/dev/null
 fi
 # ARCH i386
-if [ -f  /lib/ld-linux.so.2 ]; then
+if [ -f "/lib/ld-linux.so.2" ]
+then
    cp -f --parents /lib/ld-linux.so.2 $CHROOT >/dev/null
 fi
 # Xterm for nano
-if [ $(cat $CHROOT_APP_LIST | grep '/bin/nano' > /dev/null; echo $?) = 0 ] && [ -d  /lib/terminfo/x ]; then
+if [ "$(cat $CHROOT_APP_LIST | grep '/bin/nano' > /dev/null; echo $?)" = 0 ] && [ -d "/lib/terminfo/x" ]
+then
    cp -r /lib/terminfo/x/* $CHROOT/lib/terminfo/x/ >/dev/null
 fi
 info "Chroot jail created.\nCommand libraries for chroot jail have been copied."
@@ -125,7 +135,8 @@ section "Setup Chroot SSHd server"
 
 # Stopping SSHd
 msg "Configuring sshd default settings..."
-if [ "$(systemctl is-active --quiet sshd; echo $?) -eq 0" ]; then
+if [ "$(systemctl is-active --quiet sshd; echo $?)" -eq 0 ]
+then
   systemctl stop ssh 2>/dev/null
 fi
 
@@ -154,7 +165,8 @@ echo
 #---- Configure SSH Server
 section "Enable SSHd server"
 
-if [ $SSHD_STATUS = 0 ]; then
+if [ "$SSHD_STATUS" = 0 ]
+then
   # Starting SSHd
   msg "Enabling SSHD server..."
   systemctl stop ssh 2>/dev/null
@@ -163,12 +175,13 @@ if [ $SSHD_STATUS = 0 ]; then
   systemctl restart ssh 2>/dev/null
   systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - ${YELLOW}port ${SSH_PORT}${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead).${NC} - port ${SSH_PORT}"
 else
-  while true; do
+  while true
+  do
     read -p "Enable SSH Server (Recommended) [y/n]? " -n 1 -r YN
     echo
     case $YN in
       [Yy]*)
-        read -p "Confirm SSH Port number: " -e -i ${SSH_PORT} SSH_PORT
+        read -p "Confirm SSH Port number: " -e -i $SSH_PORT SSH_PORT
         msg "Enabling SSHD server..."
         SSHD_STATUS=0
         systemctl stop ssh 2>/dev/null
@@ -198,5 +211,5 @@ else
 fi
 
 #---- Finish
-info "Success. Chroot Jail has been configured.\n  --  SSHd Status: $(if [ $SSHD_STATUS = 0 ]; then echo "${GREEN}active (running)${NC}"; else echo "${RED}inactive (dead)${NC}"; fi)\n  --  Monitored SSH Port: ${YELLOW}${SSH_PORT}${NC}\n"
+info "Success. Chroot Jail has been configured.\n  --  SSHd Status: $(if [ "$SSHD_STATUS" = 0 ]; then echo "${GREEN}active (running)${NC}"; else echo "${RED}inactive (dead)${NC}"; fi)\n  --  Monitored SSH Port: ${YELLOW}$SSH_PORT${NC}\n"
 #-----------------------------------------------------------------------------------

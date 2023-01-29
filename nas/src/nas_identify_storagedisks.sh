@@ -9,8 +9,10 @@
 #---- Dependencies -----------------------------------------------------------------
 
 # Clean out inactive /etc/fstab mounts
-while read target; do
-  if [[ ! $(findmnt ${target} -n -o source) ]]; then
+while read target
+do
+  if [[ ! $(findmnt ${target} -n -o source) ]]
+  then
     msg "Deleting inactive mount point..."
     sed -i "\|${target}|d" /etc/fstab
     info "Deleted inactive mount point: ${YELLOW}${target}${NC}"
@@ -21,13 +23,16 @@ done < <( cat /etc/fstab | awk '$2 ~ /^\/mnt\/.*/ {print $2}' ) # /mnt mount poi
 # Install PVE USB auto mount
 function install_usbautomount () {
   PVE_VERS=$(pveversion -v | grep 'proxmox-ve:*' | awk '{ print $2 }' | sed 's/\..*$//')
-  if [ ${PVE_VERS} = 6 ]; then
+  if [ "$PVE_VERS" = 6 ]
+  then
     # Remove old version
-    if [ $(dpkg -l pve[0-9]-usb-automount >/dev/null 2>&1; echo $?) = 0 ] && [ $(dpkg -l pve6-usb-automount >/dev/null 2>&1; echo $?) != 0 ]; then
+    if [ "$(dpkg -l pve[0-9]-usb-automount >/dev/null 2>&1; echo $?)" = 0 ] && [ ! "$(dpkg -l pve6-usb-automount >/dev/null 2>&1; echo $?)" = 0 ]
+    then
       apt-get remove --purge pve[0-9]-usb-automount -y > /dev/null
     fi
     # Install new version
-    if [ $(dpkg -l pve6-usb-automount >/dev/null 2>&1; echo $?) != 0 ]; then
+    if [ ! $(dpkg -l pve6-usb-automount >/dev/null 2>&1; echo $?) = 0 ]
+    then
       msg "Installing PVE USB automount..."
       apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2FAB19E7CCB7F415 &> /dev/null
       echo "deb https://apt.iteas.at/iteas buster main" > /etc/apt/sources.list.d/iteas.list
@@ -43,19 +48,23 @@ function install_usbautomount () {
         trap cleanup EXIT
       fi
     fi
-  elif [ ${PVE_VERS} = 7 ]; then
+  elif [ "$PVE_VERS" = 7 ]
+  then
     # Remove old version
-    if [ $(dpkg -l pve[0-9]-usb-automount >/dev/null 2>&1; echo $?) = 0 ] && [ $(dpkg -l pve7-usb-automount >/dev/null 2>&1; echo $?) != 0 ]; then
+    if [ $(dpkg -l pve[0-9]-usb-automount >/dev/null 2>&1; echo $?) = 0 ] && [ ! $(dpkg -l pve7-usb-automount >/dev/null 2>&1; echo $?) = 0 ]
+    then
       apt-get remove --purge pve[0-9]-usb-automount -y > /dev/null
     fi
     # Install new version
-    if [ $(dpkg -l pve7-usb-automount >/dev/null 2>&1; echo $?) != 0 ]; then
+    if [ ! $(dpkg -l pve7-usb-automount >/dev/null 2>&1; echo $?) = 0 ]
+    then
       msg "Installing PVE USB automount..."
       apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2FAB19E7CCB7F415 &> /dev/null
       echo "deb https://apt.iteas.at/iteas bullseye main" > /etc/apt/sources.list.d/iteas.list
       apt-get -qq update > /dev/null
       apt-get install pve7-usb-automount -y > /dev/null
-      if [ $(dpkg -l pve7-usb-automount >/dev/null 2>&1; echo $?) = 0 ]; then
+      if [ $(dpkg -l pve7-usb-automount >/dev/null 2>&1; echo $?) = 0 ]
+      then
         info "PVE USB Automount status: ${GREEN}ok${NC} ( fully installed )"
         echo
       else
@@ -65,7 +74,8 @@ function install_usbautomount () {
         trap cleanup EXIT
       fi
     fi
-  elif [ ${PVE_VERS} -lt 6 ]; then
+  elif [ "$PVE_VERS" -lt 6 ]
+  then
     warn "There are problems with the installation:\n\n      1. This installation requires Proxmox version 6 or later. To continue you must first upgrade your Proxmox host.\n\n      Exiting installation in 3 second. Bye..."
     sleep 2
     echo
@@ -77,17 +87,19 @@ function install_usbautomount () {
 function reset_usb() {
   msg "Resetting USB devices..."
   # USB 3.1 Only
-  for port in $(lspci | grep xHCI | cut -d' ' -f1); do
-    echo -n "0000:${port}"| tee /sys/bus/pci/drivers/xhci_hcd/unbind > /dev/null
+  for port in $(lspci | grep xHCI | cut -d' ' -f1)
+  do
+    echo -n "0000:$port"| tee /sys/bus/pci/drivers/xhci_hcd/unbind > /dev/null
     sleep 5
-    echo -n "0000:${port}" | tee /sys/bus/pci/drivers/xhci_hcd/bind > /dev/null
+    echo -n "0000:$port" | tee /sys/bus/pci/drivers/xhci_hcd/bind > /dev/null
     sleep 5
   done
   # All USB
-  for port in $(lspci | grep USB | cut -d' ' -f1); do
-    echo -n "0000:${port}"| tee /sys/bus/pci/drivers/xhci_hcd/unbind > /dev/null
+  for port in $(lspci | grep USB | cut -d' ' -f1)
+  do
+    echo -n "0000:$port"| tee /sys/bus/pci/drivers/xhci_hcd/unbind > /dev/null
     sleep 5
-    echo -n "0000:${port}" | tee /sys/bus/pci/drivers/xhci_hcd/bind > /dev/null
+    echo -n "0000:$port" | tee /sys/bus/pci/drivers/xhci_hcd/bind > /dev/null
     sleep 5
   done
   echo
@@ -98,32 +110,37 @@ function storage_list() {
   # 1=PATH:2=KNAME:3=PKNAME (or part cnt.):4=FSTYPE:5=TRAN:6=MODEL:7=SERIAL:8=SIZE:9=TYPE:10=ROTA:11=UUID:12=RM:13=LABEL:14=ZPOOLNAME:15=SYSTEM
   # PVE All Disk array
   # Output printf '%s\n' "${allSTORAGE[@]}"
-  unset allSTORAGE
+  allSTORAGE=()
   existing_pt_LIST=()
   # Suppress warnings
   export LVM_SUPPRESS_FD_WARNINGS=1
-  while read -r line; do
+  while read -r line
+  do
     #---- Set dev
-    dev=$(echo $line | awk -F':' '{ print $1 }')
+    dev=$(echo "$line" | awk -F':' '{ print $1 }')
 
     #---- Check physical disk (inc. part parent disks) is exists in VM pass-through
-    if [[ ${dev} =~ ^/dev/(sd[a-z]|nvme[0-9]n[0-9]) ]]; then
+    if [[ "$dev" =~ ^/dev/(sd[a-z]|nvme[0-9]n[0-9]) ]]
+    then
       # If dev is a part
-      if [[ ${dev} =~ ^/dev/(sd[a-z][0-9]$|nvme[0-9]n[0-9]p[0-9]$) ]]; then
-        chk_dev="/dev/$(lsblk ${dev} -nbr -o PKNAME)"
-        tran=$(lsblk ${chk_dev} -nbr -o TRAN 2> /dev/null)
-        by_id=$(ls -l /dev/disk/by-id | grep -E "${tran}" | grep -w "$(echo ${chk_dev} | sed 's|^.*/||')" | awk '{ print $9 }')
+      if [[ "$dev" =~ ^/dev/(sd[a-z][0-9]$|nvme[0-9]n[0-9]p[0-9]$) ]]
+      then
+        chk_dev="/dev/$(lsblk $dev -nbr -o PKNAME)"
+        tran=$(lsblk $chk_dev -nbr -o TRAN 2> /dev/null)
+        by_id=$(ls -l /dev/disk/by-id | grep -E "$tran" | grep -w "$(echo "$chk_dev "| sed 's|^.*/||')" | awk '{ print $9 }')
       else
-        chk_dev=${dev}
-        tran=$(echo $line | awk -F':' '{ print $5 }')
-        by_id=$(ls -l /dev/disk/by-id | grep -E "${tran}" | grep -w "$(echo ${chk_dev} | sed 's|^.*/||')" | awk '{ print $9 }')
+        chk_dev="$dev"
+        tran=$(echo "$line" | awk -F':' '{ print $5 }')
+        by_id=$(ls -l /dev/disk/by-id | grep -E "$tran" | grep -w "$(echo "$chk_dev" | sed 's|^.*/||')" | awk '{ print $9 }')
       fi
       # Check for existing disk VM pass-through
-      while read -r chk_vmid; do
-        if [[ $(grep -w "/dev/disk/by-id/${by_id}" /etc/pve/qemu-server/${chk_vmid}.conf) ]]; then
+      while read -r chk_vmid
+      do
+        if [[ $(grep -w "/dev/disk/by-id/$by_id" /etc/pve/qemu-server/${chk_vmid}.conf) ]]
+        then
           # Create existing VM disk pass-through list (skipped)
-          size=$(lsblk -nbrd -o SIZE ${chk_dev} | awk '{ $1=sprintf("%.0f",$1/(1024^3))"G" } {print $0}')
-          model=$(lsblk -nbrd -o MODEL ${chk_dev})
+          size=$(lsblk -nbrd -o SIZE $chk_dev | awk '{ $1=sprintf("%.0f",$1/(1024^3))"G" } {print $0}')
+          model=$(lsblk -nbrd -o MODEL $chk_dev)
           existing_pt_LIST+=( "${chk_vmid}:${tran}:${chk_dev}:${model}:${size}" )
           continue 2
         fi
@@ -132,113 +149,136 @@ function storage_list() {
 
     #---- Set variables
     # Partition Cnt (Col 3)
-    if ! [[ $(echo $line | awk -F':' '{ print $3 }') ]] && [[ "$(echo "$line" | awk -F':' '{ if ($1 ~ /^\/dev\/sd[a-z]$/ || $1 ~ /^\/dev\/nvme[0-9]n[0-9]$/) { print "0" } }')" ]]; then
+    if ! [[ $(echo "$line" | awk -F':' '{ print $3 }') ]] && [[ "$(echo "$line" | awk -F':' '{ if ($1 ~ /^\/dev\/sd[a-z]$/ || $1 ~ /^\/dev\/nvme[0-9]n[0-9]$/) { print "0" } }')" ]]
+    then
       # var3=$(partx -g ${dev} | wc -l)
-      if [[ $(lsblk ${dev} | grep part) ]]; then
-        var3=$(lsblk ${dev} | grep part | wc -l)
+      if [[ $(lsblk $dev | grep part) ]]
+      then
+        var3=$(lsblk $dev | grep part | wc -l)
       else
         var3='0'
       fi
     else
-      var3=$(echo $line | awk -F':' '{ print $3 }')
+      var3=$(echo "$line" | awk -F':' '{ print $3 }')
     fi
 
     #---- ZFS_Members (Col 4)
-    if ! [[ $(echo $line | awk -F':' '{ print $4 }') ]] && [ "$(lsblk -nbr -o FSTYPE ${dev})" = "zfs_member" ] || [ "$(blkid -o value -s TYPE ${dev})" = "zfs_member" ]; then
+    if ! [[ $(echo "$line" | awk -F':' '{ print $4 }') ]] && [ "$(lsblk -nbr -o FSTYPE $dev)" = "zfs_member" ] || [ "$(blkid -o value -s TYPE $dev)" = "zfs_member" ]
+    then
       var4='zfs_member'
     else
-      var4=$(echo $line | awk -F':' '{ print $4 }')
+      var4=$(echo "$line" | awk -F':' '{ print $4 }')
     fi
 
     # Tran (Col 5)
-    if ! [[ $(echo $line | awk -F':' '{ print $5 }') ]] && [[ ${dev} =~ ^/dev/(sd[a-z]|nvme[0-9]n[0-9]) ]]; then
-      var5=$(lsblk -nbr -o TRAN /dev/"$(lsblk -nbr -o PKNAME ${dev} | grep 'sd[a-z]$\|nvme[0-9]n[0-9]$' | uniq | sed '/^$/d')" | uniq | sed '/^$/d')
-    elif [[ ${dev} =~ ^/dev/mapper ]] && [ $(lvs $dev &> /dev/null; echo $?) == '0' ]; then
+    if ! [[ $(echo "$line" | awk -F':' '{ print $5 }') ]] && [[ "$dev" =~ ^/dev/(sd[a-z]|nvme[0-9]n[0-9]) ]]
+    then
+      var5=$(lsblk -nbr -o TRAN /dev/"$(lsblk -nbr -o PKNAME $dev | grep 'sd[a-z]$\|nvme[0-9]n[0-9]$' | uniq | sed '/^$/d')" | uniq | sed '/^$/d')
+    elif [[ "$dev" =~ ^/dev/mapper ]] && [ $(lvs $dev &> /dev/null; echo $?) == '0' ]
+    then
       vg_var="$(lvs $dev --noheadings -o vg_name | sed 's/ //g')"
       device_var=$(pvs --noheadings -o pv_name,vg_name | sed  's/^[t ]*//g' | grep "$vg_var" | awk '{ print $1 }')
-      if [[ ${device_var} =~ ^/dev/(sd[a-z]$|nvme[0-9]n[0-9]$) ]]; then
-        device=$device_var
+      if [[ "$device_var" =~ ^/dev/(sd[a-z]$|nvme[0-9]n[0-9]$) ]]
+      then
+        device="$device_var"
       else
         device="/dev/$(lsblk -nbr -o PKNAME $device_var | grep 'sd[a-z]$\|nvme[0-9]n[0-9]$' | sed '/^$/d' | uniq)"
       fi
       var5=$(lsblk -nbr -o TRAN $device | sed '/^$/d')
     else
-      var5=$(echo $line | awk -F':' '{ print $5 }')
+      var5=$(echo "$line" | awk -F':' '{ print $5 }')
     fi
 
     # Size (Col 8)
-    var8=$(lsblk -nbrd -o SIZE ${dev} | awk '{ $1=sprintf("%.0f",$1/(1024^3))"G" } {print $0}')
+    var8=$(lsblk -nbrd -o SIZE $dev | awk '{ $1=sprintf("%.0f",$1/(1024^3))"G" } {print $0}')
     # Rota (Col 10)
-    if [[ $(hdparm -I ${dev} 2> /dev/null | awk -F':' '/Nominal Media Rotation Rate/ { print $2 }' | sed 's/ //g') == 'SolidStateDevice' ]]; then
+    if [[ $(hdparm -I $dev 2> /dev/null | awk -F':' '/Nominal Media Rotation Rate/ { print $2 }' | sed 's/ //g') == 'SolidStateDevice' ]]
+    then
       var10='0'
     else
       var10='1'
     fi
 
     # Zpool/LVM VG Name or Cnt (Col 14)
-    if [[ $(lsblk ${dev} -dnbr -o TYPE) == 'disk' ]] && [ ! "$(blkid -o value -s TYPE ${dev})" == 'LVM2_member' ]; then
+    if [[ $(lsblk $dev -dnbr -o TYPE) == 'disk' ]] && [ ! "$(blkid -o value -s TYPE $dev)" = 'LVM2_member' ]
+    then
       cnt=0
       var14=0
-      while read -r dev_line; do
-        if [ ! "$(blkid -o value -s TYPE ${dev_line})" == 'zfs_member' ] && [ ! "$(blkid -o value -s TYPE ${dev_line})" == 'LVM2_member' ]; then
+      while read -r dev_line
+      do
+        if [ ! "$(blkid -o value -s TYPE $dev_line)" = 'zfs_member' ] && [ ! "$(blkid -o value -s TYPE ${dev_line})" = 'LVM2_member' ]
+        then
           continue
         fi
         cnt=$((cnt+1))
         var14=$cnt
       done < <(lsblk -nbr ${dev} -o PATH)
-    elif [ $(lsblk ${dev} -dnbr -o TYPE) == 'part' ] && [ "$(blkid -o value -s TYPE ${dev})" == 'zfs_member' ]; then
-      var14=$(blkid -o value -s LABEL ${dev})
-    elif [[ $(lsblk ${dev} -dnbr -o TYPE) =~ (disk|part) ]] && [ "$(blkid -o value -s TYPE ${dev})" == 'LVM2_member' ]; then
+    elif [ "$(lsblk ${dev} -dnbr -o TYPE)" = 'part' ] && [ "$(blkid -o value -s TYPE ${dev})" = 'zfs_member' ]
+    then
+      var14=$(blkid -o value -s LABEL $dev)
+    elif [[ "$(lsblk ${dev} -dnbr -o TYPE)" =~ (disk|part) ]] && [ "$(blkid -o value -s TYPE ${dev})" = 'LVM2_member' ]
+    then
       var14=$(pvs --noheadings -o pv_name,vg_name | sed "s/^[ \t]*//" | grep $dev | awk '{ print $2 }')
-    elif [[ ${dev} =~ ^/dev/mapper ]] && [[ ! ${dev} =~ ^/dev/mapper/pve- ]] && [ $(lvs $dev &> /dev/null; echo $?) == '0' ]; then
+    elif [[ "$dev" =~ ^/dev/mapper ]] && [[ ! "$dev" =~ ^/dev/mapper/pve- ]] && [ $(lvs $dev &> /dev/null; echo $?) = 0 ]
+    then
       var14=$(lvs $dev --noheadings -a -o vg_name | sed 's/ //g')
-    elif [[ ${dev} =~ ^/dev/mapper/pve- ]]; then
-      var14=$(echo $dev | awk -F'/' '{print $NF}' | sed 's/\-.*$//')
+    elif [[ "$dev" =~ ^/dev/mapper/pve- ]]
+    then
+      var14=$(echo "$dev" | awk -F'/' '{print $NF}' | sed 's/\-.*$//')
     else
       var14='0'
     fi
 
     # System (Col 15)
-    if [[ $(df -hT | grep /$ | grep -w '^rpool/.*') ]]; then
+    if [[ $(df -hT | grep /$ | grep -w '^rpool/.*') ]]
+    then
       # ONLINE=$(zpool status rpool | grep -Po "\S*(?=\s*ONLINE)")
       ONLINE=$(zpool status rpool 2> /dev/null | grep -Po "\S*(?=\s*ONLINE|\s*DEGRADED)")
-      unset ROOT_DEV
-      while read -r pool; do
-        if ! [ -b "/dev/disk/by-id/${pool}" ]; then
+      ROOT_DEV=()
+      while read -r pool
+      do
+        if ! [ -b "/dev/disk/by-id/${pool}" ]
+        then
           continue
         fi
-        ROOT_DEV+=( $(readlink -f /dev/disk/by-id/${pool}) )
+        ROOT_DEV+=( $(readlink -f /dev/disk/by-id/$pool) )
       done <<< "$ONLINE"
-    elif [[ $(df -hT | grep /$ | grep -w '^/dev/.*') ]]; then
+    elif [[ $(df -hT | grep /$ | grep -w '^/dev/.*') ]]
+    then
       ROOT_DEV+=( $(df -hT | grep /$) )
     fi
-    if [[ $(fdisk -l ${dev} 2>/dev/null | grep -E '(BIOS boot|EFI System|Linux swap|Linux LVM)' | awk '{ print $1 }') ]] || [[ "${ROOT_DEV[*]}" =~ "${dev}" ]]; then
+    if [[ $(fdisk -l ${dev} 2>/dev/null | grep -E '(BIOS boot|EFI System|Linux swap|Linux LVM)' | awk '{ print $1 }') ]] || [[ "${ROOT_DEV[*]}" =~ "$dev" ]]
+    then
       var15='1'
-    elif [[ ${dev} =~ ^/dev/mapper/(pve-root|pve-data.*|pve-vm.*|pve-swap.*) ]]; then
+    elif [[ "$dev" =~ ^/dev/mapper/(pve-root|pve-data.*|pve-vm.*|pve-swap.*) ]]
+    then
       var15='1'
-    elif [ "$var14" == 'pve' ]; then
+    elif [ "$var14" == 'pve' ]
+    then
       var15='1'
     else
       var15='0'
     fi
 
     #---- Finished Output
-    allSTORAGE+=( "$(echo $line | awk -F':' -v var3=${var3} -v var4=${var4} -v var5=${var5} -v var8=${var8} -v var10=${var10} -v var14=${var14} -v var15=${var15} 'BEGIN {OFS = FS}{ $3 = var3 } { $4 = var4 } {if ($5 == "") {$5 = var5;}} { $8 = var8 } { $10 = var10 } { $14 = var14 } { $15 = var15 } { print $0 }')" )
+    allSTORAGE+=( "$(echo "$line" | awk -F':' -v var3=${var3} -v var4=${var4} -v var5=${var5} -v var8=${var8} -v var10=${var10} -v var14=${var14} -v var15=${var15} 'BEGIN {OFS = FS}{ $3 = var3 } { $4 = var4 } {if ($5 == "") {$5 = var5;}} { $8 = var8 } { $10 = var10 } { $14 = var14 } { $15 = var15 } { print $0 }')" )
 
   done < <( lsblk -nbr -o PATH,KNAME,PKNAME,FSTYPE,TRAN,MODEL,SERIAL,SIZE,TYPE,ROTA,UUID,RM,LABEL | sed 's/ /:/g' | sed 's/$/:/' | sed 's/$/:0/' | sed '/^$/d' | awk '!a[$0]++' 2> /dev/null )
 }
 
 # Working output Storage Array List
 function stor_LIST() {
-  unset storLIST
-  for i in "${allSTORAGE[@]}"; do
+  storLIST=()
+  for i in "${allSTORAGE[@]}"
+  do
     storLIST+=( $(echo $i) )
   done
 }
 
 # Wake USB disk
 function wake_usb() {
-  while IFS= read -r line; do
+  while IFS= read -r line
+  do
     dd if=${line} of=/dev/null count=512 status=none
   done < <( lsblk -nbr -o PATH,TRAN | awk '{if ($2 == "usb") print $1 }' )
 }

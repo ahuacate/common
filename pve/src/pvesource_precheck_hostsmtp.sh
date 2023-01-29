@@ -22,7 +22,8 @@ LOCAL_NET=$(hostname -I | awk -F'.' -v OFS="." '{ print $1,$2,"0.0/16" }')
 check_smtp_status
 
 # Set SMTP options manually
-if [ "${SMTP_STATUS}" == 0 ]; then
+if [ "$SMTP_STATUS" = 0 ]
+then
   # Options if SMTP is inactive
   file='/etc/postfix/main.cf'
 
@@ -33,7 +34,8 @@ if [ "${SMTP_STATUS}" == 0 ]; then
   precheck_msg1=()
   precheck_error_msg1=()
   # Pre-check Postfix
-  if [ "$(systemctl is-active --quiet postfix; echo $?)" == '0' ]; then
+  if [ "$(systemctl is-active --quiet postfix; echo $?)" = 0 ]
+  then
     precheck_msg1+=( "Postfix service status:active" )
     # Pre-check cnt
     ((k=k+1))
@@ -42,14 +44,16 @@ if [ "${SMTP_STATUS}" == 0 ]; then
     precheck_error_msg1+=( "Postfix service status: fail (inactive)" )
   fi
   # Pre-check Ahuacate ES SMTP
-  if [ "$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)" == '1' ]; then
+  if [ "$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)" = 1 ]
+  then
     precheck_msg1+=( "Ahuacate SMTP Easy Script status:pass" )
   else
     precheck_msg1+=( "Ahuacate SMTP Easy Script status:not installed (not required for manual configs)" )
   fi
   # Check Global (Main) configure Postfix configuration file /etc/postfix/main.cf
   # Pre-check mynetworks
-  if [[ $(postconf mynetworks 2> /dev/null | grep '127.0.0.0' | grep "${LOCAL_NET}" || true) ]]; then
+  if [[ $(postconf mynetworks 2> /dev/null | grep '127.0.0.0' | grep "${LOCAL_NET}" || true) ]]
+  then
     precheck_msg1+=( "Postfix conf - 'mynetworks':pass" )
     # Pre-check cnt
     ((k=k+1))
@@ -58,7 +62,8 @@ if [ "${SMTP_STATUS}" == 0 ]; then
     precheck_error_msg1+=( "Postfix conf - 'mynetworks':fail (requires '127.0.0.0/8, ${LOCAL_NET}')" )
   fi
   # Pre-check inet_interfaces
-  if [[ $(postconf inet_interfaces 2> /dev/null | grep 'all' || true) ]]; then
+  if [[ $(postconf inet_interfaces 2> /dev/null | grep 'all' || true) ]]
+  then
     precheck_msg1+=( "Postfix conf - 'inet_interfaces':pass" )
     # Pre-check cnt
     ((k=k+1))
@@ -67,7 +72,8 @@ if [ "${SMTP_STATUS}" == 0 ]; then
     precheck_error_msg1+=( "Postfix conf - 'inet_interfaces':fail (requires 'all')" )
   fi
   # Pre-check smtpd_recipient_restrictions
-  if [[ $(postconf smtpd_recipient_restrictions 2> /dev/null | grep 'permit_mynetworks' || true) ]]; then
+  if [[ $(postconf smtpd_recipient_restrictions 2> /dev/null | grep 'permit_mynetworks' || true) ]]
+  then
     precheck_msg1+=( "Postfix conf - 'smtpd_recipient_restrictions':pass" )
     # Pre-check cnt
     ((k=k+1))
@@ -76,7 +82,8 @@ if [ "${SMTP_STATUS}" == 0 ]; then
     precheck_error_msg1+=( "Postfix conf - 'smtpd_recipient_restrictions':fail (requires 'permit_mynetworks')" )
   fi
   # Pre-check smtpd_client_restrictions
-  if [[ $(postconf smtpd_client_restrictions 2> /dev/null | grep 'permit_mynetworks' || true) ]]; then
+  if [[ $(postconf smtpd_client_restrictions 2> /dev/null | grep 'permit_mynetworks' || true) ]]
+  then
     precheck_msg1+=( "Postfix conf - 'smtpd_client_restrictions':pass" )
     # Pre-check cnt
     ((k=k+1))
@@ -85,7 +92,8 @@ if [ "${SMTP_STATUS}" == 0 ]; then
     precheck_error_msg1+=( "Postfix conf - 'smtpd_client_restrictions':fail (requires 'permit_mynetworks')" )
   fi
   # Pre-check smtpd_relay_restrictions
-  if [[ $(postconf smtpd_relay_restrictions 2> /dev/null | grep 'permit_mynetworks' || true) ]]; then
+  if [[ $(postconf smtpd_relay_restrictions 2> /dev/null | grep 'permit_mynetworks' || true) ]]
+  then
     precheck_msg1+=( "Postfix conf - 'smtpd_relay_restrictions':pass" )
     # Pre-check cnt
     ((k=k+1))
@@ -108,14 +116,17 @@ if [ "${SMTP_STATUS}" == 0 ]; then
   makeselect_input2
   singleselect SELECTED "$OPTIONS_STRING"
 
-  if [ ${RESULTS} == 'TYPE01' ]; then
+  if [ "$RESULTS" = 'TYPE01' ]
+  then
     # Exit and install SMTP
     msg "Go to our Github repository and run our PVE Host Toolbox selecting our 'SMTP Email Setup' option:\n\n  --  https://github.com/ahuacate/pve-host\n\nRe-run this installer after your have configured '$(hostname)' SMTP email support. Bye..."
     echo
     exit 0
-  elif [ ${RESULTS} == 'TYPE02' ]; then
+  elif [ "$RESULTS" = 'TYPE02' ]
+  then
     # Proceed without SMTP email support
-    if [ "${k}" -lt "${chk_min}" ]; then
+    if [ "${k}" -lt "${chk_min}" ]
+    then
       display_error_msg="Your Proxmox Postfix SMTP server configuration appears to not meet our requirements. Check your Postfix file '/etc/postfix/main.cf' is configured to support relaying emails from your network VM/CT clients. Reported errors are:\n\n$(printf '%s\n' "${precheck_error_msg1[@]}" | column -s ":" -t -N "DESCRIPTION,STATUS" | indent2)\n\nFix the issues or choose to proceed without VM/CT SMTP email services."
       msg "#### PLEASE READ CAREFULLY ####\n\n${display_error_msg}"
 
@@ -125,11 +136,13 @@ if [ "${SMTP_STATUS}" == 0 ]; then
       "None. Exit this installer" )
       makeselect_input2
       singleselect SELECTED "$OPTIONS_STRING"
-      if [ ${RESULTS} == 'TYPE01' ]; then
+      if [ "$RESULTS" = 'TYPE01' ]
+      then
         # Proceed without SMTP email support
         msg "You have chosen to proceed without SMTP email support. You can always manually configure Postfix SMTP services at a later stage. We recommend you do so."
         echo
-      elif [ ${RESULTS} == 'TYPE00' ]; then
+      elif [ "$RESULTS" = 'TYPE00' ]
+      then
         msg "You have chosen not to proceed. Aborting. Bye..."
         echo
         exit 0
@@ -142,15 +155,16 @@ if [ "${SMTP_STATUS}" == 0 ]; then
       SMTP_STATUS=1
     fi
     echo
-  elif [ ${RESULTS} == 'TYPE03' ]; then
+  elif [ "$RESULTS" = 'TYPE03' ]
+  then
     # Proceed without SMTP email support
     msg "You have chosen to proceed without SMTP email support. You can always manually configure Postfix SMTP services at a later stage. We recommend you do so."
     echo
-  elif [ ${RESULTS} == 'TYPE00' ]; then
+  elif [ "$RESULTS" = 'TYPE00' ]
+  then
     msg "You have chosen not to proceed. Aborting. Bye..."
     echo
     exit 0
   fi
 fi
-
 #-----------------------------------------------------------------------------------

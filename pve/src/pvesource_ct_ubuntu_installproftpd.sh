@@ -7,12 +7,12 @@
 #---- Source -----------------------------------------------------------------------
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-COMMON_PVE_SOURCE="${DIR}"
+COMMON_PVE_SOURCE="$DIR"
 
 #---- Dependencies -----------------------------------------------------------------
 
 # Run Bash Header
-source ${DIR}/pvesource_bash_defaults.sh
+source $DIR/pvesource_bash_defaults.sh
 
 #---- Static Variables -------------------------------------------------------------
 #---- Other Variables --------------------------------------------------------------
@@ -30,7 +30,8 @@ ProFTPd is a highly feature rich FTP server, exposing a large amount of configur
 
 ProFTPd management can be done using the Webmin management frontend. ProFTPd is installed by default."
 echo
-while true; do
+while true
+do
   read -p "Install ProFTPd [y/n]?: " -n 1 -r YN
   echo
   case $YN in
@@ -54,9 +55,11 @@ while true; do
 done
 
 #---- Install ProFTP Prerequisites
-if [ ${INSTALL_PROFTPD} == 0 ]; then
+if [ "$INSTALL_PROFTPD" = 0 ]
+then
   msg "Checking ProFTPd status..."
-  if [ $(dpkg -s proftpd-core >/dev/null 2>&1; echo $?) = 0 ]; then
+  if [ "$(dpkg -s proftpd-core >/dev/null 2>&1; echo $?)" = 0 ]
+  then
     info "ProFTPd status: ${GREEN}installed.${NC} ( $(proftpd --version) )"
     echo
   else
@@ -64,7 +67,8 @@ if [ ${INSTALL_PROFTPD} == 0 ]; then
     apt-get -y update >/dev/null 2>&1
     apt-get install -y proftpd-core openssl proftpd-mod-crypto >/dev/null
     sleep 1
-    if [ $(dpkg -s proftpd-core >/dev/null 2>&1; echo $?) = 0 ]; then
+    if [ "$(dpkg -s proftpd-core >/dev/null 2>&1; echo $?)" = 0 ]
+    then
       info "ProFTPd status: ${GREEN}installed${NC} ( $(proftpd --version) )"
       echo
     else
@@ -80,11 +84,13 @@ if [ ${INSTALL_PROFTPD} == 0 ]; then
 
   # Starting ProFTPd service 
   msg "Checking ProFTP status..."
-  if [ "$(systemctl is-active proftpd)" == "inactive" ]; then
+  if [ "$(systemctl is-active proftpd)" = 'inactive' ]
+  then
     msg "Starting ProFTPd..."
     systemctl start proftpd
     msg "Waiting to hear from ProFTPd..."
-    while ! [[ "$(systemctl is-active proftpd)" == "active" ]]; do
+    while ! [[ "$(systemctl is-active proftpd)" = 'active' ]]
+    do
       echo -n .
     done
     info "ProFTPd status: ${GREEN}running${NC}"
@@ -96,7 +102,8 @@ if [ ${INSTALL_PROFTPD} == 0 ]; then
 fi
 
 #---- Finish Line ------------------------------------------------------------------
-if [ ! ${INSTALL_PROFTPD} == 1 ]; then
+if [ ! "$INSTALL_PROFTPD" = 1 ]
+then
   section "Completion Status."
 
   info "${WHITE}Success.${NC} ProFTPd has been installed and configured."
@@ -104,6 +111,8 @@ if [ ! ${INSTALL_PROFTPD} == 1 ]; then
 fi
 
 # Cleanup
-if [ -z "${PARENT_EXEC+x}" ]; then
+if [ -z "${PARENT_EXEC+x}" ]
+then
   trap cleanup EXIT
 fi
+#-----------------------------------------------------------------------------------

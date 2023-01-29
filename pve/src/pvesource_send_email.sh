@@ -26,7 +26,8 @@ function check_smtp_status() {
   # Host SMTP Option ('0' is inactive, '1' is active)
   var='ahuacate_smtp'
   file='/etc/postfix/main.cf'
-  if [ -f $file ] && [ "$(systemctl is-active --quiet postfix; echo $?)" == '0' ]; then
+  if [ -f $file ] && [ "$(systemctl is-active --quiet postfix; echo $?)" = 0 ]
+  then
     SMTP_STATUS=$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)
   else
     # Set SMTP inactive
@@ -41,7 +42,7 @@ fi
 # Check PVE host SMTP status
 # '0' inactive, '1' enabled.
 check_smtp_status
-if [ "$SMTP_STATUS" == '0' ]
+if [ "$SMTP_STATUS" = 0 ]
 then
   # Options if SMTP is inactive
   display_msg='Unfortunately we cannot send this email. The SMTP server in your network is not known. Your PVE hosts should be configured to support SMTP email services. Our PVE Host SMTP Server installer is available in our PVE Host Toolbox located at GitHub:\n\n    --  https://github.com/ahuacate/pve-host'

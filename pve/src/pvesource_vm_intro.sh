@@ -18,7 +18,8 @@ msg_box "#### PLEASE READ CAREFULLY ####\n\nThis Easy Script will create a Proxm
 sleep 1
 
 echo
-while true; do
+while true
+do
   read -p "Proceed to create a new '${SECTION_HEAD}' VM [y/n]? " -n 1 -r YN
   echo
   case $YN in
@@ -29,7 +30,7 @@ while true; do
       ;;
     [Nn]*)
       info "You have chosen to skip this step. Aborting installation."
-      rm -rf ${TEMP_DIR}
+      rm -rf "$TEMP_DIR"
       exit 0
       ;;
     *)
@@ -38,3 +39,4 @@ while true; do
       ;;
   esac
 done
+#-----------------------------------------------------------------------------------

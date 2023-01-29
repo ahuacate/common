@@ -42,19 +42,22 @@ IP_FAIL_MSG="The IP address is not valid. A valid IP address is when all of the 
 Try again..."
 
 # ES Validate PVE primary hostname and IP address
-if [[ ${PVE_HOSTNAME} =~ ^.*([1|0])$ ]] && [ $(valid_ip ${PVE_HOST_IP} > /dev/null; echo $?) == '0' ]; then
+if [[ "$PVE_HOSTNAME" =~ ^.*([1|0])$ ]] && [ "$(valid_ip $PVE_HOST_IP > /dev/null; echo $?)" = 0 ]
+then
   msg "ES validating PVE primary hostname and IP address..."
-  info "PVE primary hostname is set: ${YELLOW}${PVE_HOSTNAME}${NC}"
-  info "PVE primary host IP address is set: ${YELLOW}${PVE_HOST_IP}${NC}"
+  info "PVE primary hostname is set: ${YELLOW}$PVE_HOSTNAME${NC}"
+  info "PVE primary host IP address is set: ${YELLOW}$PVE_HOST_IP${NC}"
   echo
 else
   msg_box "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm the PVE primary hostname and IP address ( lookup results '${PVE_HOSTNAME} : ${PVE_HOST_IP}' ). Only input the PVE primary host details and NOT the secondary host. These inputs are critical for system and application configuration."
   # Manual Confirm PVE primary hostname
-  while true; do
-    read -p "Enter your PVE primary host hostname: " -e -i ${PVE_HOSTNAME} PVE_HOSTNAME_VAR
-    if [[ ${PVE_HOSTNAME_VAR} =~ ${pve_hostname_regex} ]] && [[ ${PVE_HOSTNAME_VAR} =~ ^.*([1|0])$ ]]; then
-      PVE_HOSTNAME=${PVE_HOSTNAME_VAR}
-      info "PVE primary hostname is set: ${YELLOW}${PVE_HOSTNAME}${NC}"
+  while true
+  do
+    read -p "Enter your PVE primary host hostname: " -e -i $PVE_HOSTNAME PVE_HOSTNAME_VAR
+    if [[ "$PVE_HOSTNAME_VAR" =~ ${pve_hostname_regex} ]] && [[ "$PVE_HOSTNAME_VAR" =~ ^.*([1|0])$ ]]
+    then
+      PVE_HOSTNAME="$PVE_HOSTNAME_VAR"
+      info "PVE primary hostname is set: ${YELLOW}$PVE_HOSTNAME${NC}"
       break
     else
       warn "$HOSTNAME_FAIL_MSG"
@@ -66,16 +69,19 @@ else
       "Input a different PVE hostname" )
       makeselect_input2
       singleselect SELECTED "$OPTIONS_STRING"
-      if [ ${RESULTS} == 'OPTION_01' ]; then
+      if [ "$RESULTS" = 'OPTION_01' ]
+      then
         msg "Good choice. Fix the issue and run this installer again. Bye..."
         echo
         trap cleanup EXIT
-      elif [ ${RESULTS} == 'OPTION_02' ]; then
-        PVE_HOSTNAME=${PVE_HOSTNAME_VAR}
-        info "PVE primary hostname is set: ${YELLOW}${PVE_HOSTNAME}${NC}"
+      elif [ "$RESULTS" = 'OPTION_02' ]
+      then
+        PVE_HOSTNAME="$PVE_HOSTNAME_VAR"
+        info "PVE primary hostname is set: ${YELLOW}$PVE_HOSTNAME${NC}"
         echo
         break
-      elif [ ${RESULTS} == 'OPTION_03' ]; then
+      elif [ "$RESULTS" = 'OPTION_03' ]
+      then
         msg "Try a different PVE hostname. But it must be a PVE primary hostname!"
         echo
       fi
@@ -83,12 +89,14 @@ else
   done
 
   # Manual Confirm PVE primary IP
-  while true; do
-    read -p "Enter your PVE primary host IP address: " -e -i ${PVE_HOST_IP} PVE_HOST_IP_VAR
+  while true
+  do
+    read -p "Enter your PVE primary host IP address: " -e -i $PVE_HOST_IP PVE_HOST_IP_VAR
     msg "Performing checks on your input ( be patient, may take a while )..."
-    if [ $(valid_ip ${PVE_HOST_IP} > /dev/null; echo $?) == 0 ]; then
-      PVE_HOST_IP=${PVE_HOST_IP_VAR}
-      info "PVE primary host IP address is set: ${YELLOW}${PVE_HOST_IP}${NC}"
+    if [ "$(valid_ip $PVE_HOST_IP > /dev/null; echo $?)" = 0 ]
+    then
+      PVE_HOST_IP="$PVE_HOST_IP_VAR"
+      info "PVE primary host IP address is set: ${YELLOW}$PVE_HOST_IP${NC}"
       echo
       break
     else
@@ -102,7 +110,8 @@ fi
 #---- Creating export settings
 section "Setting PVE host node hostnames and IP addresses"
 
-if [[ ! ${PVE_HOSTNAME} =~ ^.*([1|0])$ ]]; then
+if [[ ! "$PVE_HOSTNAME" =~ ^.*([1|0])$ ]]
+then
   # Single PVE node
   msg "The User has chosen a invalid PVE primary hostname: ${PVE_HOSTNAME}."
   # Add first node to array
@@ -112,16 +121,17 @@ if [[ ! ${PVE_HOSTNAME} =~ ^.*([1|0])$ ]]; then
   echo
   printf '%s\n' "${pve_node_LIST[@]}" | column -s "," -t -N "PVE HOSTNAME,IP ADDRESS,CLUSTER NODE TYPE" | indent2
   echo
-elif [[ ${PVE_HOSTNAME} =~ ^.*([1|0])$ ]] && [[ ${PVE_HOST_IP} =~ ${ip4_regex} ]]; then
+elif [[ "$PVE_HOSTNAME" =~ ^.*([1|0])$ ]] && [[ "$PVE_HOST_IP" =~ ${ip4_regex} ]]
+then
   # Multi PVE nodes IPv4
-  msg "Setting your PVE host nodes identities as shown ( total of ${PVE_HOST_NODE_CNT} reserved PVE nodes ):"
+  msg "Setting your PVE host nodes identities as shown ( total of $PVE_HOST_NODE_CNT reserved PVE nodes ):"
   unset pve_node_LIST
   pve_node_LIST=()
   # IP vars
-  i=$(( $(echo ${PVE_HOST_IP} | cut -d . -f 4) + 1 ))
+  i=$(( $(echo "$PVE_HOST_IP" | cut -d . -f 4) + 1 ))
   # Hostname vars
-  j=$(( $(echo ${PVE_HOSTNAME} | awk '{print substr($0,length,1)}') + 1 ))
-  PVE_HOSTNAME_VAR=$(echo ${PVE_HOSTNAME} | sed 's/.$//')
+  j=$(( $(echo "$PVE_HOSTNAME" | awk '{print substr($0,length,1)}') + 1 ))
+  PVE_HOSTNAME_VAR=$(echo "$PVE_HOSTNAME" | sed 's/.$//')
   counter=1
   # Add first node to array
   pve_node_LIST+=( "${PVE_HOSTNAME},${PVE_HOST_IP},primary host" )
@@ -135,14 +145,15 @@ elif [[ ${PVE_HOSTNAME} =~ ^.*([1|0])$ ]] && [[ ${PVE_HOST_IP} =~ ${ip4_regex} ]
   echo
   printf '%s\n' "${pve_node_LIST[@]}" | column -s "," -t -N "PVE HOSTNAME,IP ADDRESS,CLUSTER NODE TYPE" | indent2
   echo
-elif [[ ${PVE_HOSTNAME} =~ ^.*([1|0])$ ]] && [[ ${PVE_HOST_IP} =~ ${ip6_regex} ]]; then
+elif [[ "$PVE_HOSTNAM"E =~ ^.*([1|0])$ ]] && [[ "$PVE_HOST_IP" =~ ${ip6_regex} ]]
+then
   # Multi PVE nodes IPv6
-  msg "Setting ${PVE_HOST_NODE_CNT} reserved PVE host nodes identities as shown:"
+  msg "Setting $PVE_HOST_NODE_CNT reserved PVE host nodes identities as shown:"
   unset pve_node_LIST
   pve_node_LIST=()
   # Hostname vars
-  j=$(( $(echo ${PVE_HOSTNAME} | awk '{print substr($0,length,1)}') + 1 ))
-  PVE_HOSTNAME_VAR=$(echo ${PVE_HOSTNAME} | sed 's/.$//')
+  j=$(( $(echo "$PVE_HOSTNAME" | awk '{print substr($0,length,1)}') + 1 ))
+  PVE_HOSTNAME_VAR=$(echo "$PVE_HOSTNAME" | sed 's/.$//')
   counter=1
   # Add first node to array
   pve_node_LIST+=( "${PVE_HOSTNAME},${PVE_HOST_IP},primary host" )

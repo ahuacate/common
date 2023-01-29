@@ -11,10 +11,12 @@
 #---- Other Files ------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
-if [ ${#pvesm_input_LIST[@]} -ge '1' ]; then
+if [ ${#pvesm_input_LIST[@]} -ge '1' ]
+then
   msg "Creating ${HOSTNAME^} CT storage bind mounts..."
   i=0
-  while IFS=',' read -r PVE_MNT CT_MNT; do
+  while IFS=',' read -r PVE_MNT CT_MNT
+  do
     pct set ${CTID} -mp$i /mnt/pve/$PVE_MNT,mp=$CT_MNT
     ((i=i+1))
     info "\t${i}. Storage bind mount created: $PVE_MNT ---> ${YELLOW}$CT_MNT${NC}"
@@ -24,3 +26,4 @@ else
   info "No storage bind mount inputs are available or have been configured.\nSkipping this step."
   echo
 fi
+#-----------------------------------------------------------------------------------

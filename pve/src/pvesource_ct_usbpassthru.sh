@@ -38,7 +38,8 @@ In the next step we will display all available USB devices connected to your PVE
 
 In the next step choose $(hostname) USB device ID to passthrough to the PVE CT."
 echo
-while true; do
+while true
+do
   read -p "Do you want to configure $(hostname) USB pass (Not Recommended) [y/n]? " -n 1 -r YN
   echo
   case $YN in
@@ -59,13 +60,17 @@ while true; do
   esac
 done
 
-if [ ${USB_PASS} = 0 ]; then
+if [ "$USB_PASS" = 0 ]
+then
   # Set CTID
-  if [ -z ${CTID+x} ]; then
+  if [ -z ${CTID+x} ]
+  then
     msg "Setting your PVE CT container CTID..."
-    while true; do
+    while true
+    do
       read -p "Enter your PVE CT container CTID: " -e -i 110 CTID_VAR
-      if [ "$(pct_list | grep -w $CTID_VAR > /dev/null; echo $?)" = 0 ]; then
+      if [ "$(pct_list | grep -w $CTID_VAR > /dev/null; echo $?)" = 0 ]
+      then
         CTID=$CTID_VAR
         info "PVE CT CTID is set: ${YELLOW}$CTID${NC}"
         echo
@@ -84,14 +89,15 @@ if [ ${USB_PASS} = 0 ]; then
   msg "Select a PVE host $(hostname) USB device port..."
   mapfile -t options < <(lsusb | awk '{$3=$4=$5=$6=""; print $0}' | sed "/[hH]ub$/d"  | awk '$1=$1')
   PS3="Select a USB bus device (entering numeric) : "
-  select USB_BUS in "${options[@]}"; do
+  select USB_BUS in "${options[@]}"
+  do
     case $USB_BUS in
       $options)
         test -n "${USB_BUS}"
-        USB_BUS_ID=$(echo ${USB_BUS} | awk '{ print $2 }')
+        USB_BUS_ID=$(echo "$USB_BUS" | awk '{ print $2 }')
         echo
         msg "You have chosen ( '${USB_BUS}' ), USB Bus No.'${USB_BUS_ID}' to configure for USB pass through..."
-        info "USB pass through Bus ID set: ${YELLOW}${USB_BUS_ID}${NC}"
+        info "USB pass through Bus ID set: ${YELLOW}$USB_BUS_ID${NC}"
         echo
         break
         ;;
@@ -110,11 +116,13 @@ if [ ${USB_PASS} = 0 ]; then
 fi
 
 #---- Finish Line ------------------------------------------------------------------
-if [ ${USB_PASS} = 0 ]; then
+if [ "$USB_PASS" = 0 ]
+then
   section "Completion Status."
 
   msg "${WHITE}Success.${NC} USB pass through has been configured.
 
-    --  PVE host $(hostname) USB pass through: ${YELLOW}${USB_BUS_ID}${NC}
+    --  PVE host $(hostname) USB pass through: ${YELLOW}$USB_BUS_ID${NC}
     --  This USB port is now available inside PVE CT '$CTID'.\n"
 fi
+#-----------------------------------------------------------------------------------

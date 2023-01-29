@@ -92,7 +92,7 @@ do
     pct_start_waitloop
 
     # Set Toolbox App script name
-    GIT_APP_SCRIPT="$(echo ${GIT_REPO} | sed 's/-/_/')_${VM_TYPE}_${APP_NAME}_toolbox.sh"
+    GIT_APP_SCRIPT="$(echo "$GIT_REPO" | sed 's/-/_/')_${VM_TYPE}_${APP_NAME}_toolbox.sh"
 
     # Run Toolbox
     source $SRC_DIR/$APP_BUILD/$GIT_APP_SCRIPT
@@ -104,5 +104,4 @@ done
 
 #---- Cleanup
 installer_cleanup
-
 #-----------------------------------------------------------------------------------

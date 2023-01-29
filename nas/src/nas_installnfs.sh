@@ -11,7 +11,8 @@
 # Requires "${nas_subfolder_LIST[@]}", "${nas_basefolder_LIST[@]}", "${nas_basefolder_extra_LIST[@]}"  array
 
 # Check for NFS installation
-if [ ! $(dpkg -s nfs-kernel-server > /dev/null 2>&1; echo $?) == 0 ]; then
+if [ ! $(dpkg -s nfs-kernel-server > /dev/null 2>&1; echo $?) = 0 ]
+then
   msg "Installing NFS (be patient, may take a while)..."
   apt-get install -y nfs-kernel-server >/dev/null
 fi
@@ -33,7 +34,8 @@ NFS_EXPORTS='/etc/exports'
 section "Configuring NFS Server"
 
 # Check if Static hostnames are mapped
-if [ ! $(nslookup ${PVE_HOSTNAME} >/dev/null 2>&1; echo $?) == '0' ]; then
+if [ ! $(nslookup ${PVE_HOSTNAME} >/dev/null 2>&1; echo $?) = 0 ]
+then
   # Set NFS export method (because nslookup failed to resolve PVE primary hostname)
   display_msg1=( "DNS Server 1:$(ip route show default | awk '/default/ {print $3}' | awk -F'.' 'BEGIN {OFS=FS} { print $1, $2, $3, "254" }'):Set your PiHole IP address" )
   display_msg1+=( "DNS Server 2:$(ip route show default | awk '/default/ {print $3}'):Set your router DNS IP" )
@@ -48,9 +50,11 @@ if [ ! $(nslookup ${PVE_HOSTNAME} >/dev/null 2>&1; echo $?) == '0' ]; then
   "NFS by Static IP - NFS exports by IP address (Recommended)" )
   makeselect_input2
   singleselect SELECTED "$OPTIONS_STRING"
-  if [ ${RESULTS} == 'OPTION_01' ]; then
+  if [ "$RESULTS" = 'OPTION_01' ]
+  then
     NFS_EXPORT_TYPE='0'
-  elif [ ${RESULTS} == 'OPTION_02' ]; then
+  elif [ "$RESULTS" = 'OPTION_02' ]
+  then
     NFS_EXPORT_TYPE='1'
   fi
 else
@@ -61,23 +65,24 @@ fi
 # Create array
 rm_match='^\#.*$|^\s*$|^git.*$|^homes.*$|^openvpn.*$|^sshkey.*$'
 # 'nas_basefolder_extra_LIST' array
-unset nas_basefolder_extra_LIST
 nas_basefolder_extra_LIST=()
-while IFS= read -r line; do
+while IFS= read -r line
+do
   [[ "$line" =~ (${rm_match}) ]] && continue
   nas_basefolder_extra_LIST+=( "$line" )
 done < nas_basefolderlist_extra
 
 # 'nas_basefolder_LIST' array
-unset nas_basefolder_LIST
 nas_basefolder_LIST=()
-while IFS= read -r line; do
+while IFS= read -r line
+do
   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
   nas_basefolder_LIST+=( "$line" )
 done < nas_basefolderlist
 
 # Query additional shares for inclusion
-if [[ ${#nas_basefolder_extra_LIST[@]} -ge '1' ]]; then
+if [[ ${#nas_basefolder_extra_LIST[@]} -ge '1' ]]
+then
   echo
   msg_box "#### PLEASE READ CAREFULLY - ADDITIONAL NFS SHARED FOLDERS ####\n\nIn a previous step you created additional custom shared folders. You can now choose which additional folders are to be included as NFS shares."
   echo
@@ -86,11 +91,13 @@ if [[ ${#nas_basefolder_extra_LIST[@]} -ge '1' ]]; then
     OPTIONS_LABELS_INPUT=$(printf '%s\n' "${nas_basefolder_extra_LIST[@]}" | awk -F',' -v var="${DIR_SCHEMA}" '{print var"/"$1, "| Folder Label: "$2}' | sed -e '$aNone | Exclude all my additional shares from NFS')
     makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
     multiselect SELECTED "$OPTIONS_STRING"
-    if [[ ${RESULTS[@]} =~ '^none,none$' ]]; then
+    if [[ ${RESULTS[@]} =~ '^none,none$' ]]
+    then
       info "All custom share folders are excluded from NFS exports."
       echo
       break
-    elif [[ ! ${RESULTS[@]} =~ '^none,none$' ]] && [ ! ${#RESULTS[@]} == '0' ]; then
+    elif [[ ! ${RESULTS[@]} =~ '^none,none$' ]] && [ ! ${#RESULTS[@]} == '0' ]
+    then
       nas_basefolder_LIST+=( "$(printf '%s\n' "${RESULTS[@]}")" )
       echo
       break
@@ -98,69 +105,23 @@ if [[ ${#nas_basefolder_extra_LIST[@]} -ge '1' ]]; then
   done
 fi
 
-# # Update NFS exports file
-# msg "Creating new NFS exports..."
-# while IFS=',' read -r dir desc group permission user_groups; do
-#   [[ ${dir} =~ 'none' ]] && continue
-#   # Check for dir
-#   if [ -d "${DIR_SCHEMA}/$dir" ]; then
-#     if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS}) ]]; then
-#       # Edit existing nfs export share
-#       i=$(echo ${PVE_01_IP} | cut -d . -f 4)
-#       counter=0
-#       until [ $counter == ${PVE_HOST_NODE_CNT} ]
-#       do
-#         PVE_0X_IP="$(echo ${PVE_01_IP} | cut -d"." -f1-3).${i}"
-#         match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
-#         if [[ $(echo "${match}" | grep -ws "${PVE_0X_IP}") ]]; then
-#           substitute=$(echo "${match}" | sed -e "s/${PVE_0X_IP}[^\t]*/${PVE_0X_IP}${NFS_STRING}/")
-#           sed -i "s|${match}|${substitute}|" ${NFS_EXPORTS}
-#         else
-#           # Add to existing nfs export share
-#           substitute=$(echo "${match}" | sed -e "s/$/\t${PVE_0X_IP}${NFS_STRING}/")
-#           sed -i "s|${match}|${substitute}|g" ${NFS_EXPORTS}
-#         fi
-#         (( i=i+1 ))
-#         counter=$(( counter+1 ))
-#       done
-#       info "Updating NFS share: ${YELLOW}${DIR_SCHEMA}/${dir}${NC}"
-#     else
-#       # Create new nfs export share
-#       printf "\n"${DIR_SCHEMA}/${dir}"" >> ${NFS_EXPORTS}
-#       i=$(echo ${PVE_01_IP} | cut -d . -f 4)
-#       counter=0
-#       until [ $counter == ${PVE_HOST_NODE_CNT} ]
-#       do
-#         PVE_0X_IP="$(echo ${PVE_01_IP} | cut -d"." -f1-3).${i}"
-#         match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
-#         # Add to existing nfs export share
-#         substitute=$(echo "${match}" | sed -e "s/$/\t${PVE_0X_IP}${NFS_STRING}/")
-#         sed -i "s|${match}|${substitute}|g" ${NFS_EXPORTS}
-#         (( i=i+1 ))
-#         counter=$(( counter+1 ))
-#       done
-#       info "New NFS share: ${YELLOW}${DIR_SCHEMA}/${dir}${NC}"
-#     fi
-#   else
-#     info "${DIR_SCHEMA}/${dir} does not exist. Skipping..."
-#   fi
-# done <<< $(printf '%s\n' "${nas_basefolder_LIST[@]}")
-# echo
-
-
-
 # Update NFS exports file
 msg "Creating new NFS exports..."
-while IFS=',' read -r dir desc user group permission user_groups; do
-  [[ ${dir} =~ 'none' ]] && continue
+while IFS=',' read -r dir desc user group permission user_groups
+do
+  [[ "$dir" =~ 'none' ]] && continue
   # Check for dir
-  if [ -d "${DIR_SCHEMA}/$dir" ]; then
-    if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS}) ]]; then
+  if [ -d "$DIR_SCHEMA/$dir" ]
+  then
+    if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS}) ]]
+    then
       # Edit existing nfs export share
-      while IFS=, read hostid ipaddr desc; do
+      while IFS=, read hostid ipaddr desc
+      do
         nfs_var=$(if [ ${NFS_EXPORT_TYPE} == '0' ]; then echo ${hostid}; else echo ${ipaddr}; fi)
         match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
-        if [[ $(echo "${match}" | grep -ws "${nfs_var}") ]]; then
+        if [[ $(echo "${match}" | grep -ws "${nfs_var}") ]]
+        then
           substitute=$(echo "${match}" | sed -e "s/${nfs_var}[^\t]*/${nfs_var}${NFS_STRING}/")
           sed -i "s|${match}|${substitute}|" ${NFS_EXPORTS}
         else
@@ -173,7 +134,8 @@ while IFS=',' read -r dir desc user group permission user_groups; do
     else
       # Create new nfs export share
       printf "\n"${DIR_SCHEMA}/${dir}"" >> ${NFS_EXPORTS}
-      while IFS=, read hostid ipaddr desc; do
+      while IFS=, read hostid ipaddr desc
+      do
         nfs_var=$(if [ ${NFS_EXPORT_TYPE} == '0' ]; then echo ${hostid}; else echo ${ipaddr}; fi)
         match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
         # Add to existing nfs export share
@@ -189,9 +151,11 @@ done <<< $(printf '%s\n' "${nas_basefolder_LIST[@]}")
 echo
 
 # Update '/etc/hosts' file
-if [ ${NFS_EXPORT_TYPE} == '0' ]; then 
+if [ "$NFS_EXPORT_TYPE" = 0 ]
+then 
 echo "# --- BEGIN PVE HOST IP ADDRESS FOR NFS ---" >> /etc/hosts
-while IFS=, read hostid ipaddr desc; do
+while IFS=, read hostid ipaddr desc
+do
   echo "${ipaddr} ${hostid}.$(hostname -d) ${hostid}" >> /etc/hosts
 done <<< $(printf '%s\n' "${pve_node_LIST[@]}")
 echo "# --- END PVE HOST IP ADDRESS FOR NFS ---" >> /etc/hosts
@@ -201,12 +165,13 @@ fi
 #---- Restart NFS server
 msg "Restarting NFS Server..."
 service nfs-kernel-server restart 2>/dev/null
-if [ "$(systemctl is-active --quiet nfs-kernel-server; echo $?) -eq 0" ]; then
+if [ "$(systemctl is-active --quiet nfs-kernel-server; echo $?)" -eq 0 ]
+then
   info "NFS Server status: ${GREEN}active (running).${NC}"
   echo
-elif [ "$(systemctl is-active --quiet nfs-kernel-server; echo $?) -eq 3" ]; then
+elif [ "$(systemctl is-active --quiet nfs-kernel-server; echo $?)" -eq 3 ]
+then
   info "NFS Server status: ${RED}inactive (dead).${NC}. Your intervention is required."
   echo
 fi
-
-#---- Finish Line ------------------------------------------------------------------
+#-----------------------------------------------------------------------------------

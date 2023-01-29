@@ -7,12 +7,12 @@
 #---- Source -----------------------------------------------------------------------
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-COMMON_PVE_SOURCE="${DIR}"
+COMMON_PVE_SOURCE="$DIR"
 
 #---- Dependencies -----------------------------------------------------------------
 
 # Run Bash Header
-source ${DIR}/pvesource_bash_defaults.sh
+source $DIR/pvesource_bash_defaults.sh
 
 #---- Static Variables -------------------------------------------------------------
 #---- Other Variables --------------------------------------------------------------
@@ -48,10 +48,13 @@ EOF
 
 # Starting Fail2ban service 
 msg "Checking Fail2ban status..."
-if [ $(systemctl is-active fail2ban.service) != "active" ]; then
+if [ ! "$(systemctl is-active fail2ban.service)" = 'active' ]
+then
   systemctl start fail2ban.service
-  while true; do
-    if [ $(systemctl is-active fail2ban.service) == "active" ]; then
+  while true
+  do
+    if [ "$(systemctl is-active fail2ban.service)" = 'active' ]
+    then
       info "Fail2ban status: ${GREEN}active${NC} (running)."
       echo
       break
@@ -69,3 +72,4 @@ msg "${WHITE}Success.${NC} Fail2Ban has been configured.\n  --  Monitored SSH Po
 if [ -z "${PARENT_EXEC+x}" ]; then
   trap cleanup EXIT
 fi
+#-----------------------------------------------------------------------------------

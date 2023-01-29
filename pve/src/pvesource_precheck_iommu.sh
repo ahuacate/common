@@ -19,7 +19,8 @@ FAIL_MSG='This VM installation requires PCIe pass-through. You need to enable th
 
 If you are creating a "PCI pass-through", the device is not available to the host or any other VM anymore.'
 
-if [ ${VM_PCI_PT} == '1' ] && [[ ! $(dmesg | grep -e DMAR -e IOMMU) =~ ^.*[IOMMU\ enabled]$ ]] || [[ ! $(lsmod | grep vfio) ]]; then
+if [ "$VM_PCI_PT" == '1' ] && [[ ! $(dmesg | grep -e DMAR -e IOMMU) =~ ^.*[IOMMU\ enabled]$ ]] || [[ ! $(lsmod | grep vfio) ]]
+then
   warn "${FAIL_MSG}"
   echo fail
   sleep 1

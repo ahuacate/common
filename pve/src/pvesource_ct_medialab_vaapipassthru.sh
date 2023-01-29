@@ -19,11 +19,13 @@ In the next steps we will check if your PVE host hardware supports VA-API video 
 
 # Checking for PVE host VA-API support
 msg "Checking PVE host support for VA-API..."
-if [ $(ls -l /dev/dri | grep renderD128 > /dev/null; echo $?) == 0 ]; then
+if [ $(ls -l /dev/dri | grep renderD128 > /dev/null; echo $?) = 0 ]
+then
   # Installing VA-INFO
   apt-get --only-upgrade install vainfo -y > /dev/null
   apt-get install vainfo -y > /dev/null
-  if [ $(dpkg -s vainfo > /dev/null 2>&1; echo $?) = 0 ]; then
+  if [ $(dpkg -s vainfo > /dev/null 2>&1; echo $?) = 0 ]
+  then
     chmod 666 /dev/dri/renderD128 >/dev/null
     # Creating rc.local script to set permissions for /dev/dri/renderD128
     echo -e '#!/bin/sh -e\n/bin/chmod 666 /dev/dri/renderD128\nexit 0' > /etc/rc.local
@@ -45,3 +47,4 @@ else
   sleep 2
   echo
 fi
+#-----------------------------------------------------------------------------------

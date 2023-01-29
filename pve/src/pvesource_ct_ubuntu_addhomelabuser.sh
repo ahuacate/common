@@ -8,11 +8,13 @@
 #---- Dependencies -----------------------------------------------------------------
 
 function pct_start_waitloop () {
-  if [ "$(pct status $CTID)" == "status: stopped" ]; then
+  if [ "$(pct status $CTID)" == 'status: stopped' ]
+  then
     msg "Starting CT $CTID..."
     pct start $CTID
     msg "Waiting to hear from CT $CTID..."
-    while ! ping -s 1 -c 2 "$CT_IP" > /dev/null; do
+    while ! ping -s 1 -c 2 "$CT_IP" > /dev/null
+    do
         echo -n .
     done
     sleep 1
@@ -42,3 +44,4 @@ msg "Creating ${OSTYPE^} CT default users..."
 pct exec $CTID -- bash -c 'if [ $(id -u home &>/dev/null; echo $?) = 1 ]; then useradd -u 1606 -g homelab -s /bin/bash -m home >/dev/null; fi'
 info "User created: ${YELLOW}'home'${NC} of Group 'homelab'"
 echo
+#-----------------------------------------------------------------------------------

@@ -14,13 +14,13 @@ SMB_CONF='/etc/samba/smb.conf'
 
 # Samba directory to store samba configuration files individually
 SMB_CONF_DIR='/etc/samba/smb.conf.d'
-mkdir -p ${SMB_CONF_DIR}
+mkdir -p "$SMB_CONF_DIR"
 
 # File which contains all includes to samba configuration files individually
 SMB_INCLUDES=/etc/samba/includes.conf
 
 # Allowed hosts
-HOSTS_ALLOW="127.0.0.1 $(echo $PVE_HOST_IP | cut -d"." -f1-3).0/24 $(echo $PVE_HOST_IP | cut -d"." -f1-2).20.0/24 $(echo $PVE_HOST_IP | cut -d"." -f1-2).30.0/24 $(echo $PVE_HOST_IP | cut -d"." -f1-2).40.0/24 $(echo $PVE_HOST_IP | cut -d"." -f1-2).50.0/24 $(echo $PVE_HOST_IP | cut -d"." -f1-2).60.0/24 $(echo $PVE_HOST_IP | cut -d"." -f1-2).80.0/24"
+HOSTS_ALLOW="127.0.0.1 $(echo "$PVE_HOST_IP" | cut -d"." -f1-3).0/24 $(echo "$PVE_HOST_IP" | cut -d"." -f1-2).20.0/24 $(echo "$PVE_HOST_IP" | cut -d"." -f1-2).30.0/24 $(echo "$PVE_HOST_IP" | cut -d"." -f1-2).40.0/24 $(echo "$PVE_HOST_IP" | cut -d"." -f1-2).50.0/24 $(echo "$PVE_HOST_IP" | cut -d"." -f1-2).60.0/24 $(echo "$PVE_HOST_IP" | cut -d"." -f1-2).80.0/24"
 
 #---- Other Files ------------------------------------------------------------------
 
@@ -70,7 +70,8 @@ valid users = %S
 EOF
 
 # public.conf
-if [ -d ${DIR_SCHEMA}/public ]; then
+if [ -d "$DIR_SCHEMA/public" ]
+then
 cat << EOF > public.conf.tmp
 [public]
 comment = public anonymous access
@@ -88,7 +89,8 @@ EOF
 fi
 
 # autoadd.conf
-if [ -d ${DIR_SCHEMA}/public/autoadd ]; then
+if [ -d "$DIR_SCHEMA/public/autoadd" ]
+then
 cat << EOF > autoadd.conf.tmp
 [autoadd]
 path = ${DIR_SCHEMA}/public/autoadd
@@ -102,8 +104,9 @@ EOF
 fi
 
 # Create nas_basefolderlist-xtra
-if [ ! -f ${TEMP_DIR}/nas_basefolderlist_extra ]; then
-  touch ${TEMP_DIR}/nas_basefolderlist_extra
+if [ ! -f ${TEMP_DIR}/nas_basefolderlist_extra ]
+then
+  touch "$TEMP_DIR/nas_basefolderlist_extra"
 fi
 
 #---- Body -------------------------------------------------------------------------
@@ -112,26 +115,27 @@ fi
 section "Installing and configuring SMB (samba)"
 
 # Check for SMB installation
-if [ ! $(dpkg -s samba > /dev/null 2>&1; echo $?) == 0 ]; then
+if [ ! $(dpkg -s samba > /dev/null 2>&1; echo $?) = 0 ]
+then
   msg "Installing SMB (be patient, may take a while)..."
   apt-get install -y samba-common-bin samba >/dev/null
 fi
 
 # Create Samba directory to store samba configuration files individually
-mkdir -p ${SMB_CONF_DIR}
+mkdir -p "$SMB_CONF_DIR"
 
 # Stopping SMB service
 service smbd stop 2>/dev/null
 
 # Create a backup of any existing smb.conf
-mv ${SMB_CONF} /etc/samba/smb.conf.bak &> /dev/null
+mv "$SMB_CONF" /etc/samba/smb.conf.bak &> /dev/null
 
 # Copy smb.conf files (global,homes,public)
 msg "Creating default SMB folder shares ( global, homes, public )..."
-cp ${TEMP_DIR}/smb.conf.tmp ${SMB_CONF}
-cp ${TEMP_DIR}/homes.conf.tmp ${SMB_CONF_DIR}/homes.conf
-cp ${TEMP_DIR}/public.conf.tmp ${SMB_CONF_DIR}/public.conf
-cp ${TEMP_DIR}/autoadd.conf.tmp ${SMB_CONF_DIR}/autoadd.conf
+cp $TEMP_DIR/smb.conf.tmp $SMB_CONF
+cp $TEMP_DIR/homes.conf.tmp $SMB_CONF_DIR/homes.conf
+cp $TEMP_DIR/public.conf.tmp $SMB_CONF_DIR/public.conf
+cp $TEMP_DIR/autoadd.conf.tmp $SMB_CONF_DIR/autoadd.conf
 
 # Create new Samba share list
 cat nas_basefolderlist nas_basefolderlist_extra \
@@ -147,9 +151,11 @@ cat nas_basefolderlist nas_basefolderlist_extra \
 
 # Create new include conf files
 msg "Creating new SMB folder shares..."
-while IFS=',' read -r dir desc user group permission user_groups; do
+while IFS=',' read -r dir desc user group permission user_groups
+do
   # Check for dir
-  if [ -d "${DIR_SCHEMA}/$dir" ]; then
+  if [ -d "$DIR_SCHEMA/$dir" ]
+  then
     # Create a includes conf file
     printf "%b\n" "[$dir]" \
     "  comment = $desc" \
@@ -158,16 +164,16 @@ while IFS=',' read -r dir desc user group permission user_groups; do
     "  read only = no" \
     "  create mask = 0775" \
     "  directory mask = 0775" \
-    "  valid users = %S,$(echo "$user_groups")\n" > ${SMB_CONF_DIR}/${dir}.conf
-    info "New SMB folder share: ${YELLOW}[${dir^}]${NC} ${DIR_SCHEMA}/${dir}"
+    "  valid users = %S,$(echo "$user_groups")\n" > $SMB_CONF_DIR/${dir}.conf
+    info "New SMB folder share: ${YELLOW}[${dir^}]${NC} $DIR_SCHEMA/$dir"
   else
-    info "${DIR_SCHEMA}/${dir} does not exist. Skipping..."
+    info "$DIR_SCHEMA/$dir does not exist. Skipping..."
   fi
 done < nas_basefolderlist-samba_dir
 echo
 
 # Populate includes.conf with files in smb.conf.d directory
-ls "${SMB_CONF_DIR}"/* | sed -e 's/^/include = /' > $SMB_INCLUDES
+ls $SMB_CONF_DIR/* | sed -e 's/^/include = /' > $SMB_INCLUDES
 
 # Restart Samba server
 msg "Starting SMB service..."

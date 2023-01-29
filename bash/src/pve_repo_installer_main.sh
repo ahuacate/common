@@ -31,7 +31,8 @@ source $COMMON_PVE_SRC_DIR/pvesource_bash_defaults.sh
 
 #---- Check and Create vm installer list
 vm_input_LIST=()
-while IFS=':' read name build vm_type desc; do
+while IFS=':' read name build vm_type desc
+do
   # Skip # lines
   [[ "$name" =~ ^\#.*$ ]] && continue
   # Set installer filename
@@ -114,5 +115,4 @@ done
 
 #---- Cleanup
 installer_cleanup
-
 #-----------------------------------------------------------------------------------
