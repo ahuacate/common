@@ -17,7 +17,7 @@ then
   i=0
   while IFS=',' read -r PVE_MNT CT_MNT
   do
-    pct set ${CTID} -mp$i /mnt/pve/$PVE_MNT,mp=$CT_MNT
+    pct set $CTID -mp$i /mnt/pve/$PVE_MNT,mp=$CT_MNT
     ((i=i+1))
     info "\t${i}. Storage bind mount created: $PVE_MNT ---> ${YELLOW}$CT_MNT${NC}"
   done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}")
