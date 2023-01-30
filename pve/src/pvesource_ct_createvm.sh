@@ -56,30 +56,30 @@ OS_TMPL="${os_LIST[-1]}"
 # Set OS template storage location
 unset tmpl_dir_LIST
 tmpl_dir_LIST+=( "$(pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}')" )
-if [ ${#tmpl_dir_LIST[@]} -eq '0' ]
+if [ ${#tmpl_dir_LIST[@]} = 0 ]
 then
   warn "A problem has occurred:\n  - Cannot determine PVE host CT template storage location (i.e vztmpl content ).\n  - Cannot proceed until the User creates a template location.\nAborting installation in 3 seconds..."
   echo
   exit 0
-elif [ ${#tmpl_dir_LIST[@]} -eq '1' ]
+elif [ ${#tmpl_dir_LIST[@]} = 1 ]
 then
   OS_TMPL_DIR=${tmpl_dir_LIST[0]}
-elif [ ${#tmpl_dir_LIST[@]} -gt '1' ]
+elif [ ${#tmpl_dir_LIST[@]} -gt 1 ]
 then
   msg "More than one PVE template location has been detected.\n\n$(pvesm status -content vztmpl -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection..."
   OPTIONS_VALUES_INPUT=$(printf '%s\n' "${tmpl_dir_LIST[@]}")
   OPTIONS_LABELS_INPUT=$(printf '%s\n' "${tmpl_dir_LIST[@]}")
   makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
   singleselect SELECTED "$OPTIONS_STRING"
-  OS_TMPL_DIR=${RESULTS}
+  OS_TMPL_DIR="$RESULTS"
   echo
 fi
 
 # Download CT template
-if [ ! -f "/var/lib/vz/template/cache/${OS_TMPL}" ] || [ ! -f "/var/lib/pve/${OS_TMPL_DIR}/template/cache/${OS_TMPL}" ]
+if [ ! -f "/var/lib/vz/template/cache/$OS_TMPL" ] || [ ! -f "/var/lib/pve/$OS_TMPL_DIR/template/cache/$OS_TMPL" ]
 then
   msg "Downloading latest release of '${OSTYPE^} ${OSVERSION}' CT/LXC OS template ( be patient, might take a while )..."
-  pveam download ${OS_TMPL_DIR} ${OS_TMPL} 2>&1
+  pveam download $OS_TMPL_DIR $OS_TMPL 2>&1
   if [ $? -ne 0 ]
   then
     warn "A problem occurred while downloading the CT/LXC OS version: ${OSTYPE}-${OSVERSION}\nCheck your internet connection and try again. Aborting installation in 3 seconds..."
