@@ -143,7 +143,7 @@ done
 # Create storage 'Volume'
 if [ -n "${VOLUME_DIR}" ]
 then
-  find "$DIR_SCHEMA/$VOLUME_DIR" -name .foo_protect -exec chattr -i {} \;
+  find $DIR_SCHEMA/$VOLUME_DIR -name .foo_protect -exec chattr -i {} \;
   mkdir -p "$DIR_SCHEMA/$VOLUME_DIR"
   chmod 0755 "$DIR_SCHEMA/$VOLUME_DIR"
   chown root:users "$DIR_SCHEMA/$VOLUME_DIR"
@@ -157,7 +157,7 @@ do
   if [ -d "$DIR_SCHEMA/$dir" ]
   then
     info "Pre-existing folder: ${UNDERLINE}"$DIR_SCHEMA/$dir"${NC}\n  Setting $group group permissions for existing folder."
-    find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
+    find $DIR_SCHEMA/$dir -name .foo_protect -exec chattr -i {} \;
     setfacl -bn "$DIR_SCHEMA/$dir"
     chgrp -R "${group}" "$DIR_SCHEMA/$dir" >/dev/null
     chmod -R "${permission}" "$DIR_SCHEMA/$dir" >/dev/null
@@ -179,7 +179,6 @@ do
     echo
   else
     info "New base folder created:\n  ${WHITE}"$DIR_SCHEMA/$dir"${NC}"
-    find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
     mkdir -p "$DIR_SCHEMA/$dir" >/dev/null
     chgrp -R "${group}" "$DIR_SCHEMA/$dir" >/dev/null
     chmod -R "${permission}" "$DIR_SCHEMA/$dir" >/dev/null
@@ -213,7 +212,7 @@ then
     if [ -d "$DIR_SCHEMA/$dir" ]
     then
       info "${DIR_SCHEMA}/${dir} exists.\n  Setting $group group permissions for this folder."
-      find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
+      find $DIR_SCHEMA/$dir -name .foo_protect -exec chattr -i {} \;
       setfacl -bn "$DIR_SCHEMA/$dir"
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null

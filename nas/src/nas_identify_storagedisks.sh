@@ -21,65 +21,38 @@ do
 done < <( cat /etc/fstab | awk '$2 ~ /^\/mnt\/.*/ {print $2}' ) # /mnt mount point listing
 
 # Install PVE USB auto mount
-function install_usbautomount () {
-  PVE_VERS=$(pveversion -v | grep 'proxmox-ve:*' | awk '{ print $2 }' | sed 's/\..*$//')
-  if [ "$PVE_VERS" = 6 ]
+function install_usbautomount() {
+  # Get PVE version
+  pve_vers=$(pveversion -v | grep 'proxmox-ve:*' | awk '{ print $2 }' | sed 's/\..*$//')
+  # Get Debian version
+  version=$(cat /etc/debian_version)
+  if [[ "$version" =~ 11(.[0-9]+)? ]]
   then
-    # Remove old version
-    if [ "$(dpkg -l pve[0-9]-usb-automount >/dev/null 2>&1; echo $?)" = 0 ] && [ ! "$(dpkg -l pve6-usb-automount >/dev/null 2>&1; echo $?)" = 0 ]
-    then
-      apt-get remove --purge pve[0-9]-usb-automount -y > /dev/null
-    fi
-    # Install new version
-    if [ ! $(dpkg -l pve6-usb-automount >/dev/null 2>&1; echo $?) = 0 ]
-    then
-      msg "Installing PVE USB automount..."
-      apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2FAB19E7CCB7F415 &> /dev/null
-      echo "deb https://apt.iteas.at/iteas buster main" > /etc/apt/sources.list.d/iteas.list
-      apt-get -qq update > /dev/null
-      apt-get install pve6-usb-automount -y > /dev/null
-      if [ $(dpkg -l pve6-usb-automount >/dev/null 2>&1; echo $?) = 0 ]; then
-        info "PVE USB Automount status: ${GREEN}ok${NC} ( fully installed )"
-        echo
-      else
-        warn "There are problems with the installation. Manual intervention is required.\nExiting installation in 3 second. Bye..."
-        sleep 3
-        echo
-        trap cleanup EXIT
-      fi
-    fi
-  elif [ "$PVE_VERS" = 7 ]
+    deb_ver_codename="bullseye"
+  elif [[ "$version" =~ 10(.[0-9]+)? ]]
   then
-    # Remove old version
-    if [ $(dpkg -l pve[0-9]-usb-automount >/dev/null 2>&1; echo $?) = 0 ] && [ ! $(dpkg -l pve7-usb-automount >/dev/null 2>&1; echo $?) = 0 ]
-    then
-      apt-get remove --purge pve[0-9]-usb-automount -y > /dev/null
-    fi
-    # Install new version
-    if [ ! $(dpkg -l pve7-usb-automount >/dev/null 2>&1; echo $?) = 0 ]
-    then
-      msg "Installing PVE USB automount..."
-      apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2FAB19E7CCB7F415 &> /dev/null
-      echo "deb https://apt.iteas.at/iteas bullseye main" > /etc/apt/sources.list.d/iteas.list
-      apt-get -qq update > /dev/null
-      apt-get install pve7-usb-automount -y > /dev/null
-      if [ $(dpkg -l pve7-usb-automount >/dev/null 2>&1; echo $?) = 0 ]
-      then
-        info "PVE USB Automount status: ${GREEN}ok${NC} ( fully installed )"
-        echo
-      else
-        warn "There are problems with the installation. Manual intervention is required.\nExiting installation in 3 second. Bye..."
-        sleep 3
-        echo
-        trap cleanup EXIT
-      fi
-    fi
-  elif [ "$PVE_VERS" -lt 6 ]
+    deb_ver_codename="buster"
+  elif [[ "$version" =~ 9(.[0-9]+)? ]]
   then
-    warn "There are problems with the installation:\n\n      1. This installation requires Proxmox version 6 or later. To continue you must first upgrade your Proxmox host.\n\n      Exiting installation in 3 second. Bye..."
-    sleep 2
-    echo
-    trap cleanup EXIT
+    deb_ver_codename="stretch"
+  fi
+
+  # Remove old version
+  if [[ $(dpkg -l pve[0-9]-usb-automount 2>/dev/null) ]] && [[ ! $(dpkg -s pve${pve_vers}-usb-automount) ]]
+  then
+    apt-get remove --purge pve[0-9]-usb-automount -y > /dev/null
+  fi
+
+  # Install new version
+  if [[ ! $(dpkg -s pve${pve_vers}-usb-automount) ]]
+  then
+    # Add iteas key
+    gpg -k && gpg --no-default-keyring --keyring /usr/share/keyrings/iteas-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 23CAE45582EB0928
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/iteas-keyring.gpg] https://apt.iteas.at/iteas $deb_ver_codename main" > /etc/apt/sources.list.d/iteas.list
+    apt-get update
+    # Install USB automount
+    msg "Installing PVE USB automount..."
+    apt-get install pve${pve_vers}-usb-automount -y
   fi
 }
 

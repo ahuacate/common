@@ -49,13 +49,13 @@ section "PVE CT Prerequisites"
 pveam update >/dev/null
 
 # Check on latest CT OS version release template file
-unset os_LIST
+os_LIST=()
 mapfile -t os_LIST < <(pveam available -section system | sed -n "s/.*\($OSTYPE-$OSVERSION.*\)/\1/p" | sort -t - -k 2 -V)
 OS_TMPL="${os_LIST[-1]}"
 
 # Set OS template storage location
 tmpl_dir_LIST=()
-tmpl_dir_LIST+=( "$(pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}')" )
+tmpl_dir_LIST+=( $(pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}') )
 if [ ${#tmpl_dir_LIST[@]} = 0 ]
 then
   warn "A problem has occurred:\n  - Cannot determine PVE host CT template storage location (i.e vztmpl content ).\n  - Cannot proceed until the User creates a template location.\nAborting installation in 3 seconds..."
@@ -63,16 +63,17 @@ then
   exit 0
 elif [ ${#tmpl_dir_LIST[@]} = 1 ]
 then
+  # Sets tmpl dir (only one available)
   OS_TMPL_DIR=${tmpl_dir_LIST[0]}
 elif [ ${#tmpl_dir_LIST[@]} -gt 1 ]
 then
+  # More than 1 tmpl dir. User must select.
   msg "More than one PVE template location has been detected.\n\n$(pvesm status -content vztmpl -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection..."
   OPTIONS_VALUES_INPUT=$(printf '%s\n' "${tmpl_dir_LIST[@]}")
   OPTIONS_LABELS_INPUT=$(printf '%s\n' "${tmpl_dir_LIST[@]}")
   makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
   singleselect SELECTED "$OPTIONS_STRING"
   OS_TMPL_DIR="$RESULTS"
-  echo
 fi
 
 # Download CT template
