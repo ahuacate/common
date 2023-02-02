@@ -49,7 +49,7 @@ then
   info "PVE primary host IP address is set: ${YELLOW}$PVE_HOST_IP${NC}"
   echo
 else
-  msg_box "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm the PVE primary hostname and IP address ( lookup results '${PVE_HOSTNAME} : ${PVE_HOST_IP}' ). Only input the PVE primary host details and NOT the secondary host. These inputs are critical for system and application configuration."
+  msg_box "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm their PVE primary hostname and IP address ( lookup results show this machine as '${PVE_HOSTNAME} : ${PVE_HOST_IP}' ). Always input the PVE primary host details and NOT a secondary host. For example our default Primary host name is 'pve-01'. These inputs are critical for system and application configuration."
   # Manual Confirm PVE primary hostname
   while true
   do

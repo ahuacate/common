@@ -12,15 +12,10 @@
 #---- Body -------------------------------------------------------------------------
 
 #---- Install and Configure Webmin
-section "Installing and configuring Webmin."
+section "Installing and configuring Webmin"
 
 #---- Install Webmin Prerequisites
 msg "Installing Webmin prerequisites (be patient, might take a while)..."
-# apt-get install -y gnupg2 >/dev/null
-# bash -c 'echo "deb http://download.webmin.com/download/repository sarge contrib" >> /etc/apt/sources.list' >/dev/null
-# wget -qL http://www.webmin.com/jcameron-key.asc
-# apt-key add jcameron-key.asc 2>/dev/null
-# apt-get update >/dev/null
 if (( $(echo "$(lsb_release -sr) >= 22.04" | bc -l) )); then
   apt-get install -y gnupg2 >/dev/null
   echo "deb https://download.webmin.com/download/repository sarge contrib" | tee /etc/apt/sources.list.d/webmin.list
