@@ -1054,7 +1054,7 @@ then
 else
   if [ $(pwd -P) != $TEMP_DIR ]
   then
-    d $TEMP_DIR > /dev/null
+    cd $TEMP_DIR > /dev/null
   fi
 fi
 #-----------------------------------------------------------------------------------
