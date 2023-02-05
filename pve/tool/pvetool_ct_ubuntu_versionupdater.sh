@@ -11,8 +11,8 @@
 #---- Source -----------------------------------------------------------------------
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-COMMON_DIR="${DIR}/../../common"
-COMMON_PVE_SRC_DIR="${DIR}/../src"
+COMMON_DIR="$DIR/../../common"
+COMMON_PVE_SRC_DIR="$DIR/../src"
 
 #---- Dependencies -----------------------------------------------------------------
 
@@ -27,7 +27,7 @@ else
 fi
 
 # Run Bash Header
-source ${COMMON_PVE_SRC_DIR}/pvesource_bash_defaults.sh
+source $COMMON_PVE_SRC_DIR/pvesource_bash_defaults.sh
 
 #---- Static Variables -------------------------------------------------------------
 #---- Other Variables --------------------------------------------------------------
@@ -44,7 +44,8 @@ section "Upgrade OS, software packages and apply patches."
 msg_box "#### PLEASE READ CAREFULLY ####\n
 This program will update and upgrade your PVE container. User input is required. The program will create, edit and/or change system files on '${HOSTNAME^^}'. When an optional default setting is provided you may accept the default by pressing ENTER on your keyboard or change it to your preferred value."
 echo
-while true; do
+while true
+do
   read -p "Proceed with a upgrade of '${HOSTNAME^^}' [y/n]? " -n 1 -r YN
   echo
   case $YN in
@@ -67,7 +68,8 @@ while true; do
 done
 
 # Perform upgrades
-if [ ${OS_UPDATE} == 0 ]; then
+if [ "$OS_UPDATE" = 0 ]
+then
   msg "Performing ${HOSTNAME^^} package repository update..."
   apt-get update -y
   msg "Installing ${HOSTNAME^^} package upgrades..."
@@ -83,14 +85,16 @@ fi
 
 
 #---- Full System Release Upgrade
-if [ $(do-release-upgrade -c > /dev/null; echo $?) = 0 ]; then
+if [ "$(do-release-upgrade -c > /dev/null; echo $?)" = 0 ]
+then
   section "Ubuntu OS release upgrade."
   msg "Checking for a new Ubuntu OS release..."
   info "$(do-release-upgrade -c | sed '$d' | sed '1d') (Current Vers: $(lsb_release -d | awk -F'\t' '{print $2}'))"
   echo
   msg_box "#### PLEASE READ CAREFULLY - WARNING ####\n\nA Ubuntu OS release upgrade is available. This is a major upgrade. Software applications might NOT work properly after upgrading. It is recommended you perform a PVE CT backup before performing this upgrade. User input is required. The update will create, edit and/or change system files on '${HOSTNAME^^}'. When an optional default setting is provided you may accept the default by pressing ENTER on your keyboard or change it to your preferred value."
   echo
-  while true; do
+  while true
+  do
     read -p "Proceed with a OS RELEASE upgrade on '${HOSTNAME^^}' [y/n]? " -n 1 -r YN
     echo
     case $YN in
@@ -116,7 +120,8 @@ else
 fi
 
 # Release upgrade
-if [ ${RELEASE_UPGRADE} == 0 ]; then
+if [ "$RELEASE_UPGRADE" = 0 ]
+then
   msg "Performing release upgrade (be patient, this will take a while)..."
   apt-get update -y > /dev/null 2>&1
   do-release-upgrade -f DistUpgradeViewNonInteractive
@@ -132,10 +137,12 @@ fi
 #---- Finish ####
 section "Completion Status."
 
-if [ ${OS_UPDATE} == 0 ] && [ ${RELEASE_UPGRADE} == 0 ]; then
+if [ "$OS_UPDATE" = 0 ] && [ "$RELEASE_UPGRADE" = 0 ]
+then
     msg "The following upgrade tasks have been successfully performed on '${HOSTNAME^^}':\n  --  updated package lists\n  --  installed latest versions of packages\n  --  upgraded '${HOSTNAME^^}' to the latest Ubuntu OS release ( New Version:  $(lsb_release -d | awk -F'\t' '{print $2}') )"
     echo
-elif [ ${OS_UPDATE} == 0 ] && [ ${RELEASE_UPGRADE} == 1 ]; then
+elif [ "$OS_UPDATE" = 0 ] && [ "$RELEASE_UPGRADE" = 1 ]
+then
     msg "The following upgrade tasks have been successfully performed on '${HOSTNAME^^}':\n  --  updated package lists\n  --  installed latest versions of packages"
     echo
 fi
@@ -144,3 +151,4 @@ fi
 if [ -z "${PARENT_EXEC+x}" ]; then
   trap cleanup EXIT
 fi
+#-----------------------------------------------------------------------------------

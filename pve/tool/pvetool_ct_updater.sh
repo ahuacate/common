@@ -44,11 +44,13 @@ function update_container () {
 }
 
 function pct_start_waitloop () {
-  if [ "$(pct status $CTID)" == "status: stopped" ]; then
+  if [ "$(pct status $CTID)" = 'status: stopped' ]
+  then
     msg "Starting CT $CTID..."
     pct start $CTID
     msg "Waiting to hear from CT $CTID..."
-    while ! [[ "$(pct status $CTID)" == "status: running" ]]; do
+    while ! [[ "$(pct status $CTID)" == "status: running" ]]
+    do
       echo -n .
     done
     sleep 2
@@ -65,13 +67,16 @@ section "Performing Updates"
 for CTID in $CTIDS
 do
   status=`pct status $CTID`
-  if [ "$status" == "status: stopped" ]; then
+  if [ "$status" = 'status: stopped' ]
+  then
     msg "PVE CT $CTID status: ${RED}stopped${NC}
     pct_start_waitloop
     update_container $CTID
     msg "Returning PVE CT $CTID to former state...
     pct shutdown $CTID
-  elif [ "$status" == "status: running" ]; then
+  elif [ "$status" = 'status: running' ]
+  then
     update_container $CTID
   fi
 done; wait
+#-----------------------------------------------------------------------------------
