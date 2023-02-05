@@ -51,15 +51,18 @@ function ct_error_return() {
   return
 }
 function cleanup_failed () {
-  if [ ! -z ${MOUNT+x} ]; then
+  if [ ! -z ${MOUNT+x} ]
+  then
     pct unmount $CTID
   fi
   if $(pct status $CTID &> /dev/null); then
-    if [ "$(pct status $CTID | awk '{print $2}')" == "running" ]; then
+    if [ "$(pct status $CTID | awk '{print $2}')" = 'running' ]
+    then
       pct stop $CTID
     fi
     pct destroy $CTID
-  elif [ "$(pvesm list $STORAGE --vmid $CTID)" != "" ]; then
+  elif [ "$(pvesm list $STORAGE --vmid $CTID)" != "" ]
+  then
     pvesm free $ROOTFS
   fi
 }
@@ -88,9 +91,10 @@ function load_module() {
 }
 # Installer cleanup
 function installer_cleanup() {
-rm -R ${REPO_TEMP}/${GIT_REPO} &> /dev/null
-if [ -f ${REPO_TEMP}/${GIT_REPO}.tar.gz ]; then
-  rm ${REPO_TEMP}/${GIT_REPO}.tar.gz > /dev/null
+rm -R $REPO_TEMP/$GIT_REPO &> /dev/null
+if [ -f "$REPO_TEMP/${GIT_REPO}.tar.gz" ]
+then
+  rm $REPO_TEMP/${GIT_REPO}.tar.gz > /dev/null
 fi
 }
 
@@ -99,15 +103,17 @@ fi
 function input_username_val() {
   while true
   do
-    read -p "Enter a new user name : " USERNAME
-    if [ ${#USERNAME} -gt 18 ];then
-    msg "User name ${WHITE}'${USERNAME}'${NC} is not valid. A user name is considered valid when all of the following constraints are satisfied:\n\n  --  it contains only lowercase characters\n  --  it begins with 3 alphabet characters\n  --  it contains at least 5 characters and at most is 18 characters long\n  --  it may include numerics and underscores\n  --  it doesn't contain any hyphens, periods or special characters [!#$&%*+-]\n  --  it doesn't contain any white space\n\nTry again...\n"
-    elif [[ ${USERNAME} =~ ^([a-z]{3})([_]?[a-z\d]){2,15}$ ]]; then
-      info "Your user name is set : ${YELLOW}${USERNAME}${NC}"
+    read -p "Enter a new user name : " USERNAME < /dev/tty
+    if [ ${#USERNAME} -gt 18 ]
+    then
+    msg "User name ${WHITE}'$USERNAME'${NC} is not valid. A user name is considered valid when all of the following constraints are satisfied:\n\n  --  it contains only lowercase characters\n  --  it begins with 3 alphabet characters\n  --  it contains at least 5 characters and at most is 18 characters long\n  --  it may include numerics and underscores\n  --  it doesn't contain any hyphens, periods or special characters [!#$&%*+-]\n  --  it doesn't contain any white space\n\nTry again...\n"
+    elif [[ "$USERNAME" =~ ^([a-z]{3})([_]?[a-z\d]){2,15}$ ]]
+    then
+      info "Your user name is set : ${YELLOW}$USERNAME${NC}"
       echo
       break
     else
-      msg "User name ${WHITE}'${USERNAME}'${NC} is not valid. A user name is considered valid when all of the following constraints are satisfied:\n\n  --  it contains only lowercase characters\n  --  it begins with 3 alphabet characters\n  --  it contains at least 5 characters and at most is 18 characters long\n  --  it may include numerics and underscores\n  --  it doesn't contain any hyphens, periods or special characters [!#$&%*+-]\n  --  it doesn't contain any white space\n\nTry again...\n"
+      msg "User name ${WHITE}'$USERNAME'${NC} is not valid. A user name is considered valid when all of the following constraints are satisfied:\n\n  --  it contains only lowercase characters\n  --  it begins with 3 alphabet characters\n  --  it contains at least 5 characters and at most is 18 characters long\n  --  it may include numerics and underscores\n  --  it doesn't contain any hyphens, periods or special characters [!#$&%*+-]\n  --  it doesn't contain any white space\n\nTry again...\n"
     fi
   done
 }
@@ -116,19 +122,21 @@ function input_username_val() {
 function input_emailaddress_val() {
   while true
   do
-    read -p "Enter a valid email address for the user: " EMAIL_VAR
-    USER_EMAIL=$(echo "${EMAIL_VAR}" | sed 's/\s//g')
-    i=$(echo "${EMAIL_VAR}" | sed 's/\s//g')
+    read -p "Enter a valid email address for the user: " EMAIL_VAR < /dev/tty
+    USER_EMAIL=$(echo "$EMAIL_VAR" | sed 's/\s//g')
+    i=$(echo "$EMAIL_VAR" | sed 's/\s//g')
     IFS="@"
     set -- $i
     msg "Validating email..."
-    if [ "${#@}" -ne 2 ]; then
+    if [ "${#@}" -ne 2 ]
+    then
       warn "Your email address '$USER_EMAIL' was rejected. Possible non-conforming input. Try again..."
     else
       # Check domain
       domain="$2"
       dig $domain | grep "ANSWER: 0" 1>/dev/null && domain_check=0
-      if [ "${domain_check}" == '0' ]; then
+      if [ "${domain_check}" = 0 ]
+      then
         warn "Your email address '$USER_EMAIL' was rejected. Email domain $domain check failed. Try again..."
       else
         info "User email is set is set : ${YELLOW}${USER_EMAIL}${NC}"
@@ -142,19 +150,20 @@ function input_emailaddress_val() {
 # Input a USER_PWD with validation. Requires libcrack2
 function input_userpwd_val() {
   # Install libcrack2
-  if [ $(dpkg -s libcrack2 >/dev/null 2>&1; echo $?) != 0 ]; then
+  if [ ! $(dpkg -s libcrack2 >/dev/null 2>&1; echo $?) = 0 ]
+  then
   apt-get install -y libcrack2 > /dev/null
   fi
   while true
   do
-    read -p "Enter a password for ${USERNAME}: " USER_PWD
+    read -p "Enter a password for $USERNAME: " USER_PWD < /dev/tty
     msg "Testing password strength..."
     result="$(cracklib-check <<<"$USER_PWD")"
     # okay awk is  bad choice but this is a demo 
     okay="$(awk -F': ' '{ print $2}' <<<"$result")"
     if [[ "$okay" == "OK" ]]
     then
-      info "Your password is set : ${YELLOW}${USER_PWD}${NC}"
+      info "Your password is set : ${YELLOW}$USER_PWD${NC}"
       echo
       break
     else
@@ -167,41 +176,46 @@ function input_userpwd_val() {
 # Make a USER_PWD. Requires makepasswd
 function make_userpwd() {
   # Install makepasswd
-  if [ $(dpkg -s makepasswd >/dev/null 2>&1; echo $?) != 0 ]; then
+  if [ ! $(dpkg -s makepasswd >/dev/null 2>&1; echo $?) = 0 ]
+  then
     apt-get install -y makepasswd > /dev/null
   fi
   msg "Creating a 13 character password..."
   USER_PWD=$(makepasswd --chars 13)
-  info "Your password is set : ${YELLOW}${USER_PWD}${NC}"
+  info "Your password is set : ${YELLOW}$USER_PWD${NC}"
   echo
 }
 
 # PCT start and wait loop command
 function pct_start_waitloop() {
-  if [ "$(pct status ${CTID})" == "status: stopped" ]; then
-    msg "Starting CT ${CTID}..."
-    pct start ${CTID}
+  if [ "$(pct status $CTID)" = 'status: stopped' ]
+  then
+    msg "Starting CT $CTID..."
+    pct start $CTID
     msg "Waiting to hear from CT ${CTID}..."
-    while ! [[ "$(pct status ${CTID})" == "status: running" ]]; do
+    while ! [[ "$(pct status $CTID)" == "status: running" ]]
+    do
       echo -n .
     done
     sleep 2
-    info "CT ${CTID} status: ${GREEN}running${NC}"
+    info "CT $CTID status: ${GREEN}running${NC}"
     echo
   fi
 }
 
 # PCT stop and wait loop command
 function pct_stop_waitloop() {
-  if [ "$(pct status ${CTID})" == "status: running" ]; then
-    msg "Stopping CT ${CTID}..."
-    pct stop ${CTID}
-    msg "Waiting to hear from CT ${CTID}..."
-    while ! [[ "$(pct status ${CTID})" == "status: stopped" ]]; do
+  if [ "$(pct status ${CTID})" = 'status: running' ]
+  then
+    msg "Stopping CT $CTID..."
+    pct stop $CTID
+    msg "Waiting to hear from CT $CTID..."
+    while ! [[ "$(pct status $CTID)" == "status: stopped" ]]
+    do
       echo -n .
     done
     sleep 2
-    info "CT ${CTID} status: ${GREEN}stopped${NC}"
+    info "CT $CTID status: ${GREEN}stopped${NC}"
     echo
   fi
 }
@@ -229,7 +243,8 @@ function check_smtp_status() {
   # Host SMTP Option ('0' is inactive, '1' is active)
   var='ahuacate_smtp'
   file='/etc/postfix/main.cf'
-  if [ -f $file ] && [ "$(systemctl is-active --quiet postfix; echo $?)" == '0' ]; then
+  if [ -f "$file" ] && [ "$(systemctl is-active --quiet postfix; echo $?)" = 0 ]
+  then
     SMTP_STATUS=$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)
   else
     # Set SMTP inactive
@@ -246,12 +261,15 @@ function pct_check_systemctl() {
   msg "Checking '${service_name}' service status..."
   FAIL_MSG='Systemctl '${service_name}' has failed. Reason unknown.\nExiting installation script in 2 second.'
   i=0
-  while true; do
-    if [ $(pct exec $CTID -- systemctl is-active ${service_name}) = 'active' ]; then
+  while true
+  do
+    if [ $(pct exec $CTID -- systemctl is-active ${service_name}) = 'active' ]
+    then
       info "Systemctl '${service_name}' status: ${YELLOW}active${NC}"
       echo
       break
-    elif [ $(pct exec $CTID -- systemctl is-active ${service_name}) != 'active' ] && [ "$i" = '5' ]; then
+    elif [ ! $(pct exec $CTID -- systemctl is-active ${service_name}) = 'active' ] && [ "$i" = 5 ]
+    then
       warn "$FAIL_MSG"
       echo
       trap error_exit EXIT
@@ -265,14 +283,15 @@ function pct_check_systemctl() {
 # Make a folder name with validation
 function input_dirname_val() {
   while true; do
-    read -p "Enter a new folder name : " DIR_NAME
+    read -p "Enter a new folder name : " DIR_NAME < /dev/tty
     DIR_NAME=${DIR_NAME,,}
-    if [[ "${DIR_NAME}" =~ ^([a-z])([_]?[a-z\d]){3,15}$ ]]; then
-      info "Your user name is set : ${YELLOW}${DIR_NAME}${NC}"
+    if [[ "${DIR_NAME}" =~ ^([a-z])([_]?[a-z\d]){3,15}$ ]]
+    then
+      info "Your user name is set : ${YELLOW}$DIR_NAME${NC}"
       echo
       break
     else
-      msg "The folder name ${WHITE}'${DIR_NAME}'${NC} is not valid. A folder name is considered valid when all of the following constraints are satisfied:\n\n  --  it contains only lowercase characters\n  --  it contains at least 3 characters and at most is 12 characters long\n  --  it may include underscores\n  --  it doesn't start or end with a underscore\n  --  it doesn't contain any numerics or special characters [!#$&%*+-]\n  --  it doesn't contain any white space\n\nTry again..."
+      msg "The folder name ${WHITE}'$DIR_NAME'${NC} is not valid. A folder name is considered valid when all of the following constraints are satisfied:\n\n  --  it contains only lowercase characters\n  --  it contains at least 3 characters and at most is 12 characters long\n  --  it may include underscores\n  --  it doesn't start or end with a underscore\n  --  it doesn't contain any numerics or special characters [!#$&%*+-]\n  --  it doesn't contain any white space\n\nTry again..."
     fi
   done
 }
@@ -437,7 +456,7 @@ function multiselect_confirm () {
   # To get output results: printf '%s\n' "${RESULTS[@]}"
   while true; do
     multiselect "$1" "$2"
-    read -p "User accepts the final selection: [y/n]?" -n 1 -r YN
+    read -p "User accepts the final selection: [y/n]?" -n 1 -r YN < /dev/tty
     echo
     case $YN in
       [Yy]*)
@@ -581,7 +600,7 @@ function singleselect_confirm () {
   # To get output results: printf '%s\n' "${RESULTS[@]}"
   while true; do
     singleselect "$1" "$2"
-    read -p "User accepts the final selection: [y/n]?" -n 1 -r YN
+    read -p "User accepts the final selection: [y/n]?" -n 1 -r YN < /dev/tty
     echo
     case $YN in
       [Yy]*)
@@ -817,7 +836,8 @@ function get_config_value() {
       print value
     }' "${config_file}" | tr -d '"')
   # Check the exit status
-  if [ -z "$get_var" ]; then
+  if [ -z "$get_var" ]
+  then
     # Print a message if the command failed
     echo "No variable found."
   fi
@@ -904,7 +924,8 @@ function check_smtp_status() {
   # Host SMTP Option ('0' is inactive, '1' is active)
   var='ahuacate_smtp'
   file='/etc/postfix/main.cf'
-  if [ -f $file ] && [ "$(systemctl is-active --quiet postfix; echo $?)" == '0' ]; then
+  if [ -f $file ] && [ "$(systemctl is-active --quiet postfix; echo $?)" = 0 ]
+  then
     SMTP_STATUS=$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)
   else
     # Set SMTP inactive
@@ -921,12 +942,15 @@ function pct_check_systemctl() {
   msg "Checking '${service_name}' service status..."
   FAIL_MSG='Systemctl '${service_name}' has failed. Reason unknown.\nExiting installation script in 2 second.'
   i=0
-  while true; do
-    if [ $(pct exec $CTID -- systemctl is-active ${service_name}) = 'active' ]; then
+  while true
+  do
+    if [ $(pct exec $CTID -- systemctl is-active ${service_name}) = 'active' ]
+    then
       info "Systemctl '${service_name}' status: ${YELLOW}active${NC}"
       echo
       break
-    elif [ $(pct exec $CTID -- systemctl is-active ${service_name}) != 'active' ] && [ "$i" = '5' ]; then
+    elif [ $(pct exec $CTID -- systemctl is-active ${service_name}) != 'active' ] && [ "$i" = '5' ]
+    then
       warn "$FAIL_MSG"
       echo
       trap error_exit EXIT
@@ -939,7 +963,8 @@ function pct_check_systemctl() {
 
 
 #---- Bash Messaging Functions
-if [ $(dpkg -s boxes > /dev/null 2>&1; echo $?) = 1 ]; then
+if [ $(dpkg -s boxes > /dev/null 2>&1; echo $?) = 1 ]
+then
   apt-get install -y boxes > /dev/null
 fi
 function msg() {
@@ -1002,9 +1027,11 @@ function indent2() {
 function valid_ip() {
   local  ip=$1
   local  stat=1
-  if [[ $ip =~ ${ip4_regex} ]]; then
+  if [[ $ip =~ ${ip4_regex} ]]
+  then
     stat=$?
-  elif [[ $ip =~ ${ip6_regex} ]]; then
+  elif [[ $ip =~ ${ip6_regex} ]]
+  then
     stat=$?
   fi
   return $stat
@@ -1020,11 +1047,14 @@ UNDERLINE=$'\033[4m'
 printf '\033[8;40;120t'
 
 #---- Set Bash Temp Folder
-if [ -z "${TEMP_DIR+x}" ]; then
-    TEMP_DIR=$(mktemp -d)
-    pushd $TEMP_DIR > /dev/null
+if [ -z "${TEMP_DIR+x}" ]
+then
+  TEMP_DIR=$(mktemp -d)
+  pushd $TEMP_DIR > /dev/null
 else
-    if [ $(pwd -P) != $TEMP_DIR ]; then
-    cd $TEMP_DIR > /dev/null
-    fi
+  if [ $(pwd -P) != $TEMP_DIR ]
+  then
+    d $TEMP_DIR > /dev/null
+  fi
 fi
+#-----------------------------------------------------------------------------------
