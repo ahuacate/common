@@ -200,10 +200,6 @@ spinner() {
 }
 
 #---- Body -------------------------------------------------------------------------
-if [ "$TAG" = 0 ]
-then
-  TAG=1
-fi
 
 #---- Prerequisites
 section "Prerequisites"
