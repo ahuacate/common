@@ -378,11 +378,13 @@ echo
 if [ "$RESULTS" = 'TYPE02' ]
 then
   # Set VLAN to disable/off
-  if [ ! "$TAG" = 0 ]
+  if [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ]
   then
-    TAG='0'
+    TAG=0
+  elif [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
+    TAG=1
   fi
-  VLAN_STATUS='0'
+  VLAN_STATUS=0
 fi
 
 
@@ -438,7 +440,7 @@ fi
 
 # Query and match or map network variables to PVE host IP format
 # if [[ "$(hostname -i)" =~ ${ip4_regex} ]] && [[ "$NET_DHCP" = 0 || ${VLAN_STATUS} == '0' ]]; then
-if [[ "$(hostname -i)" =~ ${ip4_regex} ]] && [[ "$NET_DHCP" = '0' ]]
+if [[ "$(hostname -i)" =~ ${ip4_regex} ]] && [ "$NET_DHCP" = 0 ]
 then
   # Copy preset variable
   preset_IP=$IP
@@ -456,12 +458,12 @@ then
   do
     eval k='$'$j
     # Set VLAN octet
-    if [ "$TAG" = 0 ]
+    if [ "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
     then
       octet3=$(hostname -i | awk -F'.' '{ print $3 }')
       nameserver_octet4=$(cat /etc/resolv.conf | grep -i '^nameserver' | head -n1 | cut -d ' ' -f2 | awk -F'.' '{ print $4 }')
       gw_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
-    elif [ ! "$TAG" = 0 ]
+    elif [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
     then
       octet3=$(echo "${k}" | awk -F'.' '{ print $3 }')
       nameserver_octet4=$(cat /etc/resolv.conf | grep -i '^nameserver' | head -n1 | cut -d ' ' -f2 | awk -F'.' '{ print $4 }')
@@ -486,12 +488,12 @@ then
         NAMESERVER=$(hostname -i | awk -F'.' -v octet3="$octet3" -v octet4="$nameserver_octet4" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
       fi
     fi
-  done <<< $(printf '%s\n' "${ipVARS[@]}")
+  done < <( printf '%s\n' "${ipVARS[@]}" )
 
   # Display msg for static IP only
   if [ "$NET_DHCP" = 0 ]
   then
-    msg_box "#### MODIFYING EASY SCRIPT IPv4 PRESETS ####\n\nOur Easy Scripts (ES) settings for your IPv4 ${VM_TYPE^^} addresses have been modified where required to match your PVE hosts IPv4 range, nameserver and gateway addresses and VLAN status ( $(if [ "$TAG" = '0' ]; then echo "disabled"; else echo "enabled"; fi) ).\n\n$(printf '%s\n' "${displayVARS[@]}" | column -s ":" -t -N "IP DESCRIPTION,DEFAULT ES PRESET,NEW ES PRESET" | indent2)\n\nThe new ES presets will be checked and validated in the next steps."
+    msg_box "#### MODIFYING EASY SCRIPT IPv4 PRESETS ####\n\nOur Easy Scripts (ES) settings for your IPv4 ${VM_TYPE^^} addresses have been modified where required to match your PVE hosts IPv4 range, nameserver and gateway addresses and VLAN status ( $(if [[ "$TAG" =~ (0|1) ]]; then echo "disabled"; else echo "enabled"; fi) ).\n\n$(printf '%s\n' "${displayVARS[@]}" | column -s ":" -t -N "IP DESCRIPTION,DEFAULT ES PRESET,NEW ES PRESET" | indent2)\n\nThe new ES presets will be checked and validated in the next steps."
     echo
   fi
 elif [ "$NET_DHCP" = 1 ]
@@ -499,7 +501,7 @@ then
   if [[ "$(hostname -i)" =~ ${ip4_regex} ]]
   then
     # Nameserver - match to PVE host IP format & VLAN ( for IPv4 only )
-    if [ ! "$TAG" = '0' ]
+    if [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
     then
       nameserver_octet3=$TAG
       nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
@@ -517,7 +519,7 @@ then
     GW=''
     GW6=''
     # Set Nameserver
-    if [ ! "$TAG" = 0 ]
+    if [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
     then
       NAMESERVER=$NAMESERVER
     else
@@ -1013,19 +1015,26 @@ fi
 
 
 #---- Set VLAN
-if [ ! "$TAG" = '0' ]
+vlan_regex='^[2-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-4]$'
+if [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
 then
   msg "Setting VLAN ID for network..."
   while true
   do
     read -p "Enter a VLAN ID ( numeric [2-254] or '0' for no vlan ): " -e -i $TAG VLAN
-    if [ "$VLAN" = 0 ]
+    if [ "$VLAN" = 0 ] && [ "$VM_TYPE" = ct ]
     then
       TAG=$VLAN
       info "VLAN status : ${YELLOW}$VLAN${NC} - disabled"
       echo
       break
-    elif [[ "$VLAN" =~ ^([2-9][0-9]?|254)$ ]]
+    elif [ "$VLAN" = 1 ] && [ "$VM_TYPE" = vm ]
+    then
+      TAG=1
+      info "VLAN status : ${YELLOW}$VLAN${NC} - disabled"
+      echo
+      break
+    elif [[ "$VLAN" =~ ${vlan_regex} ]]
     then
       TAG=$VLAN
       info "VLAN status : ${YELLOW}$VLAN${NC} - enabled"
@@ -1037,7 +1046,6 @@ then
     fi
   done
 fi
-
 
 #---- Set Static IP Address
 if [ "$NET_DHCP" = 0 ]
@@ -1053,20 +1061,24 @@ then
   then
     IP_VAR="$IP"
   fi
+
   while true
   do
-    read -p "Enter a IP address ( IPv4 or IPv6 ): " -e -i $IP_VAR IP_VAR
-    if [[ "$IP_VAR" =~ ${ip4_regex} ]] && [ "$TAG" = 0 ] && [ ! "$(echo "$IP_VAR" | awk -F'.' '{print $3}')" = 1 ]
-    then
-      warn "The IPv4 address '$IP_VAR' is set for VLAN $(echo "$IP_VAR" | awk -F'.' '{print $3}'). Network VLAN is currently set as disabled. Try again..."
-      echo
-      break
-    elif [[ "$IP_VAR" =~ ${ip4_regex} ]] && [ ! "$TAG" = 0 ] && [ ! "$(echo "$IP_VAR" | awk -F'.' '{print $3}')" = $TAG ]
-    then
-      warn "The IPv4 address '$IP_VAR' third octet '$(echo "$IP_VAR" | awk -F'.' '{print $3}')' does not match your VLAN ID ${TAG}. This installer script always sets the third IPv4 octet to match the VLAN number. Try again..."
-      echo
-      break
-    fi
+    while true
+    do
+      read -p "Enter a IP address ( IPv4 or IPv6 ): " -e -i $IP_VAR IP_VAR
+      if [[ "$IP_VAR" =~ ${ip4_regex} ]] && [[ "$TAG" =~ (0|1) ]] && [ ! "$(echo "$IP_VAR" | awk -F'.' '{print $3}')" = 1 ]
+      then
+        warn "The IPv4 address '$IP_VAR' is set for VLAN $(echo "$IP_VAR" | awk -F'.' '{print $3}'). Network VLAN is currently set as disabled. Try again..."
+        echo
+      elif [[ "$IP_VAR" =~ ${ip4_regex} ]] && [[ ! "$TAG" =~ (0|1) ]] && [ ! "$(echo "$IP_VAR" | awk -F'.' '{print $3}')" = $TAG ]
+      then
+        warn "The IPv4 address '$IP_VAR' third octet '$(echo "$IP_VAR" | awk -F'.' '{print $3}')' does not match your VLAN ID ${TAG}. This installer script always sets the third IPv4 octet to match the VLAN number. Try again..."
+        echo
+      else
+        break
+      fi
+    done
     # Validate IP
     FAIL_MSG="The IP address is not valid. A valid IP address is when all of the following constraints are satisfied:\n
     --  it does not exist on the network.
@@ -1074,7 +1086,7 @@ then
     --  it is not assigned to any other PVE CT or VM.
     --  it doesn't contain any white space.\n
     Try again..."
-    PASS_MSG="IP address is set: ${YELLOW}${IP_VAR}${NC}\nVLAN is set: ${YELLOW}${TAG}${NC}$(if [ "$TAG" = 0 ]; then echo " - disabled"; else echo " - enabled"; fi)"
+    PASS_MSG="IP address is set: ${YELLOW}$IP_VAR${NC}\nVLAN is set: ${YELLOW}$TAG${NC}$(if [[ "$TAG" =~ (0|1) ]]; then echo " - disabled"; else echo " - enabled"; fi)"
     valid_ip "$IP_VAR"
     check1=$?
     ip_free "$IP_VAR"
@@ -1146,71 +1158,149 @@ fi
 
 
 #---- Set Nameserver IP Address ( DNS )
-if [ ! "$TAG" = '0' ] && [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp)$ ]] || [[ "$IP" =~ ${ip4_regex} ]] && [ ! "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = $TAG ]
+if [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp)$ ]] || [[ "$IP" =~ ${ip4_regex} ]]
 then
-  # Nameserver - match to PVE host IP format ( for IPv4 only )
-  nameserver_octet3=$TAG
-  nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
-  NAMESERVER_VAR=$(hostname -i | awk -F'.' -v octet3="$nameserver_octet3" -v octet4="$nameserver_octet4" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
-  # Set nameserver
-  msg "Setting '${HOSTNAME^}' Nameserver IP address..."
-  while true
-  do
-    read -p "Enter a Nameserver IP address for vlan${TAG}: " -e -i $NAMESERVER_VAR NAMESERVER
-    FAIL_MSG="The Nameserver address 'appears' to be not valid. A valid Nameserver IP address is when all of the following constraints are satisfied:\n
-    --  the Nameserver server IP exists on the network ( passes ping test ).
-    --  it meets the IPv4 or IPv6 standard.
-    --  can resolve host command tests of public URLs ( ibm.com, github.com ).\n
-    This fail warning may be false flag. Because the Nameserver IP address is on a VLAN different to the host LAN network security maybe blocking access to '${NAMESERVER}' vlan.\n
-    Manually accept or try again..."
-    PASS_MSG="Nameserver IP server is set: ${YELLOW}$NAMESERVER${NC}"
-    valid_dns "$NAMESERVER"
-    if [ $? == 0 ]
-    then
-      info "$PASS_MSG"
-      echo
-      break
-    elif [ $? != 0 ]
-    then
-      warn "$FAIL_MSG"
-      # Manually validate the entry
-      while true
-      do
-        read -p "Accept Nameserver IP '${NAMESERVER}' as correct [y/n]?: " -n 1 -r YN
-        echo
-        case $YN in
-          [Yy]*)
-            info "$PASS_MSG"
-            echo
-            break 2
-            ;;
-          [Nn]*)
-            msg "Try again..."
-            echo
-            break
-            ;;
-          *)
-            warn "Error! Entry must be 'y' or 'n'. Try again..."
-            echo
-            ;;
-        esac
-      done
+  if [[ ! "$TAG" =~ (0|1) ]] && [ ! "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = $TAG ]
+  then
+    # Nameserver - match to PVE host IP format ( for IPv4 only )
+    nameserver_octet3=$TAG
+    nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
+    NAMESERVER_VAR=$(hostname -i | awk -F'.' -v octet3="$nameserver_octet3" -v octet4="$nameserver_octet4" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
 
-      echo
-    fi
-  done
-elif [ ! "$TAG" == '0' ] && [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp)$ ]] || [[ "$IP" =~ ${ip4_regex} ]] && [ "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = "$TAG" ]; then
-  # Set nameserver to match host (same vlan)
-  NAMESERVER=$(ip route show default | awk '/default/ {print $3}')
-elif [ ! "$TAG" = 0 ] && [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp6)$ ]] || [[ "$IP6" =~ ${ip6_regex} ]]
-then
-  # IPv6 Nameserver set to host
-  NAMESERVER=''
-elif [ "$TAG" = 0 ]
-then
-  # Nameserver set to host
-  NAMESERVER=''
+    # Set nameserver
+    msg "Setting '${HOSTNAME^}' Nameserver IP address..."
+    while true
+    do
+      read -p "Enter a Nameserver IP address for vlan$TAG: " -e -i $NAMESERVER_VAR NAMESERVER
+      FAIL_MSG="The Nameserver address 'appears' to be not valid. A valid Nameserver IP address is when all of the following constraints are satisfied:\n
+      --  the Nameserver server IP exists on the network ( passes ping test ).
+      --  it meets the IPv4 or IPv6 standard.
+      --  can resolve host command tests of public URLs ( ibm.com, github.com ).\n
+      This fail warning may be false flag. Because the Nameserver IP address is on a VLAN different to the host LAN network security maybe blocking access to '${NAMESERVER}' vlan.\n
+      Manually accept or try again..."
+      PASS_MSG="Nameserver IP server is set: ${YELLOW}$NAMESERVER${NC}"
+      valid_dns "$NAMESERVER"
+      if [ "$?" = 0 ]
+      then
+        info "$PASS_MSG"
+        echo
+        break
+      elif [ ! "$?" = 0 ]
+      then
+        warn "$FAIL_MSG"
+        # Manually validate the entry
+        while true
+        do
+          read -p "Accept Nameserver IP '${NAMESERVER}' as correct [y/n]?: " -n 1 -r YN
+          echo
+          case $YN in
+            [Yy]*)
+              info "$PASS_MSG"
+              echo
+              break 2
+              ;;
+            [Nn]*)
+              msg "Try again..."
+              echo
+              break
+              ;;
+            *)
+              warn "Error! Entry must be 'y' or 'n'. Try again..."
+              echo
+              ;;
+          esac
+        done
+      fi
+    done
+  elif [ "$VM_TYPE" = ct ] && [ ! "$TAG" = 0 ] && [ "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = $TAG ]
+  then
+    # Set nameserver to match host (same vlan)
+    NAMESERVER=$(ip route show default | awk '/default/ {print $3}')
+  elif [ "$VM_TYPE" = vm ] && [ ! "$TAG" = 1 ] && [ "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = $TAG ]
+  then
+    # Set nameserver to match host (same vlan)
+    NAMESERVER=$(ip route show default | awk '/default/ {print $3}')
+  elif [[ ! "$TAG" =~ (0|1) ]] && [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp6)$ ]] || [[ "$IP6" =~ ${ip6_regex} ]]
+  then
+    # IPv6 Nameserver set to host
+    NAMESERVER=''
+  elif [ "$VM_TYPE" = ct ] && [ "$TAG" = 0 ]
+  then
+    # Nameserver set to host
+    NAMESERVER=''
+  elif [ "$VM_TYPE" = vm ] && [ "$TAG" = 1 ]
+  then
+    # Nameserver set to host
+    NAMESERVER=''
+  fi
 fi
+
+
+# if [ ! "$TAG" = 0 ] && [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp)$ ]] || [[ "$IP" =~ ${ip4_regex} ]] && [ ! "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = $TAG ]
+# then
+#   # Nameserver - match to PVE host IP format ( for IPv4 only )
+#   nameserver_octet3=$TAG
+#   nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
+#   NAMESERVER_VAR=$(hostname -i | awk -F'.' -v octet3="$nameserver_octet3" -v octet4="$nameserver_octet4" 'BEGIN {OFS=FS} { print $1, $2, octet3, octet4 }')
+#   # Set nameserver
+#   msg "Setting '${HOSTNAME^}' Nameserver IP address..."
+#   while true
+#   do
+#     read -p "Enter a Nameserver IP address for vlan${TAG}: " -e -i $NAMESERVER_VAR NAMESERVER
+#     FAIL_MSG="The Nameserver address 'appears' to be not valid. A valid Nameserver IP address is when all of the following constraints are satisfied:\n
+#     --  the Nameserver server IP exists on the network ( passes ping test ).
+#     --  it meets the IPv4 or IPv6 standard.
+#     --  can resolve host command tests of public URLs ( ibm.com, github.com ).\n
+#     This fail warning may be false flag. Because the Nameserver IP address is on a VLAN different to the host LAN network security maybe blocking access to '${NAMESERVER}' vlan.\n
+#     Manually accept or try again..."
+#     PASS_MSG="Nameserver IP server is set: ${YELLOW}$NAMESERVER${NC}"
+#     valid_dns "$NAMESERVER"
+#     if [ $? == 0 ]
+#     then
+#       info "$PASS_MSG"
+#       echo
+#       break
+#     elif [ $? != 0 ]
+#     then
+#       warn "$FAIL_MSG"
+#       # Manually validate the entry
+#       while true
+#       do
+#         read -p "Accept Nameserver IP '${NAMESERVER}' as correct [y/n]?: " -n 1 -r YN
+#         echo
+#         case $YN in
+#           [Yy]*)
+#             info "$PASS_MSG"
+#             echo
+#             break 2
+#             ;;
+#           [Nn]*)
+#             msg "Try again..."
+#             echo
+#             break
+#             ;;
+#           *)
+#             warn "Error! Entry must be 'y' or 'n'. Try again..."
+#             echo
+#             ;;
+#         esac
+#       done
+
+#       echo
+#     fi
+#   done
+# elif [ ! "$TAG" == '0' ] && [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp)$ ]] || [[ "$IP" =~ ${ip4_regex} ]] && [ "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = "$TAG" ]; then
+#   # Set nameserver to match host (same vlan)
+#   NAMESERVER=$(ip route show default | awk '/default/ {print $3}')
+# elif [ ! "$TAG" = 0 ] && [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp6)$ ]] || [[ "$IP6" =~ ${ip6_regex} ]]
+# then
+#   # IPv6 Nameserver set to host
+#   NAMESERVER=''
+# elif [ "$TAG" = 0 ]
+# then
+#   # Nameserver set to host
+#   NAMESERVER=''
+# fi
 
 
 #---- Set CTID/VMID
@@ -1225,7 +1315,7 @@ then
 fi
 msg "Setting ${HOSTNAME^} ${ID_NUM_TYPE}..."
 # Set temporary ID number if script CTID/VMID preset is not available
-if [ -n "${IP}" ] && [[ "$IP" =~ ${ip4_regex} ]] && [ ! $(valid_machineid ${ID_NUM_TMP} > /dev/null 2>&1; echo $?) = 0 ]
+if [ -n "${IP}" ] && [[ "$IP" =~ ${ip4_regex} ]] && [ ! $(valid_machineid $ID_NUM_TMP > /dev/null 2>&1; echo $?) = 0 ]
 then
   if [ $(valid_machineid "$(echo ${IP} | awk -F'.' '{print $4}')" > /dev/null 2>&1; echo $?) = 0 ]
   then
