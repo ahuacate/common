@@ -11,7 +11,7 @@
 # Requires "${nas_subfolder_LIST[@]}", "${nas_basefolder_LIST[@]}", "${nas_basefolder_extra_LIST[@]}"  array
 
 # Check for NFS installation
-if [ ! $(dpkg -s nfs-kernel-server > /dev/null 2>&1; echo $?) = 0 ]
+if [[ ! $(dpkg -s nfs-kernel-server 2> /dev/null) ]]
 then
   msg "Installing NFS (be patient, may take a while)..."
   apt-get install -y nfs-kernel-server >/dev/null

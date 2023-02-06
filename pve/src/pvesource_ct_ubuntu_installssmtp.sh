@@ -94,7 +94,7 @@ then
 section "Checking Prerequisites."
 
 msg "Checking SSMTP status..."
-if [ "$(dpkg -s ssmtp >/dev/null 2>&1; echo $?)" = 0 ]
+if [[ $(dpkg -s ssmtp 2>/dev/null) ]]
 then
   info "SSMTP status: ${GREEN}active (running).${NC}"
 else
@@ -102,7 +102,7 @@ else
   apt-get install ssmtp -y >/dev/null
   apt-get install sharutils -y >/dev/null
   sleep 1
-  if [ "$(dpkg -s ssmtp >/dev/null 2>&1; echo $?)" = 0 ]
+  if [[ $(dpkg -s ssmtp 2>/dev/null) ]]
   then
     info "SSMTP status: ${GREEN}active (running).${NC}"
   else
@@ -380,7 +380,7 @@ echo
 
 #---- Setup Webmin Email Service
 # First check if Webmin is installed
-if [ "$(dpkg -s webmin >/dev/null 2>&1; echo $?)" = 0 ]
+if [[ $(dpkg -s webmin 2> /dev/null) ]]
 then
   section "Configure Webmin SendMail"
   echo

@@ -17,7 +17,7 @@ then
 fi
 
 # Check for ACL installation
-if [[ ! $(dpkg -s acl) ]]
+if [[ ! $(dpkg -s acl 2> /dev/null) ]]
 then
   apt-get install -y acl > /dev/null
 fi

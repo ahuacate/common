@@ -14,7 +14,7 @@ then
 fi
 
 # Check for Git SW
-if [[ ! $(dpkg -s git) ]]
+if [[ ! $(dpkg -s git 2> /dev/null) ]]
 then
   apt-get install git -yqq
 fi

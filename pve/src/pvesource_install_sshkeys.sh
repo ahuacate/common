@@ -35,7 +35,7 @@ then
   fi
 else
   # Install linux libuser
-  if [[ ! $(dpkg -s libuser) ]]
+  if [[ ! $(dpkg -s libuser 2> /dev/null) ]]
     msg "Installing libuser..."
     apt-get install -y libuser >/dev/null
     info "libuser status: ${GREEN}installed${NC}"
@@ -44,7 +44,7 @@ else
 fi
 
 # Install Puttytools
-if [[ ! $(dpkg -s putty-tools) ]]
+if [[ ! $(dpkg -s putty-tools 2> /dev/null) ]]
 then
   msg "Installing Putty Tools..."
   apt-get install -y putty-tools >/dev/null
@@ -281,7 +281,7 @@ then
   # uuencode for Postfix (part of package sharutils)
   if [ "$SMTP_STATUS" = 1 ]
   then
-    if [[ ! $(dpkg -s sharutils) ]]
+    if [[ ! $(dpkg -s sharutils 2> /dev/null) ]]
       msg "Checking SMTP Postfix email server prerequisites..."
       msg "Installing sharutils (uuencode)..."
       apt-get install -y sharutils >/dev/null

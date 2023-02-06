@@ -38,13 +38,13 @@ function install_usbautomount() {
   fi
 
   # Remove old version
-  if [[ $(dpkg -l pve[0-9]-usb-automount 2>/dev/null) ]] && [[ ! $(dpkg -s pve${pve_vers}-usb-automount) ]]
+  if [[ $(dpkg -l pve[0-9]-usb-automount 2>/dev/null) ]] && [[ ! $(dpkg -s pve${pve_vers}-usb-automount 2> /dev/null) ]]
   then
     apt-get remove --purge pve[0-9]-usb-automount -y > /dev/null
   fi
 
   # Install new version
-  if [[ ! $(dpkg -s pve${pve_vers}-usb-automount) ]]
+  if [[ ! $(dpkg -s pve${pve_vers}-usb-automount 2> /dev/null) ]]
   then
     # Add iteas key
     gpg -k && gpg --no-default-keyring --keyring /usr/share/keyrings/iteas-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 23CAE45582EB0928

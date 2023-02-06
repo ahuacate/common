@@ -24,7 +24,7 @@ then
   # Installing VA-INFO
   apt-get --only-upgrade install vainfo -y > /dev/null
   apt-get install vainfo -y > /dev/null
-  if [ $(dpkg -s vainfo > /dev/null 2>&1; echo $?) = 0 ]
+  if [[ $(dpkg -s vainfo 2> /dev/null) ]]
   then
     chmod 666 /dev/dri/renderD128 >/dev/null
     # Creating rc.local script to set permissions for /dev/dri/renderD128

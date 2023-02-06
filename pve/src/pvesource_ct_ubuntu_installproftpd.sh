@@ -58,7 +58,7 @@ done
 if [ "$INSTALL_PROFTPD" = 0 ]
 then
   msg "Checking ProFTPd status..."
-  if [ "$(dpkg -s proftpd-core >/dev/null 2>&1; echo $?)" = 0 ]
+  if [[ $(dpkg -s proftpd-core 2>/dev/null) ]]
   then
     info "ProFTPd status: ${GREEN}installed.${NC} ( $(proftpd --version) )"
     echo
@@ -67,7 +67,7 @@ then
     apt-get -y update >/dev/null 2>&1
     apt-get install -y proftpd-core openssl proftpd-mod-crypto >/dev/null
     sleep 1
-    if [ "$(dpkg -s proftpd-core >/dev/null 2>&1; echo $?)" = 0 ]
+    if [[ $(dpkg -s proftpd-core 2>/dev/null) ]]
     then
       info "ProFTPd status: ${GREEN}installed${NC} ( $(proftpd --version) )"
       echo

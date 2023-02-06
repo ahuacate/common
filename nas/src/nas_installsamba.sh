@@ -104,7 +104,7 @@ EOF
 fi
 
 # Create nas_basefolderlist-xtra
-if [ ! -f ${TEMP_DIR}/nas_basefolderlist_extra ]
+if [ ! -f "$TEMP_DIR/nas_basefolderlist_extra" ]
 then
   touch "$TEMP_DIR/nas_basefolderlist_extra"
 fi
@@ -115,7 +115,7 @@ fi
 section "Installing and configuring SMB (samba)"
 
 # Check for SMB installation
-if [ ! $(dpkg -s samba > /dev/null 2>&1; echo $?) = 0 ]
+if [[ ! $(dpkg -s samba 2> /dev/null) ]]
 then
   msg "Installing SMB (be patient, may take a while)..."
   apt-get install -y samba-common-bin samba >/dev/null

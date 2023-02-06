@@ -7,13 +7,13 @@
 #---- Dependencies -----------------------------------------------------------------
 
 # Nmap
-if [[ ! $(dpkg -s nmap) ]]
+if [[ ! $(dpkg -s nmap 2> /dev/null) ]]
 then
   apt-get install nmap -yqq
 fi
 
 # Ethtool
-if [[ ! $(dpkg -s ethtool) ]]
+if [[ ! $(dpkg -s ethtool 2> /dev/null) ]]
 then
   apt-get install ethtool -yqq
 fi

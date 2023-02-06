@@ -150,7 +150,7 @@ function input_emailaddress_val() {
 # Input a USER_PWD with validation. Requires libcrack2
 function input_userpwd_val() {
   # Install libcrack2
-  if [ ! $(dpkg -s libcrack2 >/dev/null 2>&1; echo $?) = 0 ]
+  if [[ ! $(dpkg -s libcrack2 2>/dev/null) ]]
   then
   apt-get install -y libcrack2 > /dev/null
   fi
@@ -176,7 +176,7 @@ function input_userpwd_val() {
 # Make a USER_PWD. Requires makepasswd
 function make_userpwd() {
   # Install makepasswd
-  if [ ! $(dpkg -s makepasswd >/dev/null 2>&1; echo $?) = 0 ]
+  if [[ ! $(dpkg -s makepasswd 2>/dev/null) ]]
   then
     apt-get install -y makepasswd > /dev/null
   fi
@@ -963,7 +963,7 @@ function pct_check_systemctl() {
 
 
 #---- Bash Messaging Functions
-if [ $(dpkg -s boxes > /dev/null 2>&1; echo $?) = 1 ]
+if [[ $(dpkg -s boxes 2> /dev/null) ]]
 then
   apt-get install -y boxes > /dev/null
 fi

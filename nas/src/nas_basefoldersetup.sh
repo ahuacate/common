@@ -10,7 +10,7 @@
 # Requires arg: 'DIR_SCHEMA' (use script: nas_identify_storagepath.sh)
 
 # Check for ACL installation
-if [[ ! $(dpkg -s acl) ]]
+if [[ ! $(dpkg -s acl 2> /dev/null) ]]
 then
   apt-get install -y acl 2> /dev/null
 fi

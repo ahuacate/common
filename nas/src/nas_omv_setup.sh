@@ -54,7 +54,7 @@ then
 fi
 
 # Install nslookup
-if [[ ! $(dpkg -s dnsutils) ]]
+if [[ ! $(dpkg -s dnsutils 2> /dev/null) ]]
 then
   apt-get install dnsutils -y
 fi
@@ -840,14 +840,14 @@ EOF
 # Check plugin status
 while IFS=':' read -r plugin desc
 do
-  if [ ! $(dpkg -s $plugin >/dev/null 2>&1; echo $?) = 0 ]
+  if [[ ! $(dpkg -s $plugin 2>/dev/null) ]]
   then
     apt-get install $plugin -y
-    info "OMV ${desc} plugin status: ${WHITE}installed${NC}"
+    info "OMV $desc plugin status: ${WHITE}installed${NC}"
   else
-    info "OMV ${desc} plugin status: existing (already installed)"
+    info "OMV $desc plugin status: existing (already installed)"
   fi
-done <<< $( printf '%s\n' "${plugin_LIST[@]}" )
+done < <( printf '%s\n' "${plugin_LIST[@]}" )
 echo
 
 
@@ -878,7 +878,7 @@ section "Completion Status"
 # Interface
 interface=$(ip route ls | grep default | grep -Po '(?<=dev )(\S+)')
 # Get IP type (ip -4 addr show eth0)
-if [[ "$(ip addr show ${interface} | grep -q dynamic > /dev/null; echo $?)" = 0 ]]
+if [ "$(ip addr show ${interface} | grep -q dynamic > /dev/null; echo $?)" = 0 ]
 then 
   ip_type='dhcp - best use dhcp IP reservation'
 else
