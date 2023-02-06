@@ -377,14 +377,8 @@ echo
 # Set VLAN support
 if [ "$RESULTS" = 'TYPE02' ]
 then
-  # Set VLAN to disable/off
-  if [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ]
-  then
-    TAG=0
-  elif [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
-  then
-    TAG=1
-  fi
+  # Set VLAN to disable/off (value 0 for disable/off, or VLAN[2-N] to enable)
+  TAG=0
   VLAN_STATUS=0
 fi
 
@@ -441,7 +435,7 @@ fi
 
 # Query and match or map network variables to PVE host IP format
 # if [[ "$(hostname -i)" =~ ${ip4_regex} ]] && [[ "$NET_DHCP" = 0 || ${VLAN_STATUS} == '0' ]]; then
-if [[ "$(hostname -i)" =~ ${ip4_regex} ]] && [ "$NET_DHCP" = 0 ]
+if [[ "$(hostname -i)" =~ ${ip4_regex} ]] && [[ "$NET_DHCP" == 0 || "$VLAN_STATUS" == '0' ]] 
 then
   # Copy preset variable
   preset_IP=$IP
@@ -459,12 +453,12 @@ then
   do
     eval k='$'$j
     # Set VLAN octet
-    if [ "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
+    if [ "$TAG" = 0 ]
     then
       octet3=$(hostname -i | awk -F'.' '{ print $3 }')
       nameserver_octet4=$(cat /etc/resolv.conf | grep -i '^nameserver' | head -n1 | cut -d ' ' -f2 | awk -F'.' '{ print $4 }')
       gw_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
-    elif [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
+    elif [ ! "$TAG" = 0 ]
     then
       octet3=$(echo "${k}" | awk -F'.' '{ print $3 }')
       nameserver_octet4=$(cat /etc/resolv.conf | grep -i '^nameserver' | head -n1 | cut -d ' ' -f2 | awk -F'.' '{ print $4 }')
@@ -494,7 +488,7 @@ then
   # Display msg for static IP only
   if [ "$NET_DHCP" = 0 ]
   then
-    msg_box "#### MODIFYING EASY SCRIPT IPv4 PRESETS ####\n\nOur Easy Scripts (ES) settings for your IPv4 ${VM_TYPE^^} addresses have been modified where required to match your PVE hosts IPv4 range, nameserver and gateway addresses and VLAN status ( $(if [[ "$TAG" =~ (0|1) ]]; then echo "disabled"; else echo "enabled"; fi) ).\n\n$(printf '%s\n' "${displayVARS[@]}" | column -s ":" -t -N "IP DESCRIPTION,DEFAULT ES PRESET,NEW ES PRESET" | indent2)\n\nThe new ES presets will be checked and validated in the next steps."
+    msg_box "#### MODIFYING EASY SCRIPT IPv4 PRESETS ####\n\nOur Easy Scripts (ES) settings for your IPv4 ${VM_TYPE^^} addresses have been modified where required to match your PVE hosts IPv4 range, nameserver and gateway addresses and VLAN status ( $(if [ "$TAG" = 0 ]; then echo "disabled"; else echo "enabled"; fi) ).\n\n$(printf '%s\n' "${displayVARS[@]}" | column -s ":" -t -N "IP DESCRIPTION,DEFAULT ES PRESET,NEW ES PRESET" | indent2)\n\nThe new ES presets will be checked and validated in the next steps."
     echo
   fi
 elif [ "$NET_DHCP" = 1 ]
@@ -502,7 +496,7 @@ then
   if [[ "$(hostname -i)" =~ ${ip4_regex} ]]
   then
     # Nameserver - match to PVE host IP format & VLAN ( for IPv4 only )
-    if [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
+    if [ ! "$TAG" = 0 ]
     then
       nameserver_octet3=$TAG
       nameserver_octet4=$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $4 }')
@@ -520,7 +514,7 @@ then
     GW=''
     GW6=''
     # Set Nameserver
-    if [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
+    if [ ! "$TAG" = 0 ]
     then
       NAMESERVER=$NAMESERVER
     else
@@ -547,7 +541,7 @@ fi
 
 # Auto set CPU Core Cnt
 cpu_core_set "$CPULIMIT"
-if [ "$VM_TYPE" == 'ct' ]
+if [ "$VM_TYPE" = 'ct' ]
 then
   CORES=$CPU_CORE_CNT
 fi
@@ -1017,21 +1011,15 @@ fi
 
 #---- Set VLAN
 vlan_regex='^[2-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-4]$'
-if [ ! "$TAG" = 0 ] && [ "$VM_TYPE" = ct ] || [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
+if [ ! "$TAG" = 0 ]
 then
   msg "Setting VLAN ID for network..."
   while true
   do
     read -p "Enter a VLAN ID ( numeric [2-254] or '0' for no vlan ): " -e -i $TAG VLAN
-    if [ "$VLAN" = 0 ] && [ "$VM_TYPE" = ct ]
+    if [ "$VLAN" = 0 ]
     then
       TAG=$VLAN
-      info "VLAN status : ${YELLOW}$VLAN${NC} - disabled"
-      echo
-      break
-    elif [ "$VLAN" = 1 ] && [ "$VM_TYPE" = vm ]
-    then
-      TAG=1
       info "VLAN status : ${YELLOW}$VLAN${NC} - disabled"
       echo
       break
@@ -1213,23 +1201,15 @@ then
         done
       fi
     done
-  elif [ "$VM_TYPE" = ct ] && [ ! "$TAG" = 0 ] && [ "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = $TAG ]
+  elif [[ ! "$TAG" =~ (0|1) ]] && [ "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = $TAG ]
   then
     # Set nameserver to match host (same vlan)
     NAMESERVER=$(ip route show default | awk '/default/ {print $3}')
-  elif [ "$VM_TYPE" = vm ] && [ ! "$TAG" = 1 ] && [ "$(ip route show default | awk '/default/ {print $3}' | awk -F'.' '{ print $3 }')" = $TAG ]
-  then
-    # Set nameserver to match host (same vlan)
-    NAMESERVER=$(ip route show default | awk '/default/ {print $3}')
-  elif [[ ! "$TAG" =~ (0|1) ]] && [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp6)$ ]] || [[ "$IP6" =~ ${ip6_regex} ]]
+  elif [[ ! "$TAG" =~ (0|1) ]] && [[ "$NET_DHCP_TYPE" =~ ^(0|dhcp6)$ || "$IP6" =~ ${ip6_regex} ]]
   then
     # IPv6 Nameserver set to host
     NAMESERVER=''
-  elif [ "$VM_TYPE" = ct ] && [ "$TAG" = 0 ]
-  then
-    # Nameserver set to host
-    NAMESERVER=''
-  elif [ "$VM_TYPE" = vm ] && [ "$TAG" = 1 ]
+  elif [[ "$TAG" =~ (0|1) ]]
   then
     # Nameserver set to host
     NAMESERVER=''

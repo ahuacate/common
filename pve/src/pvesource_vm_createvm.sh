@@ -128,9 +128,10 @@ function make_vm_create_LIST() {
         elif [[ "${string_name}" =~ ^cdrom$ ]] && [[ "${j}" =~ ^ISO_SRC$ ]]
         then
           arr_LIST+=( "${OS_TMPL}" )
-        # # SCSI args
-        # elif [[ "${string_name}" =~ ^scsi[0-9]$ ]] && [[ "${j}" =~ ^SCSI[0-9]_SIZE$ ]]; then
-        #   arr_LIST+=( "${VOLUME}:${i}" )
+        # NET args 
+        elif [[ "${string_name}" =~ ^net[0-9]$ ]] && [[ "${j}" =~ ^TAG$ ]] && [[ "${i}" =~ (0|1) ]]
+        then
+          continue
         # IPv4 args
         elif [[ "${string_name}" =~ ^ipconfig[0-9]$ ]] && [[ "${j}" =~ ^IP$ ]] && [[ "${i}" =~ ${ip4_regex} ]]
         then

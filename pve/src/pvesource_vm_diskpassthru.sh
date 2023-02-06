@@ -160,25 +160,21 @@ fi
 if [ "$VM_DISK_PT" = 2 ]
 then
   # Select disks for pass-through
-  while true
-  do
-    OPTIONS_VALUES_INPUT=$(printf '%s\n' "${pt_disk_LIST[@]}" | awk -F':' 'BEGIN{OFS=FS} { print $2, $3, $6 }' | sed -e '$aTYPE00')
-    OPTIONS_LABELS_INPUT=$(printf '%s\n' "${pt_disk_LIST[@]}" | awk -F':' '{ print $3, $5, $4, "("$2" device)" }' | sed -e '$aNone. Exit this installer')
-    makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
-    multiselect SELECTED "$OPTIONS_STRING"
-    if [[ "${RESULTS[*]}" =~ 'TYPE00' ]]
-    then
-      VM_DISK_PT=0
-      msg "You have chosen not to proceed. Aborting. Bye..."
-      sleep 1
-      echo
-      return
-    else
-      pt_disk_LIST=()
-      pt_disk_LIST+=( "$(printf '%s\n' "${RESULTS[@]}")" )
-      break
-    fi
-  done
+  OPTIONS_VALUES_INPUT=$(printf '%s\n' "${pt_disk_LIST[@]}" | awk -F':' 'BEGIN{OFS=FS} { print $2, $3, $6 }' | sed -e '$aTYPE00')
+  OPTIONS_LABELS_INPUT=$(printf '%s\n' "${pt_disk_LIST[@]}" | awk -F':' '{ print $3, $5, $4, "("$2" device)" }' | sed -e '$aNone. Exit this installer')
+  makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
+  multiselect SELECTED "$OPTIONS_STRING"
+  if [[ "${RESULTS[*]}" =~ 'TYPE00' ]]
+  then
+    VM_DISK_PT=0
+    msg "You have chosen not to proceed. Aborting. Bye..."
+    sleep 1
+    echo
+    return
+  else
+    pt_disk_LIST=()
+    pt_disk_LIST+=( $(printf '%s\n' "${RESULTS[@]}") )
+  fi
 
   # qm set scsi drive
   if [ ! "${#pt_disk_LIST[@]}" = 0 ]
@@ -195,16 +191,21 @@ then
     j='1' # Set cnt
     while IFS=':' read -r tran dev serial
     do
-      by_id=$(ls -l /dev/disk/by-id | grep -E "$tran" | grep -w "$(echo "$dev" | sed 's|^.*/||')" | awk '{ print $9 }')
+      # Remove the "/dev/" prefix from the device name
+      dev_name=$(echo "$dev" | sed 's/\/dev\///g')
+      # Get the by-id name for the specified device
+      by_id_name="$(ls -l /dev/disk/by-id | grep -v "wwn-" | grep "$dev_name" | awk '{print $9}')"
+      
       # Create scsi[0-9] disk entry if new only
-      if [[ ! $(grep -w "/dev/disk/by-id/$by_id" /etc/pve/qemu-server/$VMID.conf) ]]
+      if [[ ! $(grep -w "/dev/disk/by-id/$by_id_name" /etc/pve/qemu-server/$VMID.conf) ]]
       then
-        qm set $VMID -scsi${i} /dev/disk/by-id/$by_id,backup=0
+        qm set $VMID -scsi${i} /dev/disk/by-id/$by_id_name,backup=0
         info "\t${j}. SCSI${i} disk pass-through created: $dev ($tran) ---> ${YELLOW}SCSI${i}${NC}"
         ((i=i+1))
       else
         info "\t${j}. SCSI $dev ($tran) disk pass-through already exists: ${WHITE}skipped${NC}"
       fi
+
       # Add to cnt
       ((j=j+1))
     done < <( printf '%s\n' "${pt_disk_LIST[@]}" )
