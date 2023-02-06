@@ -382,6 +382,7 @@ then
   then
     TAG=0
   elif [ ! "$TAG" = 1 ] && [ "$VM_TYPE" = vm ]
+  then
     TAG=1
   fi
   VLAN_STATUS=0
