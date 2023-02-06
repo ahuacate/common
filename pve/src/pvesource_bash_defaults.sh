@@ -1027,10 +1027,10 @@ function indent2() {
 function valid_ip() {
   local  ip=$1
   local  stat=1
-  if [[ $ip =~ ${ip4_regex} ]]
+  if [[ "$ip" =~ ${ip4_regex} ]]
   then
     stat=$?
-  elif [[ $ip =~ ${ip6_regex} ]]
+  elif [[ "$ip" =~ ${ip6_regex} ]]
   then
     stat=$?
   fi

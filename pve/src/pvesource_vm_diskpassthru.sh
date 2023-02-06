@@ -8,7 +8,31 @@
 
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
+
+# Requires arg 'usb' or 'onboard' to be set in source command
+# Sets the validation input type: pvesource_vm_diskpassthru.sh "onboard"
+if [ -z "$1" ]
+then
+  input_tran=""
+  input_tran_arg=""
+elif [[ "$1" =~ 'usb' ]]
+then
+  input_tran='(usb)'
+  input_tran_arg='usb'
+elif [[ "$1" =~ 'onboard' ]]
+then
+  input_tran='(sata|ata|scsi|nvme)'
+  input_tran_arg='onboard'
+fi
+
 #---- Static Variables -------------------------------------------------------------
+
+# Basic storage disk label
+basic_disklabel='(.*_hba|.*_usb|.*_onboard)$'
+
+# USB Disk Storage minimum size (GB)
+stor_min='30'
+
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
 #---- Functions --------------------------------------------------------------------
@@ -44,20 +68,19 @@ singleselect SELECTED "$OPTIONS_STRING"
 # Set disk access type
 if [ "$RESULTS" = TYPE01 ]
 then
-  VM_DISK_PT='1'
-  msg "PCIe card passthrough is manually configured using the Proxmox web management frontend. Perform after the VM is created."
+  VM_DISK_PT=1
+  msg "PCIe card passthrough must be manually configured using the Proxmox web management frontend. Perform after this VM is created."
   echo
 elif [ "$RESULTS" = TYPE02 ]
 then
-  VM_DISK_PT='2'
+  VM_DISK_PT=2
 elif [ "$RESULTS" = TYPE00 ]
 then
-  VM_DISK_PT='0'
+  VM_DISK_PT=0
   msg "You have chosen not to proceed. Aborting this task. Bye..."
   echo
   return
 fi
-
 
 #---- PCIe HBA Card pass-through ---------------------------------------------------
 
@@ -71,27 +94,26 @@ then
   # Create stor_LIST
   source $COMMON_DIR/nas/src/nas_identify_storagedisks.sh
 
-  # Basic storage disk label
-  BASIC_DISKLABEL='(.*_hba|.*_usb|.*_onboard)$'
-
   # Create raw disk list
-  pt_disk_options=()
-  pt_disk_options=( "$(printf '%s\n' "${storLIST[@]}" | awk -F':' -v STOR_MIN="$STOR_MIN" -v INPUT_TRAN="$INPUT_TRAN" -v BASIC_DISKLABEL="$BASIC_DISKLABEL" \
+  pt_disk_LIST=()
+  pt_disk_LIST=( "$(printf '%s\n' "${storLIST[@]}" | awk -F':' -v stor_min="$stor_min" -v input_tran="$input_tran" -v basic_disklabel="$basic_disklabel" \
   'BEGIN{OFS=FS} {$8 ~ /G$/} {size=0.0+$8} \
   # Pass-thru raw storage disks
-  {if ($5 ~ INPUT_TRAN && $3 == 0 && ($4 != "LVM2_member" || $4 != "zfs_member") && $9 == "disk" && size >= STOR_MIN && $13 !~ BASIC_DISKLABEL && $14 == 0 && $15 == 0) print "Physical raw disk", $5, $1, $8, $6, $7}')" )
+  {if ($5 ~ input_tran && $3 == 0 && ($4 != "LVM2_member" || $4 != "zfs_member") && $9 == "disk" && size >= stor_min && $13 !~ basic_disklabel && $14 == 0 && $15 == 0) print "Physical raw disk", $5, $1, $8, $6, $7}')" )
 
-
-  if [ ! ${#pt_disk_options[@]} = 0 ]
+  if [ ! "${#pt_disk_LIST[@]}" = 0 ]
   then
-    msg_box "#### PLEASE READ CAREFULLY ####\n\nSelect all the disks for physical disk pass-through to your OMV NAS. You can select more than one disk. We recommend you should always crosscheck the model and device ID to make sure its not in use by your Proxmox host or another PVE CT or VM.\n\n$(printf '%s\n' "${pt_disk_options[@]}" | awk -F':' 'BEGIN{OFS=FS} { print $1, $2, $3, $5, $4 }' | column -s ":" -t -N "DESCRIPTION,TYPE,DEVICE,,MODEL,CAPACITY (GB)" | indent2)\n\n$(if [ ! "${#existing_pt_LIST[@]}" == '0' ]; then echo "The following disks are in-use by other VMs (excluded):\n" && printf '%s\n' "${existing_pt_LIST[@]}" | column -s ":" -t -N "VMID,TYPE,DEVICE,MODEL,CAPACITY (GB)" | indent2; fi)\n\nNew disk(s) might have been wrongly identified as 'system drives' if they contain Linux system or OS partitions and are not available. To fix this issue, manually format the missing disk erasing all data before running this installation again. You can exit this installer at the next prompt. Go to Proxmox web management interface 'PVE Host' > 'Disks' > 'Select disk' > 'Wipe Disk' and use the inbuilt function. All disks must have a data capacity greater than ${STOR_MIN}G to be detected."
+    # Display msg
+    display_msg1=$(printf '%s\n' "${pt_disk_LIST[@]}" | awk -F':' 'BEGIN{OFS=FS} { print $1, $2, $3, $5, $4 }' | column -s ":" -t -N "DESCRIPTION,TYPE,DEVICE,,MODEL,CAPACITY (GB)" | indent2)
+
+    msg_box "#### PLEASE READ CAREFULLY ####\n\nSelect the disks for physical disk pass-through to your PVE VM. You can select any number of disk. We recommend you crosscheck the model and device ID to make sure its not in use by your Proxmox host or another PVE CT or VM.\n\n$(echo "$display_msg1")\n\nAny missing disks may have been wrongly identified as 'system drives' if they contain Linux system or OS partitions. To fix this issue, manually format the missing disk erasing all data before running this installation again. You can exit this installer at the next prompt. Go to Proxmox web management interface 'PVE Host' > 'Disks' > 'Select disk' > 'Wipe Disk' and use the inbuilt function. All disks must have a data capacity greater than ${stor_min}G to be detected."
 
     # Select pass-through option
     msg "Select the option you want..."
     OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" "TYPE00" )
     OPTIONS_LABELS_INPUT=( "Yes - I want to select disks for pass-through to my VM" \
     "No - I do not want to pass-through any disks to my VM" \
-    "Disks are missing. I want to fix the issue. Exit this installer now" )
+    "None. Exit this installer (i.e disks are missing)" )
     makeselect_input2
     singleselect SELECTED "$OPTIONS_STRING"
 
@@ -111,7 +133,7 @@ then
       return
     fi
   else
-    msg_box "#### PLEASE READ CAREFULLY ####\n\nThe installer cannot detect any available storage disks for pass-through. New disk(s) might have been wrongly identified as 'system drives' if they contain Linux system or OS partitions and are not available.\n\n$(if [ ! "${#existing_pt_LIST[@]}" == '0' ]; then echo "Also the following disks are not available because they are in-use by other VMs (excluded):\n" && printf '%s\n' "${existing_pt_LIST[@]}" | column -s ":" -t -N "VMID,TYPE,DEVICE,MODEL,CAPACITY (GB)" | indent2; fi)\n\nTo fix this issue, manually format the missing disk erasing all data before running this installation again. You can exit this installer at the next prompt. Go to Proxmox web management interface 'PVE Host' > 'Disks' > 'Select disk' > 'Wipe Disk' and use the inbuilt function. All disks must have a data capacity greater than ${STOR_MIN}G to be detected."
+    msg_box "#### PLEASE READ CAREFULLY ####\n\nThe installer cannot detect any available storage disks for pass-through. Any missing disks (including new disks) may have been wrongly identified as 'system drives' if they contain Linux system or partitions.\n\nTo fix this issue, manually format the missing disk erasing all data before running this installation again. You can exit this installer at the next prompt. Go to Proxmox web management interface 'PVE Host' > 'Disks' > 'Select disk' > 'Wipe Disk' and use the inbuilt function. All disks must have a data capacity greater than ${stor_min}G to be detected."
 
     # Select pass-through option
     msg "Select the option you want..."
@@ -134,19 +156,21 @@ then
   fi
 fi
 
-# Set physical disk scsi pass-through
+#---- Set physical disk scsi pass-through
 if [ "$VM_DISK_PT" = 2 ]
 then
   # Select disks for pass-through
-  while true; do
-    OPTIONS_VALUES_INPUT=$(printf '%s\n' "${pt_disk_options[@]}" | awk -F':' 'BEGIN{OFS=FS} { print $2, $3, $6 }' | sed -e '$aTYPE00')
-    OPTIONS_LABELS_INPUT=$(printf '%s\n' "${pt_disk_options[@]}" | awk -F':' '{ print $3, $5, $4, "("$2" device)" }' | sed -e '$aNone. Exit this installer')
+  while true
+  do
+    OPTIONS_VALUES_INPUT=$(printf '%s\n' "${pt_disk_LIST[@]}" | awk -F':' 'BEGIN{OFS=FS} { print $2, $3, $6 }' | sed -e '$aTYPE00')
+    OPTIONS_LABELS_INPUT=$(printf '%s\n' "${pt_disk_LIST[@]}" | awk -F':' '{ print $3, $5, $4, "("$2" device)" }' | sed -e '$aNone. Exit this installer')
     makeselect_input1 "$OPTIONS_VALUES_INPUT" "$OPTIONS_LABELS_INPUT"
     multiselect SELECTED "$OPTIONS_STRING"
-    if [[ "${RESULTS[*]}" =~ 'TYPE00' ]]; then
+    if [[ "${RESULTS[*]}" =~ 'TYPE00' ]]
+    then
       VM_DISK_PT=0
       msg "You have chosen not to proceed. Aborting. Bye..."
-      sleep 3
+      sleep 1
       echo
       return
     else
@@ -157,7 +181,7 @@ then
   done
 
   # qm set scsi drive
-  if [ "${#pt_disk_LIST[@]}" -ge '1' ]
+  if [ ! "${#pt_disk_LIST[@]}" = 0 ]
   then
     msg "Creating SCSI pass-through disk(s) conf..."
     # Check VMID scsi disk id
@@ -165,16 +189,17 @@ then
     do
       i=$(echo "$dev" | sed 's/[a-z]//g')
       ((i=i+1))
-    done <<< $(grep ^scsi[0-9]\:.*$ /etc/pve/qemu-server/${VMID}.conf | sort)
+    done < <( grep ^scsi[0-9]\:.*$ /etc/pve/qemu-server/$VMID.conf | sort )
 
     # Create qm set scsi[0-9] conf entry
     j='1' # Set cnt
     while IFS=':' read -r tran dev serial
     do
-      BY_ID=$(ls -l /dev/disk/by-id | grep -E "$tran" | grep -w "$(echo "$dev" | sed 's|^.*/||')" | awk '{ print $9 }')
+      by_id=$(ls -l /dev/disk/by-id | grep -E "$tran" | grep -w "$(echo "$dev" | sed 's|^.*/||')" | awk '{ print $9 }')
       # Create scsi[0-9] disk entry if new only
-      if [[ ! $(grep -w "/dev/disk/by-id/${BY_ID}" /etc/pve/qemu-server/${VMID}.conf) ]]; then
-        qm set $VMID -scsi${i} /dev/disk/by-id/${BY_ID},backup=0
+      if [[ ! $(grep -w "/dev/disk/by-id/$by_id" /etc/pve/qemu-server/$VMID.conf) ]]
+      then
+        qm set $VMID -scsi${i} /dev/disk/by-id/$by_id,backup=0
         info "\t${j}. SCSI${i} disk pass-through created: $dev ($tran) ---> ${YELLOW}SCSI${i}${NC}"
         ((i=i+1))
       else
@@ -182,7 +207,7 @@ then
       fi
       # Add to cnt
       ((j=j+1))
-    done <<< $(printf '%s\n' "${pt_disk_LIST[@]}")
+    done < <( printf '%s\n' "${pt_disk_LIST[@]}" )
     echo
   fi
 fi
