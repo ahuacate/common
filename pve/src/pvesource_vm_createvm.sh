@@ -224,20 +224,20 @@ then
   # Check for existing template
   while read -r storage
   do
-    if [[ $(pvesm list ${storage} | grep "\/${OS_TMPL_FILENAME}") ]]
+    if [[ $(pvesm list $storage | grep "\/${OS_TMPL_FILENAME}") ]]
     then
       # Set existing tmpl location
-      OS_TMPL=$(pvesm list ${storage} | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
+      OS_TMPL=$(pvesm list $storage | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
       break
     fi
-  done <<< $(pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}')
+  done < <( pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}' )
   # Download Generic OS compatible images
   if [ -n "${OS_TMPL}" ]
   then
     msg "Downloading installation iso/img ( be patient, might take a while )..."
     while true
     do
-      wget -qNLc -T 15 --show-progress -c ${OS_TMPL_URL} -O ${OS_TMPL_PATH}/${OS_TMPL_FILENAME} && break
+      wget -qNLc -T 15 --show-progress -c $OS_TMPL_URL -O $OS_TMPL_PATH/$OS_TMPL_FILENAME && break
     done
     if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]
     then
@@ -251,14 +251,14 @@ fi
 if [ -n "${OTHER_OS_URL}" ]
 then
   # Download src Custom iso/img
-  OS_TMPL_URL=${OTHER_OS_URL}
+  OS_TMPL_URL="$OTHER_OS_URL"
   msg "Downloading installation iso/img ( be patient, might take a while )..."
   while true
   do
-    wget -qNLc -T 15 --show-progress --content-disposition -c ${OS_TMPL_URL} -P ${OS_TMPL_PATH} && break
+    wget -qNLc -T 15 --show-progress --content-disposition -c $OS_TMPL_URL -P $OS_TMPL_PATH && break
   done
   # Set OS_TMPL filename
-  OS_TMPL_FILENAME=$(wget --spider --server-response ${OS_TMPL_URL} 2>&1 | grep -i content-disposition | awk -F"filename=" '{if ($2) print $2}' | tr -d '"')
+  OS_TMPL_FILENAME=$(wget --spider --server-response $OS_TMPL_URL 2>&1 | grep -i content-disposition | awk -F"filename=" '{if ($2) print $2}' | tr -d '"')
   if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]
   then
     # Set tmpl location
@@ -269,16 +269,16 @@ fi
 
 # VM Install dir location
 rootdir_LIST=( $(pvesm status --content rootdir -enabled | awk 'NR>1 {print $1}') )
-if [ ${#rootdir_LIST[@]} -eq '0' ]
+if [ "${#rootdir_LIST[@]}" = 0 ]
 then
   warn "Aborting install. A error has occurred:\n  --  Cannot determine a valid VM image storage location.\n  --  Cannot proceed until the User creates a storage location (i.e local-lvm, local-zfs).\nAborting installation..."
   echo
   sleep 2
   exit 0
-elif [ ${#rootdir_LIST[@]} -eq '1' ]
+elif [ "${#rootdir_LIST[@]}" = 1 ]
 then
   VOLUME="${rootdir_LIST[0]}"
-elif [ ${#rootdir_LIST[@]} -gt '1' ]
+elif [ "${#rootdir_LIST[@]}" -gt 1 ]
 then
   msg "Multiple PVE storage locations have been detected to use as a VM root volume.\n\n$(pvesm status -content rootdir -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection."
   OPTIONS_VALUES_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
@@ -304,11 +304,13 @@ do
   # Run func 
   make_vm_create_LIST "$line"
   # Add results to input_LIST
-  if [ "${#results_LIST[@]}" != '0' ]; then
+  if [ ! "${#results_LIST[@]}" = 0 ]
+  then
     input_LIST+=( "$(printf '%s\n' "${results_LIST[@]}")" )
   fi
-done <<< $(printf '%s\n' "${section_category_LIST[@]}")
+done < <( printf '%s\n' "${section_category_LIST[@]}" )
 
+printf '%s ' "${input_LIST[@]}"
 # Create VM
 msg "Creating ${HOSTNAME^} VM..."
 qm create $(printf '%s ' "${input_LIST[@]}")
