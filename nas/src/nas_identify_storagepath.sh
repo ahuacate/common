@@ -23,7 +23,7 @@ do
 done <<< $( df -hx tmpfs --output=target | sed '1d' | grep -v '/$\|^/dev.*\|^/var.*\|^/boot.*\|^/rpool.*\|/etc.*' )
 print_DISPLAY+=( "Other. Input your own storage path,-,-" )
 
-msg_box "#### PLEASE READ CAREFULLY - SELECT A STORAGE LOCATION ####\n\nA storage location is a parent directory, LVM volume, ZPool, MergeFS Pool or another storage filesystem where your new folder shares will be created. A scan shows the following available storage locations:\n\n$(printf '%s\n' "${print_DISPLAY[@]}" | column -s "," -t -N "STORAGE DEVICE,FS TYPE,CAPACITY" | indent2)\n\nThe User must now select a storage location. Or select 'other' to manually input the full storage path."
+msg_box "#### PLEASE READ CAREFULLY - SELECT A STORAGE LOCATION ####\n\nA storage location is a parent directory, LVM volume, ZPool, MergeFS Pool or another storage filesystem where new folder shares and files will be created. A scan shows the following available storage locations:\n\n$(printf '%s\n' "${print_DISPLAY[@]}" | column -s "," -t -N "STORAGE DEVICE,FS TYPE,CAPACITY" | indent2)\n\nThe User must now select a storage location. Or select 'other' to manually input the full storage path."
 echo
 msg "Select a storage location from the menu:"
 while true
@@ -64,8 +64,9 @@ do
         echo
       elif [ -d "$stor_path" ]
       then
-        while true; do
-          read -p "Re-confirm storage path '${stor_path}' is correct [y/n]?: " -n 1 -r YN
+        while true
+        do
+          read -p "Re-confirm storage path '$stor_path' is correct [y/n]?: " -n 1 -r YN
           echo
           case $YN in
             [Yy]*)

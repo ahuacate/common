@@ -42,19 +42,19 @@ IP_FAIL_MSG="The IP address is not valid. A valid IP address is when all of the 
 Try again..."
 
 # ES Validate PVE primary hostname and IP address
-if [[ ${PVE_HOSTNAME} =~ ^.*([1|0])$ ]] && [ "$(valid_ip ${PVE_HOST_IP} > /dev/null; echo $?)" = 0 ]
+if [[ "$PVE_HOSTNAME" =~ ^.*([1|0])$ ]] && [ "$(valid_ip $PVE_HOST_IP > /dev/null; echo $?)" = 0 ]
 then
   msg "ES validating PVE primary hostname and IP address..."
   info "PVE primary hostname is set: ${YELLOW}$PVE_HOSTNAME${NC}"
   info "PVE primary host IP address is set: ${YELLOW}$PVE_HOST_IP${NC}"
   echo
 else
-  msg_box "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm the PVE primary hostname and IP address ( lookup results '${PVE_HOSTNAME} : ${PVE_HOST_IP}' ). Only input the PVE primary host details and NOT the secondary host. These inputs are required for critical system and application configuring."
+  msg_box "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm the PVE primary hostname and IP address ( lookup results '$PVE_HOSTNAME : $PVE_HOST_IP' ). Only input the PVE primary host details and NOT the secondary host. These inputs are required for critical system and application configuring."
   # Manual Confirm PVE primary hostname
   while true
   do
     read -p "Enter your PVE primary host hostname: " -e -i $PVE_HOSTNAME PVE_HOSTNAME_VAR
-    if [[ ${PVE_HOSTNAME_VAR} =~ ${pve_hostname_regex} ]] && [[ ${PVE_HOSTNAME_VAR} =~ ^.*([1|0])$ ]]
+    if [[ "$PVE_HOSTNAME_VAR" =~ ${pve_hostname_regex} ]] && [[ "$PVE_HOSTNAME_VAR" =~ ^.*([1|0])$ ]]
     then
       PVE_HOSTNAME="$PVE_HOSTNAME_VAR"
       info "PVE primary hostname is set: ${YELLOW}$PVE_HOSTNAME${NC}"
@@ -67,7 +67,7 @@ else
       unset OPTIONS_LABELS_INPUT
       OPTIONS_VALUES_INPUT+=( "OPTION_01" "OPTION_02" "OPTION_03" )
       OPTIONS_LABELS_INPUT+=( "Exit installer and fix the naming of your Proxmox PVE hostnames ( Recommended )" \
-      "Proceed with '${PVE_HOSTNAME_VAR} ( invalid PVE hostname )" \
+      "Proceed with '$PVE_HOSTNAME_VAR' ( invalid PVE hostname )" \
       "Input a different PVE hostname" )
       makeselect_input2
       singleselect SELECTED "$OPTIONS_STRING"
@@ -91,10 +91,11 @@ else
   done
 
   # Manual Confirm PVE primary IP
-  while true; do
+  while true
+  do
     read -p "Enter your PVE primary host IP address: " -e -i $PVE_HOST_IP PVE_HOST_IP_VAR
     msg "Performing checks on your input ( be patient, may take a while )..."
-    if [ $(valid_ip ${PVE_HOST_IP} > /dev/null; echo $?) = 0 ]
+    if [ $(valid_ip $PVE_HOST_IP > /dev/null; echo $?) = 0 ]
     then
       PVE_HOST_IP="$PVE_HOST_IP_VAR"
       info "PVE primary host IP address is set: ${YELLOW}$PVE_HOST_IP${NC}"
@@ -111,7 +112,7 @@ fi
 #---- Creating export settings
 section "Setting PVE host node hostnames and IP addresses"
 
-if [[ ! ${PVE_HOSTNAME} =~ ^.*([1|0])$ ]]
+if [[ ! "$PVE_HOSTNAME" =~ ^.*([1|0])$ ]]
 then
   # Single PVE node
   msg "The User has chosen a invalid PVE primary hostname: ${PVE_HOSTNAME}. This will limit settings for NFS or SMB exports."

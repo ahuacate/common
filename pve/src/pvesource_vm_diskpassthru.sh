@@ -46,21 +46,21 @@ You must choose your OMV NAS disk access method. Please read and select carefull
 
 Your options are:
 
-1)  PCIe HBA card pass-thru
+1)  Physical Disk Passthrough (individual disks)
+Each selected disk is passed through to OMV VM (not the disk controller) as a SCSI device. You can select any amount of SAS/SATA/NVMe unassigned disks.
+All storage frontend is fully managed by OMV NAS. The selected disks will no longer be available to the host.
+
+2)  PCIe HBA card pass-thru
 PCI passthrough allows you to use a physical mainboard PCI SATA or HBA device inside a PVE VM (KVM virtualization only).
 
 The PVE host must be installed with a 'dedicated' PCIe HBA SAS/SATA/NVMe Card. All NAS disks (including any Cache SSds) must be connected to this PCIe HBA Card. You cannot co-mingle any OMV NAS disks with mainboard SATA/NVMe devices. All storage, both backend and fronted is fully managed by OMV NAS. You also have the option of configuring SSD cache using SSD drives inside OMV NAS. SSD cache will provide High Speed disk I/O.
 
-If you 'PCI passthrough' a device, the device and connected disks are not available to the host anymore.
-
-2)  Physical Disk Passthrough (individual disks)
-Each selected disk is passed through to OMV VM (not the disk controller) as a SCSI device. You can select any amount of SAS/SATA/NVMe unassigned disks.
-All storage frontend is fully managed by OMV NAS. The selected disks will no longer be available to the host."
+If you 'PCI passthrough' a device, the device and connected disks are not available to the host anymore."
 echo
 msg "Select the NAS disk access you want..."
 OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" "TYPE00" )
-OPTIONS_LABELS_INPUT=( "PCIe HBA card pass-through - dedicated PCIe HBA card only" \
-"Physical disk pass-through - select physical disks individually" \
+OPTIONS_LABELS_INPUT=( "Physical disk pass-through - select physical disks individually" \
+"PCIe HBA card pass-through - dedicated PCIe HBA card only" \
 "None. Exit this installer" )
 makeselect_input2
 singleselect SELECTED "$OPTIONS_STRING"
@@ -69,11 +69,12 @@ singleselect SELECTED "$OPTIONS_STRING"
 if [ "$RESULTS" = TYPE01 ]
 then
   VM_DISK_PT=1
-  msg "PCIe card passthrough must be manually configured using the Proxmox web management frontend. Perform after this VM is created."
-  echo
 elif [ "$RESULTS" = TYPE02 ]
 then
   VM_DISK_PT=2
+  msg "PCIe card passthrough must be manually configured using the Proxmox web management frontend. Perform after this VM is created."
+  echo
+  return
 elif [ "$RESULTS" = TYPE00 ]
 then
   VM_DISK_PT=0
@@ -89,7 +90,7 @@ fi
 #---- Physical disk pass-through to VM ---------------------------------------------
 
 #---- Identify available storage disks for pass-through
-if [ "$VM_DISK_PT" = 2 ]
+if [ "$VM_DISK_PT" = 1 ]
 then
   # Create stor_LIST
   source $COMMON_DIR/nas/src/nas_identify_storagedisks.sh
@@ -119,12 +120,13 @@ then
 
     if [ "$RESULTS" = TYPE01 ]
     then
-      VM_DISK_PT=2
+      VM_DISK_PT=1
     elif [ "$RESULTS" = TYPE02 ]
     then
       VM_DISK_PT=0
       info "No physical disks will be configured for pass-through to your VM"
       echo
+      return
     elif [ "$RESULTS" = TYPE00 ]
     then
       VM_DISK_PT=0
@@ -134,30 +136,13 @@ then
     fi
   else
     msg_box "#### PLEASE READ CAREFULLY ####\n\nThe installer cannot detect any available storage disks for pass-through. Any missing disks (including new disks) may have been wrongly identified as 'system drives' if they contain Linux system or partitions.\n\nTo fix this issue, manually format the missing disk erasing all data before running this installation again. You can exit this installer at the next prompt. Go to Proxmox web management interface 'PVE Host' > 'Disks' > 'Select disk' > 'Wipe Disk' and use the inbuilt function. All disks must have a data capacity greater than ${stor_min}G to be detected."
-
-    # Select pass-through option
-    msg "Select the option you want..."
-    OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE00" )
-    OPTIONS_LABELS_INPUT=( "Proceed without any disk pass-through to my VM" \
-    "Disks are missing. I want to fix the issue. Exit this installer now" )
-    makeselect_input2
-    singleselect SELECTED "$OPTIONS_STRING"
-
-    if [ "$RESULTS" = TYPE01 ]
-    then
-      VM_DISK_PT=0
-    elif [ "$RESULTS" = TYPE00 ]
-    then
-      VM_DISK_PT=0
-      msg "You have chosen not to proceed. Aborting this task. Bye..."
-      echo
-      return
-    fi
+    echo
+    return
   fi
 fi
 
 #---- Set physical disk scsi pass-through
-if [ "$VM_DISK_PT" = 2 ]
+if [ "$VM_DISK_PT" = 1 ]
 then
   # Select disks for pass-through
   OPTIONS_VALUES_INPUT=$(printf '%s\n' "${pt_disk_LIST[@]}" | awk -F':' 'BEGIN{OFS=FS} { print $2, $3, $6 }' | sed -e '$aTYPE00')

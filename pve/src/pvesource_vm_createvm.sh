@@ -311,34 +311,8 @@ do
   fi
 done < <( printf '%s\n' "${section_category_LIST[@]}" )
 
-printf '%s ' "${input_LIST[@]}"
 # Create VM
 msg "Creating ${HOSTNAME^} VM..."
 qm create $(printf '%s ' "${input_LIST[@]}")
 echo
 #-----------------------------------------------------------------------------------
-
-# qm create 100 --name nas-04 \
-# --onboot 1 \
-# --autostart 1 \
-# --hotplug 1 \
-# --tablet 1 \
-# --scsihw virtio-scsi-pci \
-# --bios seabios \
-# --boot order=scsi0 \
-# --agent enabled=1,fstrim_cloned_disks=0,type=virtio \
-# --vga type=std,memory=32 \
-# --cores 1 \
-# --cpulimit 0 \
-# --cpuunits 1024 \
-# --sockets 1 \
-# --numa 0 --memory 2048 \
-# --balloon 512 \
-# --net0 model=virtio,bridge=vmbr0,firewall=1 \
-# --ostype l26 \
-# --cpu cputype=kvm64 \
-# --startup order=1,up=60,down=1 \
-# --scsi0 local-lvm:10,ssd=1,backup=1 \
-# --cdrom local:iso/openmediavault_6.0.24-amd64.iso,media=cdrom --ciuser root \
-# --cipassword ahuacate \
-# --citype nocloud --ipconfig0 ip=dhcp

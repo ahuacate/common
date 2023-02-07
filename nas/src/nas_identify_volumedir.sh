@@ -31,9 +31,9 @@ fi
 
 #---- Select storage volume dir
 # Create volume list
-if [[ $(ls -d ${DIR_SCHEMA}/${VOLUME_VAR}[1-9] 2>/dev/null) ]]
+if [[ $(ls -d $DIR_SCHEMA/${VOLUME_VAR}[1-9] 2>/dev/null) ]]
 then
-  volume_dir_LIST=( $(ls -d ${DIR_SCHEMA}/${VOLUME_VAR}[1-9]) )
+  volume_dir_LIST=( $(ls -d $DIR_SCHEMA/${VOLUME_VAR}[1-9]) )
 else
   volume_dir_LIST=()
 fi
@@ -46,17 +46,19 @@ then
 elif [ "${#volume_dir_LIST[@]}" -ge '1' ]
 then
   #Create or set storage volume dir
-  msg_box "#### PLEASE READ CAREFULLY - SELECT OR CREATE A VOLUME ####\n\nVolumes provide the basic first level storage space on your NAS. All of your shared folders are created in a volume folder. Therefore, before you start you will need to select or create a volume."
+  msg_box "#### PLEASE READ CAREFULLY - SELECT OR CREATE A VOLUME ####\n\nVolumes provide the basic first level storage space on your machine or NAS. Your file storage included shared folders and files are created in a volume folder. Therefore, before you start you will need to select or create a volume."
   msg "Select or create a volume from the menu:"
   OPTIONS_VALUES_INPUT=( $(printf '%s\n' "${volume_dir_LIST[@]}") )
   OPTIONS_LABELS_INPUT=( $(printf '%s\n' "${volume_dir_LIST[@]}") )
   # Add new 'volume[1-9]' option
-  if [[ -d ${DIR_SCHEMA}/${VOLUME_VAR}1 ]]; then
+  if [[ -d "$DIR_SCHEMA/${VOLUME_VAR}1" ]]
+  then
     i=1
-    while [[ -d ${DIR_SCHEMA}/${VOLUME_VAR}$i ]]; do
+    while [[ -d "$DIR_SCHEMA/$VOLUME_VAR$i" ]]
+    do
       let i++
     done
-    new_dir="${VOLUME_VAR}$i"
+    new_dir="$VOLUME_VAR$i"
   fi
   OPTIONS_VALUES_INPUT+=( "$DIR_SCHEMA/$new_dir" )
   OPTIONS_LABELS_INPUT+=( "Create new volume -- $DIR_SCHEMA/$new_dir" )
