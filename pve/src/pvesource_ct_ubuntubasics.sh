@@ -50,16 +50,16 @@ pct exec $CTID -- apt-get autoremove -y 2> /dev/null
 
 # Configuring Ubuntu for unattended upgrades
 msg "Setting ${OSTYPE^} CT for unattended upgrades..."
-pct exec $CTID -- apt-get install unattended-upgrades -y 2> /dev/null
+pct exec $CTID -- apt-get install unattended-upgrades -yqq 2> /dev/null
 pct exec $CTID -- systemctl enable unattended-upgrades
 
 # Installing HTTPS transport
 msg "Installing HTTPS transport for APT..."
-pct exec $CTID -- apt-get install apt-transport-https -y 2> /dev/null
+pct exec $CTID -- apt-get install apt-transport-https -yqq 2> /dev/null
 
 # Installing GnuPG
 msg "Installing GnuPG and CA Certificates..."
-pct exec $CTID -- apt-get install gnupg2 ca-certificates -y 2> /dev/null
+pct exec $CTID -- apt-get install gnupg2 ca-certificates -yqq 2> /dev/null
 
 # GPG creating defaults
 msg "Creating GnuPG default directory, keybox and trustdb..."
@@ -67,14 +67,14 @@ pct exec $CTID -- gpg -k &> /dev/null
 
 # Installing curl
 msg "Installing curl..."
-pct exec $CTID -- apt-get install curl -y 2> /dev/null
+pct exec $CTID -- apt-get install curl -yqq 2> /dev/null
 
 # msg "Installing ACL..."
 msg "Installing ACL (Access Control Lists)..."
-pct exec $CTID -- apt-get install acl -y 2> /dev/null
+pct exec $CTID -- apt-get install acl -yqq 2> /dev/null
 
 # msg "Installing BC..."
 msg "Installing BC..."
-pct exec $CTID -- apt-get install bc -y 2> /dev/null
+pct exec $CTID -- apt-get install bc -yqq 2> /dev/null
 echo
 #-----------------------------------------------------------------------------------
