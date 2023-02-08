@@ -46,7 +46,7 @@ then
 elif [ "${#volume_dir_LIST[@]}" -ge '1' ]
 then
   #Create or set storage volume dir
-  msg_box "#### PLEASE READ CAREFULLY - SELECT OR CREATE A VOLUME ####\n\nVolumes provide the basic first level storage space on your machine or NAS. Your file storage included shared folders and files are created in a volume folder. Therefore, before you start you will need to select or create a volume."
+  msg_box "#### PLEASE READ CAREFULLY - SELECT OR CREATE A VOLUME ####\n\nVolumes provide the basic first level storage space on your machine or NAS. File storage shared folders are created in this volume folder. Therefore, before you start you will need to select or create a volume."
   msg "Select or create a volume from the menu:"
   OPTIONS_VALUES_INPUT=( $(printf '%s\n' "${volume_dir_LIST[@]}") )
   OPTIONS_LABELS_INPUT=( $(printf '%s\n' "${volume_dir_LIST[@]}") )

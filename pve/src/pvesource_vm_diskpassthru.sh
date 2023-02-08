@@ -184,7 +184,7 @@ then
       # Create scsi[0-9] disk entry if new only
       if [[ ! $(grep -w "/dev/disk/by-id/$by_id_name" /etc/pve/qemu-server/$VMID.conf) ]]
       then
-        qm set $VMID -scsi${i} /dev/disk/by-id/$by_id_name,backup=0
+        qm set $VMID -scsi${i} /dev/disk/by-id/$by_id_name
         info "\t${j}. SCSI${i} disk pass-through created: $dev ($tran) ---> ${YELLOW}SCSI${i}${NC}"
         ((i=i+1))
       else
