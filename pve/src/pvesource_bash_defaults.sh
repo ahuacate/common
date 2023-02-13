@@ -963,7 +963,7 @@ function pct_check_systemctl() {
 
 
 #---- Bash Messaging Functions
-if [[ $(dpkg -s boxes 2> /dev/null) ]]
+if [[ ! $(dpkg -s boxes 2> /dev/null) ]]
 then
   apt-get install -y boxes > /dev/null
 fi
