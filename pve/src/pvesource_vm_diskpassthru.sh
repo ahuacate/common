@@ -93,7 +93,16 @@ fi
 if [ "$VM_DISK_PT" = 1 ]
 then
   # Create stor_LIST
-  source $COMMON_DIR/nas/src/nas_identify_storagedisks.sh
+  source $COMMON_DIR/nas/src/nas_bash_utility.sh
+
+  # Wakeup USB disks
+  wake_usb
+
+  # Create storage list array
+  storage_list
+
+  # Create a working list array
+  stor_LIST
 
   # Create raw disk list
   pt_disk_LIST=()
