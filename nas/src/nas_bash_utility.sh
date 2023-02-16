@@ -97,7 +97,7 @@ function storage_list() {
     system_dev_tmp_LIST+=( $(df -hT | grep /$ | awk '{print $1}') )
   fi
   # System devices by "df -x tmpfs -x devtmpfs -x debugfs -x fusectl"
-  system_dev_tmp_LIST+=( $(df -x tmpfs -x devtmpfs -x debugfs -x fusectl | awk 'NR>1 {print $1}' | egrep ^/dev/.*) )
+  system_dev_tmp_LIST+=( $(df -x tmpfs -x devtmpfs -x debugfs -x fusectl | grep -v -E '(/media/.*|/mnt/.*?)' | awk 'NR>1 {print $1}' | egrep ^/dev/.*) )
   # System devices by PVE mapper
   system_dev_tmp_LIST+=( "/dev/mapper/pve-root" "/dev/mapper/pve-(data|data|vm|lxc|ct|vm|swap).*" )
   # Remove duplicates, create raw devices & make regex
