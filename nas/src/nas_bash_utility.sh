@@ -134,7 +134,7 @@ function storage_list() {
       if [[ "$dev" =~ ^/dev/(sd[a-z][0-9]$|nvme[0-9]n[0-9]p[0-9]$) ]]
       then
         chk_dev="/dev/$(lsblk $dev -nbr -o PKNAME)"
-        tran=$(lsblk $chk_dev -nbr -o TRAN 2> /dev/null)
+        tran=$(lsblk $chk_dev -nbr -o TRAN 2> /dev/null | sed '/^$/d')
         by_id=$(ls -l /dev/disk/by-id | grep -E "$tran" | grep -w "$(echo "$chk_dev "| sed 's|^.*/||')" | awk '{ print $9 }')
       else
         chk_dev="$dev"
