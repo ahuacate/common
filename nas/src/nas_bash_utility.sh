@@ -172,7 +172,7 @@ function storage_list() {
     fi
 
     #---- ZFS_Members (Col 4)
-    if ! [[ $(echo $line | awk -F':' '{ print $4 }') ]] && [ "$(lsblk -nbr -o FSTYPE $dev)" = "zfs_member" ] || [ "$(blkid -o value -s TYPE $dev)" = 'zfs_member' ]
+    if ! [[ $(echo $line | awk -F':' '{ print $4 }') ]] && [ "$(lsblk -nbr -o FSTYPE $dev)" = 'zfs_member' ] || [ "$(blkid -o value -s TYPE $dev)" = 'zfs_member' ]
     then
       var4='zfs_member'
     else
@@ -202,7 +202,7 @@ function storage_list() {
     var8=$(lsblk -nbrd -o SIZE $dev | awk '{ $1=sprintf("%.0f",$1/(1024^3))"G" } {print $0}')
 
     # Rota (Col 10)
-    if [[ $(hdparm -I $dev 2> /dev/null | awk -F':' '/Nominal Media Rotation Rate/ { print $2 }' | sed 's/ //g') == 'SolidStateDevice' ]]
+    if [ $(hdparm -I $dev 2> /dev/null | awk -F':' '/Nominal Media Rotation Rate/ { print $2 }' | sed 's/ //g') = 'SolidStateDevice' ]
     then
       var10=0
     else
