@@ -60,7 +60,7 @@ ENV{ID_FS_LABEL}!="", ENV{dir_name}="%E{ID_FS_LABEL}"
 ENV{ID_FS_LABEL}=="", ENV{dir_name}="usb-%k"
 
 # Determine the mount point
-ENV{mount_point}="/mnt/%E{dir_name}"
+ENV{mount_point}="/media/%E{dir_name}"
 
 # Mount the device on 'add' action (a.k.a. plug the USB drive) & have usb port power always on (required for usb nas disks)
 ACTION=="add", RUN{program}+="/usr/bin/mkdir -p %E{mount_point}", RUN{program}+="/usr/bin/systemd-mount --type=%E{ID_FS_TYPE} --options=defaults,auto,nofail,rw,user_xattr,acl --no-block --automount=no --collect $devnode %E{mount_point}", TEST=="power/control", ATTR{power/control}="on"
