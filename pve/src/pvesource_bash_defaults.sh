@@ -238,20 +238,6 @@ function qm_list() {
   pct list | awk 'BEGIN{OFS=","} {print $1,$3,$2}'
 }
 
-# Check PVE host SMTP status
-function check_smtp_status() {
-  # Host SMTP Option ('0' is inactive, '1' is active)
-  var='ahuacate_smtp'
-  file='/etc/postfix/main.cf'
-  if [ -f "$file" ] && [ "$(systemctl is-active --quiet postfix; echo $?)" = 0 ]
-  then
-    SMTP_STATUS=$(grep --color=never -Po "^${var}=\K.*" "${file}" || true)
-  else
-    # Set SMTP inactive
-    SMTP_STATUS=0
-fi
-}
-
 
 #---- SW Systemctl checks
 # Check Install CT SW status (active or abort script)
@@ -276,6 +262,30 @@ function pct_check_systemctl() {
     fi
     ((i=i+1))
     sleep 1
+  done
+}
+
+
+#---- USB reset
+function usb_reset(){
+  base="/sys/bus/pci/drivers"
+  sleep_secs="1"
+
+  # This might find a sub-set of these:
+  # * 'ohci_hcd' - USB 3.0
+  # * 'ehci-pci' - USB 2.0
+  # * 'xhci_hcd' - USB 3.0
+
+  # Looking for USB standards
+  for usb_std in "$base/"?hci[-_]?c*
+  do
+    for dev_path in "$usb_std/"*:*
+    do
+        dev="$(basename "$dev_path")"
+        printf '%s' "$dev" | tee "$usb_std/unbind" > /dev/null
+        sleep "$sleep_secs"
+        printf '%s' "$dev" | tee "$usb_std/bind" > /dev/null
+    done
   done
 }
 
@@ -931,6 +941,27 @@ function check_smtp_status() {
     # Set SMTP inactive
     SMTP_STATUS=0
 fi
+}
+
+#---- UID & GID mapping
+
+# Check PVE host subid mapping
+function check_host_subid() {
+  # For PVE host only
+  # Use before creating 
+  subgid_root_entry_1="root:65604:100"
+  subgid_root_entry_2="root:100:1"
+  subuid_root_entry_1="root:1605:1"
+  subuid_root_entry_2="root:1606:1"
+  subuid_root_entry_3="root:1607:1"
+
+  # Check if all the subgid entries exist
+  if ! grep -qF "$subgid_root_entry_1" /etc/subgid || ! grep -qF "$subgid_root_entry_2" /etc/subgid || ! grep -qF "$subuid_root_entry_1" /etc/subuid || ! grep -qF "$subuid_root_entry_2" /etc/subuid || ! grep -qF "$subuid_root_entry_3" /etc/subuid
+  then
+    warn "There are issues with your PVE hosts UID & GID mapping.\nYou must run our PVE host toolbox ( option 'PVE Basic - required by all hosts' ), to prepare your PVE hosts before running this installer again.\nMore information is available here: https://github.com/ahuacate/pve-host \nBye..."
+    echo
+    exit 0
+  fi
 }
 
 
