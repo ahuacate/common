@@ -74,28 +74,28 @@ do
     break
   else
     # Set Hostname
-    APP_HOSTNAME=$(echo "$RESULTS" | awk -F':' '{ print $1 }')
+    app_hostname=$(echo "$RESULTS" | awk -F':' '{ print $1 }')
 
     # App dir
-    APP_BUILD=$(echo "$RESULTS" | awk -F':' '{ print $2 }')
+    app_build=$(echo "$RESULTS" | awk -F':' '{ print $2 }')
 
     # VM type
-    VM_TYPE=$(echo "$RESULTS" | awk -F':' '{ print $3 }')
+    vm_type=$(echo "$RESULTS" | awk -F':' '{ print $3 }')
 
     # Set CTID
     CTID=$(echo "$RESULTS" | awk -F':' '{ print $4 }')
 
     # App Name
-    APP_NAME=$(echo "$RESULTS" | awk -F':' '{ print $5 }')
+    app_name=$(echo "$RESULTS" | awk -F':' '{ print $5 }')
 
     # Check CT run status
     pct_start_waitloop
 
     # Set Toolbox App script name
-    GIT_APP_SCRIPT="$(echo "$GIT_REPO" | sed 's/-/_/')_${VM_TYPE}_${APP_NAME}_toolbox.sh"
+    git_app_script="$(echo "$GIT_REPO" | sed 's/-/_/')_${vm_type}_${app_name}_toolbox.sh"
 
     # Run Toolbox
-    source $SRC_DIR/$APP_BUILD/$GIT_APP_SCRIPT
+    source $SRC_DIR/$app_build/$git_app_script
   fi
 
   # Reset Section Head
