@@ -57,6 +57,8 @@ The PVE host must be installed with a 'dedicated' PCIe HBA SAS/SATA/NVMe Card. A
 
 If you 'PCI passthrough' a device, the device and connected disks are not available to the host anymore."
 echo
+
+# Select your disk attachment option
 msg "Select the NAS disk access you want..."
 OPTIONS_VALUES_INPUT=( "TYPE01" "TYPE02" "TYPE00" )
 OPTIONS_LABELS_INPUT=( "Physical disk pass-through - select physical disks individually" \

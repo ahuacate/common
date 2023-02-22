@@ -15,8 +15,10 @@
 # Requires variable 'VM_PCI_PT'
 FAIL_MSG='This VM installation requires PCIe pass-through. You need to enable IOMMU for PCI pass-through, by editing your Proxmox hosts kernel commandline. Perform the required edits as shown here:
 
-  -- https://pve.proxmox.com/wiki/Pci_passthrough (follow the instructions)
-  -- Edit the bootloader command line config to include 'intel_iommu=on'
+  -- https://pve.proxmox.com/wiki/Pci_passthrough
+     (follow all the instructions)
+  -- Edit the bootloader to include:
+     'intel_iommu=on iommu=pt' or 'amd_iommu=on iommu=pt'
   -- Add the required modules to file '/etc/modules'
   -- Run CLI 'update-grub'
   -- Reboot your Proxmox host
