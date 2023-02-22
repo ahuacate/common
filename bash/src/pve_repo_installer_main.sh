@@ -94,19 +94,19 @@ do
     break
   else
     # Set Hostname
-    APP_NAME=$(echo "$RESULTS" | awk -F':' '{ print $1 }')
+    app_name=$(echo "$RESULTS" | awk -F':' '{ print $1 }')
 
     # App dir
-    APP_DIR=$(echo "$RESULTS" | awk -F':' '{ print $2 }')
+    app_dir=$(echo "$RESULTS" | awk -F':' '{ print $2 }')
 
     # VM type
-    VM_TYPE=$(echo "$RESULTS" | awk -F':' '{ print $3 }')
+    vm_type=$(echo "$RESULTS" | awk -F':' '{ print $3 }')
 
     # Set Installer App script name
-    GIT_APP_SCRIPT="$(echo "$GIT_REPO" | sed 's/-/_/')_${VM_TYPE}_${APP_NAME}_installer.sh"
+    git_app_script="$(echo "$GIT_REPO" | sed 's/-/_/')_${vm_type}_${app_name}_installer.sh"
 
     # Run Toolbox
-    source "$SRC_DIR/$APP_DIR/$GIT_APP_SCRIPT"
+    source "$SRC_DIR/$app_dir/$git_app_script"
   fi
 
   # Reset Section Head
