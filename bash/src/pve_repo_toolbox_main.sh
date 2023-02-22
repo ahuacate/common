@@ -31,6 +31,8 @@ TEMP_DIR="$DIR/tmp"
 source $COMMON_PVE_SRC_DIR/pvesource_bash_defaults.sh
 
 #---- Check and Create vm toolbox list
+
+# Create vm input list
 vm_input_LIST=()
 while read -r line
 do
