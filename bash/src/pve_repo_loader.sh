@@ -23,8 +23,8 @@ fi
 
 # Installer cleanup
 function installer_cleanup () {
-  rm -R "$REPO_TEMP/$GIT_REPO" &> /dev/null
-  rm "$REPO_TEMP/${GIT_REPO}.tar.gz" &> /dev/null
+  rm -R "$repo_temp/$GIT_REPO" &> /dev/null
+  rm "$repo_temp/${GIT_REPO}.tar.gz" &> /dev/null
 }
 
 #---- Body -------------------------------------------------------------------------
@@ -34,43 +34,43 @@ installer_cleanup
 
 #---- Local repo (developer)
 # if [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ]; then
-#   cp -R /mnt/pve/nas-*[0-9]-git/${GIT_USER}/${GIT_REPO} ${REPO_TEMP}
-#   tar --exclude=".*" -czf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP} ${GIT_REPO}/ &> /dev/null
+#   cp -R /mnt/pve/nas-*[0-9]-git/${GIT_USER}/${GIT_REPO} ${repo_temp}
+#   tar --exclude=".*" -czf ${repo_temp}/${GIT_REPO}.tar.gz -C ${repo_temp} ${GIT_REPO}/ &> /dev/null
 #   # Create tmp dir
-#   mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
+#   mkdir -p ${repo_temp}/${GIT_REPO}/tmp
 # fi
-if [ -d "$REPO_PATH/$GIT_REPO" ]
+if [ -d "$repo_path/$GIT_REPO" ]
 then
-  cp -R "$REPO_PATH/$GIT_REPO" $REPO_TEMP
-  tar --exclude=".*" -czf $REPO_TEMP/${GIT_REPO}.tar.gz -C $REPO_TEMP $GIT_REPO/ &> /dev/null
+  cp -R "$repo_path/$GIT_REPO" $repo_temp
+  tar --exclude=".*" -czf $repo_temp/${GIT_REPO}.tar.gz -C $repo_temp $GIT_REPO/ &> /dev/null
   # Create tmp dir
-  mkdir -p "$REPO_TEMP/$GIT_REPO/tmp"
+  mkdir -p "$repo_temp/$GIT_REPO/tmp"
 fi
 
 
 
 #---- Download Github repo
 
-if [ ! -d "$REPO_PATH/$GIT_REPO" ]
+if [ ! -d "$repo_path/$GIT_REPO" ]
 then
   # Git clone
   git clone --recurse-submodules https://github.com/$GIT_USER/${GIT_REPO}.git
   # # Download Repo packages
-  # wget -qL - ${GIT_SERVER}/${GIT_USER}/${GIT_REPO}/archive/${GIT_BRANCH}.tar.gz -O ${REPO_TEMP}/${GIT_REPO}.tar.gz
-  # tar -zxf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP}
-  # mv ${REPO_TEMP}/${GIT_REPO}-${GIT_BRANCH} ${REPO_TEMP}/${GIT_REPO}
-  # chmod -R 777 ${REPO_TEMP}/${GIT_REPO}
+  # wget -qL - ${GIT_SERVER}/${GIT_USER}/${GIT_REPO}/archive/${GIT_BRANCH}.tar.gz -O ${repo_temp}/${GIT_REPO}.tar.gz
+  # tar -zxf ${repo_temp}/${GIT_REPO}.tar.gz -C ${repo_temp}
+  # mv ${repo_temp}/${GIT_REPO}-${GIT_BRANCH} ${repo_temp}/${GIT_REPO}
+  # chmod -R 777 ${repo_temp}/${GIT_REPO}
   # # Download Common packages
-  # wget -qL - ${GIT_SERVER}/${GIT_USER}/common/archive/${GIT_BRANCH}.tar.gz -O ${REPO_TEMP}/common.tar.gz
-  # tar -zxf ${REPO_TEMP}/common.tar.gz -C ${REPO_TEMP}
-  # mv ${REPO_TEMP}/common-${GIT_BRANCH}/ ${REPO_TEMP}/common
-  # mv ${REPO_TEMP}/common/ ${REPO_TEMP}/${GIT_REPO}
-  # chmod -R 777 ${REPO_TEMP}/${GIT_REPO}/common
+  # wget -qL - ${GIT_SERVER}/${GIT_USER}/common/archive/${GIT_BRANCH}.tar.gz -O ${repo_temp}/common.tar.gz
+  # tar -zxf ${repo_temp}/common.tar.gz -C ${repo_temp}
+  # mv ${repo_temp}/common-${GIT_BRANCH}/ ${repo_temp}/common
+  # mv ${repo_temp}/common/ ${repo_temp}/${GIT_REPO}
+  # chmod -R 777 ${repo_temp}/${GIT_REPO}/common
   # Create new tar files
-  # rm ${REPO_TEMP}/${GIT_REPO}.tar.gz
-  chmod -R 777 "$REPO_TEMP/$GIT_REPO"
-  tar --exclude=".*" -czf $REPO_TEMP/${GIT_REPO}.tar.gz -C $REPO_TEMP $GIT_REPO/
+  # rm ${repo_temp}/${GIT_REPO}.tar.gz
+  chmod -R 777 "$repo_temp/$GIT_REPO"
+  tar --exclude=".*" -czf $repo_temp/${GIT_REPO}.tar.gz -C $repo_temp $GIT_REPO/
   # Create tmp dir
-  mkdir -p "$REPO_TEMP/$GIT_REPO/tmp"
+  mkdir -p "$repo_temp/$GIT_REPO/tmp"
 fi
 #-----------------------------------------------------------------------------------
