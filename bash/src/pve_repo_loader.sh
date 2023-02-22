@@ -9,7 +9,7 @@
 # Check host is PVE
 if [[ ! $(command -v pveversion) ]]
 then
-  echo "This application is for Proxmox IS only. This host OS not supported.\nBye..."
+  echo "This application is for Proxmox only. This host OS is not supported.\nBye..."
   exit 0
 fi
 
@@ -30,45 +30,34 @@ function installer_cleanup () {
 #---- Body -------------------------------------------------------------------------
 
 #---- Clean old copies
+
+# Run function
 installer_cleanup
 
+
 #---- Local repo (developer)
-# if [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ]; then
-#   cp -R /mnt/pve/nas-*[0-9]-git/${GIT_USER}/${GIT_REPO} ${REPO_TEMP}
-#   tar --exclude=".*" -czf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP} ${GIT_REPO}/ &> /dev/null
-#   # Create tmp dir
-#   mkdir -p ${REPO_TEMP}/${GIT_REPO}/tmp
-# fi
+
+# Download Local loader (developer)
 if [ -d "$REPO_PATH/$GIT_REPO" ]
 then
+  # Copy local repo to host
   cp -R "$REPO_PATH/$GIT_REPO" $REPO_TEMP
+  # Create tar file of repo
   tar --exclude=".*" -czf $REPO_TEMP/${GIT_REPO}.tar.gz -C $REPO_TEMP $GIT_REPO/ &> /dev/null
   # Create tmp dir
   mkdir -p "$REPO_TEMP/$GIT_REPO/tmp"
 fi
 
 
-
 #---- Download Github repo
 
+# Download Github loader
 if [ ! -d "$REPO_PATH/$GIT_REPO" ]
 then
   # Git clone
   git clone --recurse-submodules https://github.com/$GIT_USER/${GIT_REPO}.git
-  # # Download Repo packages
-  # wget -qL - ${GIT_SERVER}/${GIT_USER}/${GIT_REPO}/archive/${GIT_BRANCH}.tar.gz -O ${REPO_TEMP}/${GIT_REPO}.tar.gz
-  # tar -zxf ${REPO_TEMP}/${GIT_REPO}.tar.gz -C ${REPO_TEMP}
-  # mv ${REPO_TEMP}/${GIT_REPO}-${GIT_BRANCH} ${REPO_TEMP}/${GIT_REPO}
-  # chmod -R 777 ${REPO_TEMP}/${GIT_REPO}
-  # # Download Common packages
-  # wget -qL - ${GIT_SERVER}/${GIT_USER}/common/archive/${GIT_BRANCH}.tar.gz -O ${REPO_TEMP}/common.tar.gz
-  # tar -zxf ${REPO_TEMP}/common.tar.gz -C ${REPO_TEMP}
-  # mv ${REPO_TEMP}/common-${GIT_BRANCH}/ ${REPO_TEMP}/common
-  # mv ${REPO_TEMP}/common/ ${REPO_TEMP}/${GIT_REPO}
-  # chmod -R 777 ${REPO_TEMP}/${GIT_REPO}/common
-  # Create new tar files
-  # rm ${REPO_TEMP}/${GIT_REPO}.tar.gz
   chmod -R 777 "$REPO_TEMP/$GIT_REPO"
+  # Create tar file of repo
   tar --exclude=".*" -czf $REPO_TEMP/${GIT_REPO}.tar.gz -C $REPO_TEMP $GIT_REPO/
   # Create tmp dir
   mkdir -p "$REPO_TEMP/$GIT_REPO/tmp"

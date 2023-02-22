@@ -48,6 +48,7 @@ do
 
   msg_box "#### SELECT A PRODUCT TOOLBOX ####\n\nSelect a product toolbox from the list or 'None - Exit this installer' to leave.\n\nAny terminal inactivity is caused by background tasks be run, system updating or downloading of Linux files. So be patient because some tasks can be slow.\n\nIf no Toolbox options are available its because no Toolbox exists for any of your installed PVE CTs."
   echo
+  
   # Create menu list
   pct_LIST=( $(pct list | awk 'NR > 1 { OFS = ":"; print $NF,$1 }') )
   unset OPTIONS_VALUES_INPUT
@@ -105,5 +106,7 @@ do
 done
 
 #---- Cleanup
+
+# Run function
 installer_cleanup
 #-----------------------------------------------------------------------------------
