@@ -64,11 +64,11 @@ do
       name_var="${build^} ${name^}"
     fi
     # Check for existing CT/VM
-    if [[ $(pct list | awk 'NR > 1 { OFS = ":"; print $3 }' | grep "^${name,,}(.\|-)\?[0-9]\+\?$") ]] && [ "$vm_type" = 'ct' ]
+    if [[ $(pct list | awk 'NR > 1 { OFS = ":"; print $3 }' | egrep "^${name,,}(-|\.)?([0-9]+)?$") ]] && [ "$vm_type" = 'ct' ]
     then
       OPTIONS_VALUES_INPUT+=( "${name,,}:${build,,}:ct" )
       OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^} ( '${name^} CT' already exists )" )
-    elif [[ $(qm list | awk '{ if (NR!=1) { print $2 }}' 2> /dev/null | grep "^${name,,}(.\|-)\?[0-9]\+\?$") ]] && [ "$vm_type" = 'vm' ]
+    elif [[ $(qm list | awk '{ if (NR!=1) { print $2 }}' 2> /dev/null | egrep "^${name,,}(-|\.)?([0-9]+)?$") ]] && [ "$vm_type" = 'vm' ]
     then
       OPTIONS_VALUES_INPUT+=( "${name,,}:${build,,}:vm" )
       OPTIONS_LABELS_INPUT+=( "${name_var} - ${desc^} ( '${name^} VM' already exists )" )
