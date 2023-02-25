@@ -46,16 +46,16 @@ then
   unset OPTIONS_VALUES_INPUT
   unset OPTIONS_LABELS_INPUT
   OPTIONS_VALUES_INPUT+=( "OPTION_01" "OPTION_02" )
-  OPTIONS_LABELS_INPUT+=( "NFS by Hostnames - NFS exports by hostnames" \
-  "NFS by Static IP - NFS exports by IP address (Recommended)" )
+  OPTIONS_LABELS_INPUT+=( "NFS by Static IP - NFS exports by IP address (Recommended)" \
+  "NFS by Hostnames - NFS exports by hostnames" )
   makeselect_input2
   singleselect SELECTED "$OPTIONS_STRING"
   if [ "$RESULTS" = 'OPTION_01' ]
   then
-    NFS_EXPORT_TYPE='0'
+    NFS_EXPORT_TYPE='1'
   elif [ "$RESULTS" = 'OPTION_02' ]
   then
-    NFS_EXPORT_TYPE='1'
+    NFS_EXPORT_TYPE='0'
   fi
 else
   # NFS exports set to use hostnames
@@ -118,7 +118,7 @@ do
       # Edit existing nfs export share
       while IFS=, read hostid ipaddr desc
       do
-        nfs_var=$(if [ ${NFS_EXPORT_TYPE} == '0' ]; then echo ${hostid}; else echo ${ipaddr}; fi)
+        nfs_var=$(if [ "$NFS_EXPORT_TYPE" = 0 ]; then echo ${hostid}; else echo ${ipaddr}; fi)
         match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
         if [[ $(echo "${match}" | grep -ws "${nfs_var}") ]]
         then
@@ -136,7 +136,7 @@ do
       printf "\n"${DIR_SCHEMA}/${dir}"" >> ${NFS_EXPORTS}
       while IFS=, read hostid ipaddr desc
       do
-        nfs_var=$(if [ ${NFS_EXPORT_TYPE} == '0' ]; then echo ${hostid}; else echo ${ipaddr}; fi)
+        nfs_var=$(if [ "$NFS_EXPORT_TYPE" = 0 ]; then echo ${hostid}; else echo ${ipaddr}; fi)
         match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
         # Add to existing nfs export share
         substitute=$(echo "${match}" | sed -e "s/$/\t${nfs_var}${NFS_STRING}/")

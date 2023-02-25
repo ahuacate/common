@@ -48,8 +48,7 @@ done < <( printf '%s\n' "${vm_LIST[@]}" )
 while true
 do
   section "Select a Installer"
-
-  msg_box "#### SELECT A INSTALLER ####\n\nSelect a application installer or service from the list or 'None - Exit this installer' to leave.\n\nAny terminal inactivity is caused by background tasks being run, system updating or downloading of required files. So be patient because some tasks can be slow."
+  msg_box "#### SELECT A INSTALLER ####\n\nPlease choose an application installer or service from the list provided, or select 'None' to exit this installer. If you experience any terminal inactivity, it may be due to background tasks running, system updates in progress, or the downloading of required files. It's important to remain patient, as some tasks may take longer to complete."
   echo
   # Create menu list
   unset OPTIONS_VALUES_INPUT
