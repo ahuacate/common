@@ -75,6 +75,9 @@ function storage_list() {
 
   #---- Prerequisites
 
+  # User warning 'be patient'
+  echo -e "Scanning storage options ( be patient, might take a while )...\n"
+
   # Deny system device list (i.e system devices, pools, partitions etc)
   system_dev_tmp_LIST=()
   # System devices by pools
