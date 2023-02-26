@@ -47,7 +47,7 @@ function install_usbautomount() {
   fi
 }
 
-# Storage Array List
+# USB reset
 function reset_usb() {
   msg "Resetting USB devices..."
   # USB 3.1 Only
@@ -68,7 +68,7 @@ function reset_usb() {
   echo
 }
 
-
+# Storage Array List
 function storage_list() {
   # 1=PATH:2=KNAME:3=PKNAME (or part cnt.):4=FSTYPE:5=TRAN:6=MODEL:7=SERIAL:8=SIZE:9=TYPE:10=ROTA:11=UUID:12=RM:13=LABEL:14=ZPOOLNAME:15=SYSTEM
   # PVE All Disk array
