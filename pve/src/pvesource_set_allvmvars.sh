@@ -118,7 +118,7 @@ function valid_ip() {
   local ip="$1"
   local stat=1
   # Checks if address conforms to standard
-  # Usage: valid_ip "192.168.1.10"
+  # Usage: valid_ip "192.168.1.110"
   # Results: '0' means valid, '1' means not
 
   if [[ "$ip" =~ ${ip4_regex} ]]
