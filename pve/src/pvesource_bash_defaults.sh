@@ -1076,6 +1076,9 @@ WHITE=$'\033[1;37m'
 NC=$'\033[0m'
 UNDERLINE=$'\033[4m'
 printf '\033[8;40;120t'
+# Position terminal top/left
+printf '\e[3;0;3t'
+
 
 #---- Set Bash Temp Folder
 if [ -z "${TEMP_DIR+x}" ]
