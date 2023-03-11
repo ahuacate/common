@@ -6,7 +6,7 @@
 
 #---- Bash command to run script ---------------------------------------------------
 
-#bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/pve-nas/common/pve/tool/pvetool_ct_ubuntuversionupdater.sh)"
+#bash -c "$(wget -qLO - https://raw.githubusercontent.com/picasso566/pve-nas/common/pve/tool/pvetool_ct_ubuntuversionupdater.sh)"
 
 #---- Source -----------------------------------------------------------------------
 

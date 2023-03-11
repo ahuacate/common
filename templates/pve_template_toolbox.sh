@@ -7,10 +7,10 @@
 #---- Bash command to run script ---------------------------------------------------
 
 #---- Source Github
-# bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/pve-homelab/main/pve_homelab_toolbox.sh)"
+# bash -c "$(wget -qLO - https://raw.githubusercontent.com/picasso566/pve-homelab/main/pve_homelab_toolbox.sh)"
 
 #---- Source local Git
-# /mnt/pve/nas-01-git/ahuacate/pve-homelab/pve_homelab_toolbox.sh
+# /mnt/pve/nas-01-git/picasso566/pve-homelab/pve_homelab_toolbox.sh
 
 #---- Installer Vars ---------------------------------------------------------------
 

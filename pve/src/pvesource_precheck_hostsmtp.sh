@@ -102,7 +102,7 @@ then
     precheck_error_msg1+=( "Postfix conf - 'smtpd_relay_restrictions':fail ( requires 'permit_mynetworks')" )
   fi
 
-  display_msg="A problem exists with your PVE host SMTP Postfix server.\n\n$(printf '%s\n' "${precheck_msg1[@]}" | column -s ":" -t -N "DESCRIPTION,STATUS" | indent2)\n\nBefore proceeding with this installation we recommend you configure all PVE hosts to support SMTP email services (including SMTP client relay). A working SMTP server can email your Proxmox System Administrator all new User login credentials, SSH keys, application specific login credentials and written guidelines. A PVE host SMTP server makes administration much easier. Also be alerted about unwarranted login attempts and other system critical alerts.\n\nA PVE Host SMTP Server installer is available in our PVE Host Toolbox at GitHub:\n\n    --  https://github.com/ahuacate/pve-host"
+  display_msg="A problem exists with your PVE host SMTP Postfix server.\n\n$(printf '%s\n' "${precheck_msg1[@]}" | column -s ":" -t -N "DESCRIPTION,STATUS" | indent2)\n\nBefore proceeding with this installation we recommend you configure all PVE hosts to support SMTP email services (including SMTP client relay). A working SMTP server can email your Proxmox System Administrator all new User login credentials, SSH keys, application specific login credentials and written guidelines. A PVE host SMTP server makes administration much easier. Also be alerted about unwarranted login attempts and other system critical alerts.\n\nA PVE Host SMTP Server installer is available in our PVE Host Toolbox at GitHub:\n\n    --  https://github.com/picasso566/pve-host"
 
 
   msg_box "#### PLEASE READ CAREFULLY ####\n\n${display_msg}"
@@ -119,7 +119,7 @@ then
   if [ "$RESULTS" = 'TYPE01' ]
   then
     # Exit and install SMTP
-    msg "Go to our Github repository and run our PVE Host Toolbox selecting our 'SMTP Email Setup' option:\n\n  --  https://github.com/ahuacate/pve-host\n\nRe-run this installer after your have configured '$(hostname)' SMTP email support. Bye..."
+    msg "Go to our Github repository and run our PVE Host Toolbox selecting our 'SMTP Email Setup' option:\n\n  --  https://github.com/picasso566/pve-host\n\nRe-run this installer after your have configured '$(hostname)' SMTP email support. Bye..."
     echo
     exit 0
   elif [ "$RESULTS" = 'TYPE02' ]

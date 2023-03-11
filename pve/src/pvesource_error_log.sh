@@ -18,7 +18,7 @@ PVESM FOLDER ERROR
 
 This error is critical and halted the installation.
 
-Failed to create CT subfolders on your PVE shared storage (NAS). The cause is often related to PVESM or NAS user and folder share permissions. We recommend the User reads our Github NAS guides ( 'https://github.com/ahuacate/nas-hardmetal' and 'https://github.com/ahuacate/pve-nas' ) and makes sure the following constraints are satisfied:
+Failed to create CT subfolders on your PVE shared storage (NAS). The cause is often related to PVESM or NAS user and folder share permissions. We recommend the User reads our Github NAS guides ( 'https://github.com/picasso566/nas-hardmetal' and 'https://github.com/picasso566/pve-nas' ) and makes sure the following constraints are satisfied:
 
   --  Power User & Group Accounts
         Groups: medialab:65605, homelab:65606, privatelab:65607, chrootjail:65608
@@ -42,7 +42,7 @@ if [ ! ${#display_permission_error_MSG[@]} == '0' ]; then
 msg "+----------------------------------------------------------------------------------+
 PVESM FOLDER PERMISSION ERROR
 
-The error occurred when setting the required CT application subfolders ACL (setfacl) permissions. We recommend the User reads our Github NAS guides ( 'https://github.com/ahuacate/nas-hardmetal' and 'https://github.com/ahuacate/pve-nas' ) and makes sure the following constraints are satisfied:
+The error occurred when setting the required CT application subfolders ACL (setfacl) permissions. We recommend the User reads our Github NAS guides ( 'https://github.com/picasso566/nas-hardmetal' and 'https://github.com/picasso566/pve-nas' ) and makes sure the following constraints are satisfied:
 
   --  Power User & Group Accounts
         Groups: medialab:65605, homelab:65606, privatelab:65607, chrootjail:65608
@@ -66,7 +66,7 @@ if [ ! ${#display_chattr_error_MSG[@]} == '0' ]; then
 msg "+----------------------------------------------------------------------------------+
 PVESM FOLDER CHATTR ERROR
 
-The error occurred when creating subfolder file '.foo_protect' for chattr. We recommend the User reads our Github NAS guides ( 'https://github.com/ahuacate/nas-hardmetal' and 'https://github.com/ahuacate/pve-nas' ) and makes sure the following constraints are satisfied:
+The error occurred when creating subfolder file '.foo_protect' for chattr. We recommend the User reads our Github NAS guides ( 'https://github.com/picasso566/nas-hardmetal' and 'https://github.com/picasso566/pve-nas' ) and makes sure the following constraints are satisfied:
 
   --  Folder and user permissions are set including ACLs
   --  Chattr is applied to subfolders using a file named '.foo_protect'

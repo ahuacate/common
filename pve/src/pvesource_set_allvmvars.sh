@@ -53,12 +53,12 @@ EOF
 #---- Other Variables --------------------------------------------------------------
 
 # Developer Option
-if [ -f "/mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git" ]
+if [ -f "/mnt/pve/nas-*[0-9]-git/picasso566/developer_settings.git" ]
 then
   while IFS== read -r var val
   do
     eval ${var}=${val}
-  done < <(cat /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git | grep -v '^#')
+  done < <(cat /mnt/pve/nas-*[0-9]-git/picasso566/developer_settings.git | grep -v '^#')
 fi
 
 # Check PVE SMTP status
