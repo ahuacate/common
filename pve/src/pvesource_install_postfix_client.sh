@@ -4,7 +4,7 @@
 # Description:  Source script for installing and setup Postfix client
 #               Requires PVE host install: 'pve_host_setup_postfix.sh'
 #               Host SMTP_STATUS=1 to install
-#               Check arg at head of /etc/postfix/main.cf: # ahuacate_smtp=1
+#               Check arg at head of /etc/postfix/main.cf: # picasso566_smtp=1
 #               Script works with PVE CTs (LXC) only
 # ----------------------------------------------------------------------------------
 #---- Source -----------------------------------------------------------------------
@@ -41,8 +41,8 @@ pct exec $CTID -- bash -c "postconf -e relayhost=${SMTP_SERVER_ADDRESS}"
 
 # Create check line in /etc/postfix/main.cf
 pct exec $CTID -- sed -i \
-    -e '/^#\?\(\s*ahuacate_smtp\s*=\s*\).*/{s//\11/;:a;n;ba;q}' \
-    -e '1i ahuacate_smtp=1' /etc/postfix/main.cf
+    -e '/^#\?\(\s*picasso566_smtp\s*=\s*\).*/{s//\11/;:a;n;ba;q}' \
+    -e '1i picasso566_smtp=1' /etc/postfix/main.cf
 
 # Reload Postfix configuration file /etc/postfix/main.cf
 pct exec $CTID -- systemctl restart postfix.service

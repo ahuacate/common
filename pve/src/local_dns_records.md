@@ -6,7 +6,7 @@ UniFi UGS/UDM routers only resolves locally assigned DHCP client hostnames. This
 
 Use Linux command `nslookup hostname` on your PVE host to check if hard-static IP client hostnames are being mapped. If you are using UniFi as your router you will find there are issues.
 
-The partial fix is to install a PVE CT PiHole DNS server to resolve arbitrary hostnames to their IP addresses. Our PiHole CT installer is available [here](https://github.com/ahuacate/pve-homelab). Navigate using the PiHole web interface to `Settings` > `DNS tab` and complete as follows (change to match your network).
+The partial fix is to install a PVE CT PiHole DNS server to resolve arbitrary hostnames to their IP addresses. Our PiHole CT installer is available [here](https://github.com/picasso566/pve-homelab). Navigate using the PiHole web interface to `Settings` > `DNS tab` and complete as follows (change to match your network).
 
 :white_check_mark: Use DNSSEC
 :white_check_mark: Use Conditional Forwarding
