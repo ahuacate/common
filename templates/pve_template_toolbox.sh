@@ -7,7 +7,7 @@
 #---- Bash command to run script ---------------------------------------------------
 
 #---- Source Github
-# bash -c "$(wget -qLO - https://raw.githubusercontent.com/picasso566/pve-homelab/main/pve_homelab_toolbox.sh)"
+# bash -c "$(wget -qLO - https://raw.githubusercontent.com/picasso566/pve-homelab/forkpaths/pve_homelab_toolbox.sh)"
 
 #---- Source local Git
 # /mnt/pve/nas-01-git/picasso566/pve-homelab/pve_homelab_toolbox.sh
@@ -58,7 +58,7 @@ if [ -f ${REPO_PATH}/common/bash/src/pve_repo_loader.sh ] && [[ $(sed -n 's/^dev
   source ${REPO_PATH}/common/bash/src/pve_repo_loader.sh
 else
   # Download Github loader
-  wget -qL - https://raw.githubusercontent.com/${GIT_USER}/common/main/bash/src/pve_repo_loader.sh -O ${REPO_TEMP}/pve_repo_loader.sh
+  wget -qL - https://raw.githubusercontent.com/${GIT_USER}/common/forkpaths/bash/src/pve_repo_loader.sh -O ${REPO_TEMP}/pve_repo_loader.sh
   chmod +x ${REPO_TEMP}/pve_repo_loader.sh
   source ${REPO_TEMP}/pve_repo_loader.sh
 fi

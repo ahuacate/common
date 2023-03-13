@@ -6,7 +6,7 @@
 
 #---- Bash command to run script ---------------------------------------------------
 #---- Source Github
-# bash -c "$(wget -qLO - https://raw.githubusercontent.com/picasso566/common/main/pve/tool/pve_tester_ct_ubuntu.sh)"
+# bash -c "$(wget -qLO - https://raw.githubusercontent.com/picasso566/common/forkpaths/pve/tool/pve_tester_ct_ubuntu.sh)"
 
 #---- Source local Git
 # /mnt/pve/nas-01-git/picasso566/common/pve/tool/pve_tester_ct_ubuntu.sh

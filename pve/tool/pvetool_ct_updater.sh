@@ -8,7 +8,7 @@
 
 #---- Bash command to run script ---------------------------------------------------
 
-#bash -c "$(wget -qLO - https://raw.githubusercontent.com/picasso566/common/main/pve/tool/pvetool_ct_updater.sh)"
+#bash -c "$(wget -qLO - https://raw.githubusercontent.com/picasso566/common/forkpaths/pve/tool/pvetool_ct_updater.sh)"
 
 #---- Source -----------------------------------------------------------------------
 
