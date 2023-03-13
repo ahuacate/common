@@ -104,11 +104,11 @@ SEARCHDOMAIN='local'
 
 #----[COMMON_NET_STATIC_OPTIONS]
 # IP address (IPv4). Only works with static IP (DHCP=0).
-IP='192.168.1.10'
+IP='192.168.1.110'
 # IP address (IPv6). Only works with static IP (DHCP=0).
 IP6=''
 # Default gateway for traffic (IPv4). Only works with static IP (DHCP=0).
-GW='192.168.1.5'
+GW='192.168.1.1'
 # Default gateway for traffic (IPv6). Only works with static IP (DHCP=0).
 GW6=''
 
