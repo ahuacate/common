@@ -48,10 +48,10 @@ PVESM_EXIT='exit/finished|Nothing more to add'
 #---- Other Variables --------------------------------------------------------------
 
 # Developer Options
-if [ -f /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git ]; then
+if [ -f /mnt/pve/nas-*[0-9]-git/aquacate/developer_settings.git ]; then
   while IFS== read -r var val; do
     eval ${var}=${val}
-  done < <(cat /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git | grep -v '^#')
+  done < <(cat /mnt/pve/nas-*[0-9]-git/aquacate/developer_settings.git | grep -v '^#')
 fi
 
 #---- Other Files ------------------------------------------------------------------

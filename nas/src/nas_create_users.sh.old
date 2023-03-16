@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------------------------------
 # Filename:     nas_create_users.sh
-# Description:  Create Ahuacate Groups and Users
+# Description:  Create aquacate Groups and Users
 # ----------------------------------------------------------------------------------
 
 #---- Bash command to run script ---------------------------------------------------

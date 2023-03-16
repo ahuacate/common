@@ -932,7 +932,7 @@ edit_json_value() {
 # Check PVE host SMTP status
 function check_smtp_status() {
   # Host SMTP Option ('0' is inactive, '1' is active)
-  var='ahuacate_smtp'
+  var='aquacate_smtp'
   file='/etc/postfix/main.cf'
   if [ -f $file ] && [ "$(systemctl is-active --quiet postfix; echo $?)" = 0 ]
   then
@@ -958,7 +958,7 @@ function check_host_subid() {
   # Check if all the subgid entries exist
   if ! grep -qF "$subgid_root_entry_1" /etc/subgid || ! grep -qF "$subgid_root_entry_2" /etc/subgid || ! grep -qF "$subuid_root_entry_1" /etc/subuid || ! grep -qF "$subuid_root_entry_2" /etc/subuid || ! grep -qF "$subuid_root_entry_3" /etc/subuid
   then
-    warn "There are issues with your PVE hosts UID & GID mapping.\nYou must run our PVE host toolbox ( option 'PVE Basic - required by all hosts' ), to prepare your PVE hosts before running this installer again.\nMore information is available here: https://github.com/ahuacate/pve-host \nBye..."
+    warn "There are issues with your PVE hosts UID & GID mapping.\nYou must run our PVE host toolbox ( option 'PVE Basic - required by all hosts' ), to prepare your PVE hosts before running this installer again.\nMore information is available here: https://github.com/aquacate/pve-host \nBye..."
     echo
     exit 0
   fi

@@ -53,12 +53,12 @@ EOF
 #---- Other Variables --------------------------------------------------------------
 
 # Developer Option
-if [ -f "/mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git" ]
+if [ -f "/mnt/pve/nas-*[0-9]-git/aquacate/developer_settings.git" ]
 then
   while IFS== read -r var val
   do
     eval ${var}=${val}
-  done < <(cat /mnt/pve/nas-*[0-9]-git/ahuacate/developer_settings.git | grep -v '^#')
+  done < <(cat /mnt/pve/nas-*[0-9]-git/aquacate/developer_settings.git | grep -v '^#')
 fi
 
 # Check PVE SMTP status
@@ -118,7 +118,7 @@ function valid_ip() {
   local ip="$1"
   local stat=1
   # Checks if address conforms to standard
-  # Usage: valid_ip "192.168.1.10"
+  # Usage: valid_ip "192.168.1.110"
   # Results: '0' means valid, '1' means not
 
   if [[ "$ip" =~ ${ip4_regex} ]]

@@ -55,8 +55,12 @@ fi
 if [ ! -d "$REPO_PATH/$GIT_REPO" ]
 then
   # Git clone
-  git clone --recurse-submodules https://github.com/$GIT_USER/${GIT_REPO}.git
+  git clone https://github.com/$GIT_USER/${GIT_REPO}.git
   chmod -R 777 "$REPO_TEMP/$GIT_REPO"
+  cd /$REPO_TEMP/$GIT_REPO
+  git submodule update --recursive --init
+  git submodule update --recursive --remote
+  
   # Create tar file of repo
   tar --exclude=".*" -czf $REPO_TEMP/${GIT_REPO}.tar.gz -C $REPO_TEMP $GIT_REPO/
   # Create tmp dir
