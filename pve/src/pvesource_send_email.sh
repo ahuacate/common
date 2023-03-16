@@ -24,7 +24,7 @@
 # Check PVE host SMTP status
 function check_smtp_status() {
   # Host SMTP Option ('0' is inactive, '1' is active)
-  var='picasso566_smtp'
+  var='aquacate_smtp'
   file='/etc/postfix/main.cf'
   if [ -f $file ] && [ "$(systemctl is-active --quiet postfix; echo $?)" = 0 ]
   then
@@ -45,7 +45,7 @@ check_smtp_status
 if [ "$SMTP_STATUS" = 0 ]
 then
   # Options if SMTP is inactive
-  display_msg='Unfortunately we cannot send this email. The SMTP server in your network is not known. Your PVE hosts should be configured to support SMTP email services. Our PVE Host SMTP Server installer is available in our PVE Host Toolbox located at GitHub:\n\n    --  https://github.com/picasso566/pve-host'
+  display_msg='Unfortunately we cannot send this email. The SMTP server in your network is not known. Your PVE hosts should be configured to support SMTP email services. Our PVE Host SMTP Server installer is available in our PVE Host Toolbox located at GitHub:\n\n    --  https://github.com/aquacate/pve-host'
 
   msg_box "#### PLEASE READ CAREFULLY ####\n\n$(echo ${display_msg})"
   sleep 3

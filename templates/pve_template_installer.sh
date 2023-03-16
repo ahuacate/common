@@ -7,17 +7,17 @@
 #---- Bash command to run script ---------------------------------------------------
 
 #---- Source Github
-# bash -c "$(wget -qLO - https://raw.githubusercontent.com/picasso566/pve-homelab/forkpaths/pve_homelab_installer.sh)"
+# bash -c "$(wget -qLO - https://raw.githubusercontent.com/aquacate/pve-homelab/forkpaths/pve_homelab_installer.sh)"
 
 #---- Source local Git
-# /mnt/pve/nas-01-git/picasso566/pve-homelab/pve_homelab_installer.sh
+# /mnt/pve/nas-01-git/aquacate/pve-homelab/pve_homelab_installer.sh
 
 #---- Installer Vars ---------------------------------------------------------------
 
 # Git server
 GIT_SERVER='https://github.com'
 # Git user
-GIT_USER='picasso566'
+GIT_USER='aquacate'
 # Git repository
 GIT_REPO='pve-homelab'
 # Git branch
