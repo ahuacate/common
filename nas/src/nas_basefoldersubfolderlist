@@ -36,7 +36,7 @@ books/ebooks,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 books/magazines,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 
 # Proxmox Folders
-proxmox/backup,root,users,1750,:rwx,65605:rwx,65607:rwx,65606:rwx,65608:000
+proxmox/backup,root,users,0750,:--x,65605:rwx,65607:rwx,65606:rwx,65608:000
 
 # Public Folders
 public/autoadd,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
