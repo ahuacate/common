@@ -11,6 +11,8 @@
 # Video Folders (Main)
 video/cctv,root,users,0750,:--x,65605:r-x,65607:rwx,65606:rwx,65608:000
 video/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/documentary/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/documentary/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 video/homevideo,root,users,1750,:--x,65605:rwx,65607:rwx,65606:000,65608:rwx
 video/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 video/musicvideo,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
@@ -21,6 +23,8 @@ video/transcode,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
 # Video Folders (stream is for low bandwidth HEVC video)
 video/stream,root,users,0750,:--x,65605:r-x,65607:r-x,65608:--x
 video/stream/documentary,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/stream/documentary/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
+video/stream/documentary/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 video/stream/movies,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 video/stream/musicvideo,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
 video/stream/pron,root,users,0750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
@@ -36,7 +40,7 @@ books/ebooks,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 books/magazines,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:r-x
 
 # Proxmox Folders
-proxmox/backup,root,users,0750,:--x,65605:rwx,65607:rwx,65606:rwx,65608:000
+proxmox/backup,root,users,1750,:--x,65605:rwx,65607:rwx,65606:rwx,65608:000
 
 # Public Folders
 public/autoadd,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
@@ -79,6 +83,7 @@ public/autoadd/vidcoderr/out_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,6
 # Download Folders
 downloads/torrent,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000
 downloads/usenet,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000
+downloads/unsorted,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000
 
 # Transcode Folders
 transcode/jellyfin,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
