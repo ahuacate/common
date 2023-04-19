@@ -17,9 +17,6 @@ This script ONLY supports Proxmox hosts installed with a AMD/Intel CPU with inte
 
 In the next steps we will check if your PVE host hardware supports VA-API video encoding. If the check passes we will configure your CT for VA-API passthrough encoding/decoding/transcoding."
 
-# Check AMD APU hardware
-if [[ $(lscpu | grep "Vendor ID:\s*AuthenticAMD") ]]
-
 # Checking for PVE host VA-API support
 msg "Checking PVE host support for VA-API..."
 if [ $(ls -l /dev/dri | grep renderD128 > /dev/null; echo $?) = 0 ]
@@ -32,7 +29,7 @@ then
     apt-get --only-upgrade install vainfo -y > /dev/null
   fi
 
-  # Configure VAAPI passthru
+  # Configure VA-API passthru
   chmod 666 /dev/dri/renderD128 >/dev/null
   # Creating rc.local script to set permissions for /dev/dri/renderD128
   echo -e '#!/bin/sh -e\n/bin/chmod 666 /dev/dri/renderD128\nexit 0' > /etc/rc.local
