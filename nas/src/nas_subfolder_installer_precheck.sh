@@ -34,49 +34,47 @@ fi
 #---- Functions --------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
-# Unset all list arrays
-unset dir_check_LIST
-unset nas_subfolder_LIST
-unset display_dir_error_MSG
-unset display_permission_error_MSG
+# Initialize list arrays
+dir_check_LIST=()
+nas_subfolder_LIST=()
+display_dir_error_MSG=()
+display_permission_error_MSG=()
+display_chattr_error_MSG=()
 
 # Create PVESM check list
-dir_check_LIST=()
+# Array 'pvesm_input_LIST' is the CT required list matched to PVESM mnt(s)
 while IFS=',' read -r pve_mnt ct_mnt
 do
   label=$(echo "$ct_mnt" | sed 's/^\/mnt\///')
   remote_mnt=$(df -h | awk -v var="$pve_mnt" '{ if ($0 ~ var) print $1 }')
   mnt_protocol=$(pvesm status | grep "^$pve_mnt" | awk '{ print $2 }')
-  # Combine to list
+  # Combine to create list
   while IFS= read -r sub_dir
   do
     remote_mnt_sub=$(echo "$sub_dir" | awk -F',' '{ print $1}' | sed "s|.*${pve_mnt}||")
-    dir_check_LIST+=( "${label},${mnt_protocol},${remote_mnt}${remote_mnt_sub},${sub_dir}" )
-  done <<< $(cat $COMMON_DIR/nas/src/nas_basefoldersubfolderlist | awk -F',' -v var="$label" '{ if ($1 ~ "^" var) print $0 }' | sed "s/${label}/\/mnt\/pve\/${pve_mnt}/")
-done <<< $(printf '%s\n' "${pvesm_input_LIST[@]}" | sed '/\/mnt\/backup$/d' | sed '/\/mnt\/music$/d' | sed '/\/mnt\/photo$/d')
+    dir_check_LIST+=( "$label,$mnt_protocol,$remote_mnt$remote_mnt_sub,$sub_dir" )
+  done < <( cat $COMMON_DIR/nas/src/nas_basefoldersubfolderlist | awk -F',' -v var="$label" '{ if ($1 ~ "^" var) print $0 }' | sed "s/${label}/\/mnt\/pve\/${pve_mnt}/" )
+done < <( printf '%s\n' "${pvesm_input_LIST[@]}" | sed '/\/mnt\/backup$/d' | sed '/\/mnt\/music$/d' | sed '/\/mnt\/photo$/d' )
 
-# Create required SubFolder list
-nas_subfolder_LIST=()
+# Check if dir exists
+# Add missing dir to 'nas_subfolder_LIST'
 while IFS=',' read -r label mnt_protocol remote_mnt sub_dir other
 do
   if ! [ -d "$sub_dir" ]
   then
-    nas_subfolder_LIST+=( "${label},${mnt_protocol},${remote_mnt},${sub_dir},${other}" )
+    nas_subfolder_LIST+=( "$label,$mnt_protocol,$remote_mnt,$sub_dir,$other" )
   fi
-done <<< $(printf '%s\n' "${dir_check_LIST[@]}")
+done < <( printf '%s\n' "${dir_check_LIST[@]}" )
 
-# Create SubFolders required by CT
-display_dir_error_MSG=()
-display_permission_error_MSG=()
-display_chattr_error_MSG=()
-if [ ! ${#nas_subfolder_LIST[@]} = 0 ]
+# Create subfolders required by CT
+if [ ! "${#nas_subfolder_LIST[@]}" = 0 ]
 then
-  section "${HOSTNAME^} Subfolders"
-  msg "Creating ${SECTION_HEAD} subfolders required by CT applications..."
+  section "${HOSTNAME^} subfolders"
+  msg "Creating ${SECTION_HEAD} subfolders required by CT application..."
   echo
   while IFS=',' read -r label mnt_protocol remote_mnt sub_dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05
   do
-    if [ -d "${sub_dir}" ]
+    if [ -d "$sub_dir" ]
     then
       info "Pre-existing folder: ${UNDERLINE}$sub_dir${NC}"
       # Check for '.foo_protect' file
@@ -121,7 +119,7 @@ then
         setfacl -Rm g:$acl_05 "$sub_dir" 2> /dev/null || display_permission_error_MSG+=( "Linux command: setfacl\nLocal PVE folder: $sub_dir\nRemote NAS folder: $(echo "$remote_mnt" | awk -F':' '{ print $2 }')\nShare protocol: $mnt_protocol\nLinux CLI: setfacl -Rm g:$acl_05 <foldername>\n" )
       fi
     fi
-  done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
+  done < <( printf "%s\n" "${nas_subfolder_LIST[@]}" )
 
   # Chattr set ZFS share points attributes to +a
   while IFS=',' read -r label mnt_protocol remote_mnt sub_dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05
@@ -131,6 +129,6 @@ then
       touch "$sub_dir/.foo_protect" 2> /dev/null || display_chattr_error_MSG+=( "Linux command: touch\nLocal PVE folder: $sub_dir\nRemote NAS folder: $(echo "$remote_mnt" | awk -F':' '{ print $2 }')\nShare protocol: $mnt_protocol\nLinux CLI: touch <foldername>/.foo_protect\n" )
       chattr +i ${sub_dir}/.foo_protect 2> /dev/null || display_chattr_error_MSG+=( "Linux command: chattr\nLocal PVE folder: $sub_dir\nRemote NAS folder: $(echo "$remote_mnt" | awk -F':' '{ print $2 }')\nShare protocol: $mnt_protocol\nLinux CLI: chattr +i <foldername>/.foo_protect\n" )
     fi
-  done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
+  done < <( printf "%s\n" "${nas_subfolder_LIST[@]}" )
 fi
 #-----------------------------------------------------------------------------------
