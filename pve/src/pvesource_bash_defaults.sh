@@ -975,12 +975,12 @@ function pct_check_systemctl() {
   i=0
   while true
   do
-    if [ $(pct exec $CTID -- systemctl is-active ${service_name}) = 'active' ]
+    if [[ $(pct exec $CTID -- systemctl is-active ${service_name}) == 'active' ]]
     then
       info "Systemctl '${service_name}' status: ${YELLOW}active${NC}"
       echo
       break
-    elif [ $(pct exec $CTID -- systemctl is-active ${service_name}) != 'active' ] && [ "$i" = '5' ]
+    elif [[ ! $(pct exec $CTID -- systemctl is-active ${service_name}) == 'active' ]] && [ "$i" = '5' ]
     then
       warn "$FAIL_MSG"
       echo

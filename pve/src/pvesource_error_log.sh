@@ -12,7 +12,7 @@
 #---- Body -------------------------------------------------------------------------
 
 # PVESM Folder Error
-if [ ! ${#display_dir_error_MSG[@]} == '0' ]; then
+if [ ! "${#display_dir_error_MSG[@]}" = 0 ]; then
 msg "+----------------------------------------------------------------------------------+
 PVESM FOLDER ERROR
 
@@ -38,7 +38,7 @@ msg_box "$(printf '%s\n' "${display_dir_error_MSG[@]}")"
 fi
 
 # PVESM Permission Error
-if [ ! ${#display_permission_error_MSG[@]} == '0' ]; then
+if [ ! "${#display_permission_error_MSG[@]}" = 0 ]; then
 msg "+----------------------------------------------------------------------------------+
 PVESM FOLDER PERMISSION ERROR
 
@@ -62,7 +62,7 @@ msg_box "$(printf '%s\n' "${display_permission_error_MSG[@]}")"
 fi
 
 # PVESM Chattr Error
-if [ ! ${#display_chattr_error_MSG[@]} == '0' ]; then
+if [ ! "${#display_chattr_error_MSG[@]}" = 0 ]; then
 msg "+----------------------------------------------------------------------------------+
 PVESM FOLDER CHATTR ERROR
 
