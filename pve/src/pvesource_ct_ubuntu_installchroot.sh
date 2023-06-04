@@ -67,7 +67,7 @@ ${CHROOT}/usr
 )
 for dir in "${array1[@]}"
 do
-  [[ -d "$dir" ]] && rm -R "$dir"
+  [[ -d "$dir" ]] && rm -Rf "$dir" 2> /dev/null
 done
 mkdir -p $CHROOT/{homes,dev,bin,lib,lib/x86_64-linux-gnu,lib64,etc,lib/terminfo/x,usr,usr/bin}
 mknod -m 666 $CHROOT/dev/null c 1 3
@@ -169,10 +169,12 @@ if [ "$SSHD_STATUS" = 0 ]
 then
   # Starting SSHd
   msg "Enabling SSHD server..."
-  systemctl stop ssh 2>/dev/null
+  # systemctl stop ssh 2>/dev/null
+  pct_stop_systemctl "ssh.service"
   sed -i "s/^[#]*\s*Port.*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config
   ufw allow ${SSH_PORT} 2>/dev/null
-  systemctl restart ssh 2>/dev/null
+  # systemctl restart ssh 2>/dev/null
+  pct_restart_systemctl "ssh.service"
   systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - ${YELLOW}port ${SSH_PORT}${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead).${NC} - port ${SSH_PORT}"
 else
   while true
@@ -184,17 +186,20 @@ else
         read -p "Confirm SSH Port number: " -e -i $SSH_PORT SSH_PORT
         msg "Enabling SSHD server..."
         SSHD_STATUS=0
-        systemctl stop ssh 2>/dev/null
+        # systemctl stop ssh 2>/dev/null
+        pct_stop_systemctl "ssh.service"
         ufw allow ${SSH_PORT} 2>/dev/null
-        systemctl enable ssh 2>/dev/null
-        systemctl start ssh 2>/dev/null
+        systemctl enable ssh.service 2>/dev/null
+        # systemctl start ssh 2>/dev/null
+        pct_start_systemctl "ssh.service"
         systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - port ${SSH_PORT}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port ${SSH_PORT}"
         echo
         break
         ;;
       [Nn]*)
         SSHD_STATUS=1
-        systemctl stop ssh 2>/dev/null
+        # systemctl stop ssh 2>/dev/null
+        pct_stop_systemctl "ssh.service"
         systemctl disable ssh 2>/dev/null
         sed -i "s/^[#]*\s*Port.*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config
         msg "Disabling SSHD server..."

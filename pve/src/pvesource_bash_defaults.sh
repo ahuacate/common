@@ -239,6 +239,76 @@ function qm_list() {
 }
 
 
+#---- Systemd functions
+# Stop System.d Services
+function pct_stop_systemctl() {
+  # Usage: pct_stop_systemctl "name.service"
+  local service_name="$1"
+  if [ "$(systemctl is-active $service_name)" = 'active' ]
+  then
+    # Stop service
+    sudo systemctl stop $service_name
+    # Waiting to hear from service
+    while ! [[ "$(systemctl is-active $service_name)" == 'inactive' ]]
+    do
+      echo -n .
+    done
+  fi
+}
+
+# Start System.d Services
+function pct_start_systemctl() {
+  # Usage: pct_start_systemctl "jellyfin.service"
+  local service_name="$1"
+  # Reload systemd manager configuration
+  sudo systemctl daemon-reload
+  if [ "$(systemctl is-active $service_name)" = 'inactive' ]
+  then
+    # Start service
+    sudo systemctl start $service_name
+    # Waiting to hear from service
+    while ! [[ "$(systemctl is-active $service_name)" == 'active' ]]
+    do
+      echo -n .
+    done
+  fi
+}
+
+# Start System.d Services
+function pct_restart_systemctl() {
+  # Usage: pct_restart_systemctl "jellyfin.service"
+  local service_name="$1"
+  # Reload systemd manager configuration
+  sudo systemctl daemon-reload
+  if [ "$(systemctl is-active $service_name)" = 'inactive' ]
+  then
+    # Start service
+    sudo systemctl start $service_name
+    # Waiting to hear from service
+    while ! [[ "$(systemctl is-active $service_name)" == 'active' ]]
+    do
+      echo -n .
+    done
+  elif [ "$(systemctl is-active $service_name)" = 'active' ]
+  then
+    # Stop service
+    sudo systemctl stop $service_name
+    # Waiting to hear from service
+    while ! [[ "$(systemctl is-active $service_name)" == 'inactive' ]]
+    do
+      echo -n .
+    done
+    # Start service
+    sudo systemctl start $service_name
+    # Waiting to hear from service
+    while ! [[ "$(systemctl is-active $service_name)" == 'active' ]]
+    do
+      echo -n .
+    done
+  fi
+}
+
+
 #---- SW Systemctl checks
 # Check Install CT SW status (active or abort script)
 function pct_check_systemctl() {
