@@ -2,6 +2,9 @@
 # ----------------------------------------------------------------------------------
 # Filename:     pvesource_ct_ubuntu_installchroot.sh
 # Description:  Source script for configuring Ubuntu chroot jail
+#
+# Requirement:  Requires a file named '<repo name>_ct_<app name>_chrootapplist'
+#               in the $DIR folder. 'pve_medialab_ct_kodirsync_chrootapplist'
 # ----------------------------------------------------------------------------------
 
 #---- Bash command to run script ---------------------------------------------------
@@ -44,17 +47,11 @@ function copy_binary() {
 #---- Body -------------------------------------------------------------------------
 
 #---- Create SSH Chroot jail Environment
-section "Create SSH chroot environment"
-
 if [ "$(grep -q "^chrootjail:" /etc/group >/dev/null; echo $?)" -ne 0 ]
 then
-  msg "Creating CT default chrootjail group..."
 	groupadd -g 65608 chrootjail
-  info "Default user group created: ${YELLOW}chrootjail${NC}"
-  echo
 fi
 
-msg "Creating basic chroot jail environment..."
 mkdir -p $CHROOT
 # Remove old chroot folders
 array1=(
@@ -80,7 +77,6 @@ chmod 0755 $CHROOT/homes #Change from 0711
 echo "chroot" > $CHROOT/etc/debian_chroot
 
 # Copy command libraries
-msg "Copying command libraries for chroot jail..."
 apt-get install -y libtinfo5 >/dev/null
 cp -f /lib/x86_64-linux-gnu/{libtinfo.so.5,libdl.so.2,libc.so.6} $CHROOT/lib/ >/dev/null
 cp -f /lib64/ld-linux-x86-64.so.2 $CHROOT/lib64/ >/dev/null
@@ -127,21 +123,16 @@ if [ "$(cat $CHROOT_APP_LIST | grep '/bin/nano' > /dev/null; echo $?)" = 0 ] && 
 then
    cp -r /lib/terminfo/x/* $CHROOT/lib/terminfo/x/ >/dev/null
 fi
-info "Chroot jail created.\nCommand libraries for chroot jail have been copied."
-echo
 
 #---- Configure SSH Server
-section "Setup Chroot SSHd server"
 
 # Stopping SSHd
-msg "Configuring sshd default settings..."
 if [ "$(systemctl is-active --quiet sshd; echo $?)" -eq 0 ]
 then
-  systemctl stop ssh 2>/dev/null
+  pct_stop_systemctl "ssh.service"
 fi
 
 # Configure ssh settings
-msg "Configuring sshd settings for chrootjail..."
 sed -i 's/^[#]*\s*PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
 sed -i 's|^[#]*\s*AuthorizedKeysFile.*|AuthorizedKeysFile     ~/.ssh/authorized_keys|g' /etc/ssh/sshd_config
 sed -i 's|^[#]*\s*PasswordAuthentication.*|PasswordAuthentication no|g' /etc/ssh/sshd_config
@@ -160,22 +151,19 @@ Match Group chrootjail
         X11Forwarding no
         ForceCommand internal-sftp
 EOF
-echo
+
 
 #---- Configure SSH Server
-section "Enable SSHd server"
 
 if [ "$SSHD_STATUS" = 0 ]
 then
   # Starting SSHd
-  msg "Enabling SSHD server..."
   # systemctl stop ssh 2>/dev/null
   pct_stop_systemctl "ssh.service"
   sed -i "s/^[#]*\s*Port.*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config
   ufw allow ${SSH_PORT} 2>/dev/null
   # systemctl restart ssh 2>/dev/null
   pct_restart_systemctl "ssh.service"
-  systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - ${YELLOW}port ${SSH_PORT}${NC}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead).${NC} - port ${SSH_PORT}"
 else
   while true
   do
@@ -184,26 +172,22 @@ else
     case $YN in
       [Yy]*)
         read -p "Confirm SSH Port number: " -e -i $SSH_PORT SSH_PORT
-        msg "Enabling SSHD server..."
+        echo "Enabling SSHD server..."
         SSHD_STATUS=0
         # systemctl stop ssh 2>/dev/null
         pct_stop_systemctl "ssh.service"
-        ufw allow ${SSH_PORT} 2>/dev/null
+        ufw allow $SSH_PORT 2>/dev/null
         systemctl enable ssh.service 2>/dev/null
         # systemctl start ssh 2>/dev/null
         pct_start_systemctl "ssh.service"
-        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running)${NC} - port ${SSH_PORT}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port ${SSH_PORT}"
-        echo
         break
         ;;
       [Nn]*)
         SSHD_STATUS=1
         # systemctl stop ssh 2>/dev/null
         pct_stop_systemctl "ssh.service"
-        systemctl disable ssh 2>/dev/null
+        systemctl disable "ssh.service" 2>/dev/null
         sed -i "s/^[#]*\s*Port.*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config
-        msg "Disabling SSHD server..."
-        systemctl is-active sshd >/dev/null 2>&1 && info "OpenBSD Secure Shell server: ${GREEN}active (running).${NC} - port ${SSH_PORT}" || info "OpenBSD Secure Shell server: ${RED}inactive (dead)${NC} - port ${SSH_PORT}"
         echo
         break
         ;;
@@ -214,7 +198,4 @@ else
     esac
   done
 fi
-
-#---- Finish
-info "Success. Chroot Jail has been configured.\n  --  SSHd Status: $(if [ "$SSHD_STATUS" = 0 ]; then echo "${GREEN}active (running)${NC}"; else echo "${RED}inactive (dead)${NC}"; fi)\n  --  Monitored SSH Port: ${YELLOW}$SSH_PORT${NC}\n"
 #-----------------------------------------------------------------------------------
