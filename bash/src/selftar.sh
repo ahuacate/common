@@ -23,14 +23,14 @@
 #     ./selftar.sh my.tar.gz
 #
 # Create self-extracted executable with command executed after archive extracting: 
-#     ./selftar.sh my.tar.gz "folder/install.sh"
+#     ./selftar.sh "my.tar.gz" "\$PREFIX/tmp/install.sh"
 #
 # Both examples create executable file my.tar.gz.run that extracts files initially
 # packaged to my.tar.gz to current directory:
 #     ./my.tar.gz.run
 #
 # Example to run (include brackets):
-#     (mkdir -p /tmp/selftar ; cd /tmp/selftar ; /tmp/installer_pkg.tar.gz.run)
+#     (mkdir -p $PREFIX/tmp/selftar ; cd $PREFIX/tmp/selftar ; $PREFIX/tmp/installer_pkg.tar.gz.run)
 # Note: You can rename Selftar output file to whatever your want:
 #     installer_pkg.tar.gz.run --> installer.run
 # ----------------------------------------------------------------------------------
