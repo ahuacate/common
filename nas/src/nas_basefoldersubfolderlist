@@ -80,6 +80,12 @@ public/autoadd/vidcoderr/out_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,6
 # public/autoadd/vidcoderr/in_stream/pron,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 # public/autoadd/vidcoderr/in_stream/series,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
 
+# Tdarr Folders
+public/autoadd/tdarr,root,users,0750,:--x,65605:r-x,65607:r-x,65606:000,65608:r--
+public/autoadd/tdarr/in_homevideo,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/tdarr/in_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rw-
+public/autoadd/tdarr/out_unsorted,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:rwx
+
 # Download Folders
 downloads/torrent,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000
 downloads/usenet,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000

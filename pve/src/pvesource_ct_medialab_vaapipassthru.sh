@@ -39,7 +39,7 @@ then
   # Creating PVE host video device passthrough
   DRM_VAR01=$(ls -l /dev/dri | grep renderD128 | awk '{print $5}' | sed "s/,//")
   DRM_VAR02=$(ls -l /dev/dri | grep renderD128 | awk '{print $6}')
-  echo -e "lxc.cgroup2.devices.allow: c $DRM_VAR01:$DRM_VAR02 rwm\nlxc.cgroup2.devices.allow: c $DRM_VAR01:0 rwm\nlxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file" >> /etc/pve/lxc/$CTID.conf
+  echo -e "lxc.cgroup2.devices.allow: c $DRM_VAR01:$DRM_VAR02 rwm\nlxc.cgroup2.devices.allow: c $DRM_VAR01:0 rwm\nlxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file\nlxc.mount.entry: /dev/dri dev/dri none bind,optional,create=dir" >> /etc/pve/lxc/$CTID.conf
   info "VA-API renderD128 is configured for '${HOSTNAME^}'."
   echo
 else
