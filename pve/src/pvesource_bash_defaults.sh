@@ -257,6 +257,7 @@ function pct_start_waitloop() {
     while ! [[ "$(pct status $CTID)" == "status: running" ]]
     do
       echo -n .
+      sleep 2
     done
     sleep 2
     info "CT $CTID status: ${GREEN}running${NC}"
@@ -274,6 +275,7 @@ function pct_stop_waitloop() {
     while ! [[ "$(pct status $CTID)" == "status: stopped" ]]
     do
       echo -n .
+      sleep 2
     done
     sleep 2
     info "CT $CTID status: ${GREEN}stopped${NC}"
