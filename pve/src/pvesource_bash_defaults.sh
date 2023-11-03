@@ -247,31 +247,36 @@ function make_userpwd() {
   echo
 }
 
-# # PCT start and wait loop command
-# function pct_start_waitloop() {
-#   if [ "$(pct status $CTID)" = 'status: stopped' ]; then
-#     msg "Starting CT $CTID..."
-#     pct start $CTID
-#     msg "Waiting to hear from CT $CTID..."
-#     sleep 0.5
-#     while ! [ "$(pct status $CTID)" = 'status: running' ]; do
-#       echo -n .
-#       sleep 2
-#     done
-#     info "CT $CTID status: ${GREEN}running${NC}"
-#     echo
-#   fi
-# }
-
-# PCT start and wait loop command
+# PCT start CTID and wait loop command
 function pct_start_waitloop() {
-    local ct_status
-    ct_status=$(pct status $CTID)
+    # Starts a LXC and waits until its running before proceeding
+    #
+    # Parameters:
+    #   None
+    #
+    # Usage:
+    #   Use existing script $CTID
+    #       pct_start_waitloop
+    #   Option to override script CTID
+    #       pct_start_waitloop CTID
 
+    # Set other variables
+    local CTID="${1:-$CTID}"  # Use the provided CTID argument or the pre-set CTID
+    local ct_status
+
+    # Check if CTID is set
+    if [ -z "$CTID" ]; then
+        warn "CTID is not set..."
+        return
+    fi
+
+    ct_status=$(pct status $CTID)  # Get LXC status
     if [ "$ct_status" = 'status: stopped' ]; then
         msg "Starting CT $CTID..."
         pct start $CTID
         msg "Waiting for CT $CTID to start..."
+        sleep 2
+        local dots=""
 
         while true; do
             ct_status=$(pct status $CTID)
@@ -280,7 +285,8 @@ function pct_start_waitloop() {
                 echo
                 break
             elif [ "$ct_status" = 'status: stopped' ]; then
-                # echo -n .
+                dots+="."
+                echo -n "$dots"
                 sleep 2
             else
                 warn "CT $CTID status: ${YELLOW}$ct_status${NC}"
@@ -293,22 +299,58 @@ function pct_start_waitloop() {
     fi
 }
 
-
-# PCT stop and wait loop command
+# PCT stop CTID and wait loop command
 function pct_stop_waitloop() {
-  if [ "$(pct status ${CTID})" = 'status: running' ]; then
-    msg "Stopping CT $CTID..."
-    pct stop $CTID
-    msg "Waiting to hear from CT $CTID..."
-    sleep 0.5
-    while ! [[ "$(pct status $CTID)" == "status: stopped" ]]; do
-      echo -n .
-      sleep 2
-    done
-    info "CT $CTID status: ${GREEN}stopped${NC}"
-    echo
-  fi
+    # Stops a LXC and waits until its stopped before proceeding
+    #
+    # Parameters:
+    #   None
+    #
+    # Usage:
+    #   Use existing script $CTID
+    #       pct_stop_waitloop
+    #   Option to override script CTID
+    #       pct_stop_waitloop CTID
+
+    # Set other variables
+    local CTID="${1:-$CTID}"  # Use the provided CTID argument or the pre-set CTID
+    local ct_status
+
+    # Check if CTID is set
+    if [ -z "$CTID" ]; then
+        warn "CTID is not set..."
+        return
+    fi
+
+    ct_status=$(pct status $CTID)  # Get LXC status
+    if [ "$ct_status" = 'status: running' ]; then
+        msg "Stopping CT $CTID..."
+        pct stop $CTID
+        msg "Waiting for CT $CTID to stop..."
+        sleep 2
+        local dots=""
+
+        while true; do
+            ct_status=$(pct status $CTID)
+            if [ "$ct_status" = 'status: stopped' ]; then
+                info "CT $CTID status: ${GREEN}stopped${NC}"
+                echo
+                break
+            elif [ "$ct_status" = 'status: running' ]; then
+                dots+="."
+                echo -n "$dots"
+                sleep 2
+            else
+                warn "CT $CTID status: ${YELLOW}$ct_status${NC}"
+                echo
+                break
+            fi
+        done
+    else
+        info "CT $CTID is already stopped"
+    fi
 }
+
 
 # PCT list
 function pct_list() {

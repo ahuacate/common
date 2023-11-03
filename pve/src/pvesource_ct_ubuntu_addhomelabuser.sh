@@ -6,23 +6,6 @@
 
 #---- Source -----------------------------------------------------------------------
 #---- Dependencies -----------------------------------------------------------------
-
-function pct_start_waitloop () {
-  if [ "$(pct status $CTID)" == 'status: stopped' ]
-  then
-    msg "Starting CT $CTID..."
-    pct start $CTID
-    msg "Waiting to hear from CT $CTID..."
-    while ! ping -s 1 -c 2 "$CT_IP" > /dev/null
-    do
-        echo -n .
-    done
-    sleep 1
-    info "CT $CTID status: ${GREEN}running${NC}"
-    echo
-  fi
-}
-
 #---- Static Variables -------------------------------------------------------------
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
