@@ -280,7 +280,7 @@ function pct_start_waitloop() {
                 echo
                 break
             elif [ "$ct_status" = 'status: stopped' ]; then
-                echo -n .
+                # echo -n .
                 sleep 2
             else
                 warn "CT $CTID status: ${YELLOW}$ct_status${NC}"
