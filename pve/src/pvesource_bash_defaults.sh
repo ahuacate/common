@@ -247,37 +247,64 @@ function make_userpwd() {
   echo
 }
 
+# # PCT start and wait loop command
+# function pct_start_waitloop() {
+#   if [ "$(pct status $CTID)" = 'status: stopped' ]; then
+#     msg "Starting CT $CTID..."
+#     pct start $CTID
+#     msg "Waiting to hear from CT $CTID..."
+#     sleep 0.5
+#     while ! [ "$(pct status $CTID)" = 'status: running' ]; do
+#       echo -n .
+#       sleep 2
+#     done
+#     info "CT $CTID status: ${GREEN}running${NC}"
+#     echo
+#   fi
+# }
+
 # PCT start and wait loop command
 function pct_start_waitloop() {
-  if [ "$(pct status $CTID)" = 'status: stopped' ]
-  then
-    msg "Starting CT $CTID..."
-    pct start $CTID
-    msg "Waiting to hear from CT ${CTID}..."
-    while ! [[ "$(pct status $CTID)" == "status: running" ]]
-    do
-      echo -n .
-      sleep 2
-    done
-    sleep 2
-    info "CT $CTID status: ${GREEN}running${NC}"
-    echo
-  fi
+    local ct_status
+    ct_status=$(pct status $CTID)
+
+    if [ "$ct_status" = 'status: stopped' ]; then
+        msg "Starting CT $CTID..."
+        pct start $CTID
+        msg "Waiting for CT $CTID to start..."
+
+        while true; do
+            ct_status=$(pct status $CTID)
+            if [ "$ct_status" = 'status: running' ]; then
+                info "CT $CTID status: ${GREEN}running${NC}"
+                echo
+                break
+            elif [ "$ct_status" = 'status: stopped' ]; then
+                echo -n .
+                sleep 2
+            else
+                warn "CT $CTID status: ${YELLOW}$ct_status${NC}"
+                echo
+                break
+            fi
+        done
+    else
+        info "CT $CTID is already running"
+    fi
 }
+
 
 # PCT stop and wait loop command
 function pct_stop_waitloop() {
-  if [ "$(pct status ${CTID})" = 'status: running' ]
-  then
+  if [ "$(pct status ${CTID})" = 'status: running' ]; then
     msg "Stopping CT $CTID..."
     pct stop $CTID
     msg "Waiting to hear from CT $CTID..."
-    while ! [[ "$(pct status $CTID)" == "status: stopped" ]]
-    do
+    sleep 0.5
+    while ! [[ "$(pct status $CTID)" == "status: stopped" ]]; do
       echo -n .
       sleep 2
     done
-    sleep 2
     info "CT $CTID status: ${GREEN}stopped${NC}"
     echo
   fi
