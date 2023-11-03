@@ -175,7 +175,7 @@ function input_username_val() {
     #   input_username_val
     while true; do
         read -p "Enter a new user name : " USERNAME < /dev/tty
-        if [ ${#USERNAME} -gt 18 ]l then
+        if [ ${#USERNAME} -gt 18 ]; then
             msg "User name ${WHITE}'$USERNAME'${NC} is not valid. A user name is considered valid when all of the following constraints are satisfied:\n\n  --  it contains only lowercase characters\n  --  it begins with 3 alphabet characters\n  --  it contains at least 5 characters and at most is 18 characters long\n  --  it may include numerics and underscores\n  --  it doesn't contain any hyphens, periods or special characters [!#$&%*+-]\n  --  it doesn't contain any white space\n\nTry again...\n"
         elif [[ "$USERNAME" =~ ^([a-z]{3})([_]?[a-z\d]){2,15}$ ]]; then
             info "Your user name is set : ${YELLOW}$USERNAME${NC}"
