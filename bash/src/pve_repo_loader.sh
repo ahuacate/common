@@ -68,18 +68,18 @@ function pve_version_status() {
         echo
         case $YN in
             [Yy]*)
-            msg "You have been warned. Proceeding..."
+            echo "You have been warned. Proceeding..."
             echo
             break
             ;;
             [Nn]*)
-            info "The User has chosen to not to proceed. Smart decision..."
+            echo "The User has chosen to not to proceed. Smart decision..."
             echo
             sleep 1
             return 0
             ;;
             *)
-            warn "Error! Entry must be 'y' or 'n'. Try again..."
+            echo "Error! Entry must be 'y' or 'n'. Try again..."
             echo
             ;;
         esac
@@ -88,7 +88,7 @@ function pve_version_status() {
 
 #--- Basic bash sw requirements
 
-function bash_shell_dep() {
+function bash_dep() {
   # Function checks for basic bash shell sw.
   # This func does not require prerequisite 'pvesource_bash_defaults.sh
 
@@ -116,11 +116,13 @@ function bash_shell_dep() {
 
     # Remove old manual install
     if [ -f "/usr/bin/boxes" ]; then
-      rm "/usr/bin/boxes"
+      rm -f "/usr/bin/boxes" 2> /dev/null
+      rm -f /usr/share/man/man1/boxes.1 2> /dev/null
+      rm -rf /usr/share/boxes 2> /dev/null
     fi
 
     # Install prerequisites 
-    apt-get install -y build-essential diffutils flex bison libunistring-dev libpcre2-dev libcmocka-dev git vim-common
+    apt-get install -y build-essential diffutils flex bison libunistring-dev libpcre2-dev libcmocka-dev git vim-common 2> /dev/null
     
     # Download the latest version from GitHub releases
     wget "https://github.com/ascii-boxes/boxes/archive/$latest_ver_tag.tar.gz"
@@ -131,9 +133,9 @@ function bash_shell_dep() {
     make
     make utest
     make test
-    cp ~/"boxes-$latest_ver"/doc/boxes.1 /usr/share/man/man1
-    cp ~/"boxes-$latest_ver"/boxes-config /usr/share/boxes
-    cp ~/"boxes-$latest_ver"/out/boxes /usr/bin
+    cp -f ~/"boxes-$latest_ver"/doc/boxes.1 /usr/share/man/man1
+    cp -f ~/"boxes-$latest_ver"/boxes-config /usr/share/boxes
+    cp -f ~/"boxes-$latest_ver"/out/boxes /usr/bin
 
     # Cleanup
     cd /
@@ -148,7 +150,7 @@ function bash_shell_dep() {
 #---- Prerequisites
 
 # Check for Basic bash sw requirements
-bash_shell_dep
+bash_dep
 
 # Check PVE version status
 pve_version_status
