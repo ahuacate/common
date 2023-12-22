@@ -131,7 +131,9 @@ function bash_shell_dep() {
     make
     make utest
     make test
-    cp ~/"boxes-$latest_ver"/boxes /usr/bin
+    cp ~/"boxes-$latest_ver"/doc/boxes.1 /usr/share/man/man1
+    cp ~/"boxes-$latest_ver"/boxes-config /usr/share/boxes
+    cp ~/"boxes-$latest_ver"/out/boxes /usr/bin
 
     # Cleanup
     cd /
