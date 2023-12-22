@@ -40,7 +40,7 @@ function error_exit() {
     local DEFAULT='Unknown failure occurred.'
     local REASON="\e[97m${1:-$DEFAULT}\e[39m"
     local FLAG="\e[91m[ERROR] \e[93m$EXIT@$LINE"
-    msg "$FLAG $REASON"
+    echo -e  "$FLAG $REASON"
     [ ! -z ${CTID-} ] && cleanup_failed
     cleanup
     exit $EXIT
@@ -87,7 +87,7 @@ function load_module() {
 # Installer cleanup
 function installer_cleanup() {
     rm -R $REPO_TEMP/$GIT_REPO &> /dev/null
-    if [ -f "$REPO_TEMP/${GIT_REPO}.tar.gz" ];then
+    if [ -f "$REPO_TEMP/${GIT_REPO}.tar.gz" ]; then
         rm $REPO_TEMP/${GIT_REPO}.tar.gz > /dev/null
     fi
 }

@@ -7,15 +7,13 @@
 #---- Dependencies -----------------------------------------------------------------
 
 # Check host is PVE
-if [[ ! $(command -v pveversion) ]]
-then
+if [[ ! $(command -v pveversion) ]]; then
   echo "This application is for Proxmox only. This host OS is not supported.\nBye..."
   exit 0
 fi
 
 # Check for Git SW
-if [[ ! $(dpkg -s git 2> /dev/null) ]]
-then
+if [[ ! $(dpkg -s git 2> /dev/null) ]]; then
   apt-get install git -yqq
 fi
 
@@ -28,19 +26,19 @@ function installer_cleanup () {
 }
 
 #--- Check Proxmox and kernel version
+
 # Get PVE version status
 function pve_version_status() {
     # Function retrieves Proxmox and Kernel versions
     # and informs the user if a upgrade is recommended.
+    # Function requires linux boxes.
     # This func does not require prerequisite 'pvesource_bash_defaults.sh
 
     local pve_vers=$(pveversion -v | grep 'proxmox-ve:*' | awk '{ print $2 }' | sed 's/\..*$//')
     local kernel_vers=$(uname -r | cut -d'.' -f1,2)
     local pve7_kernel_min=5.19  # Recommended min Kernel version
     local pve8_kernel_min=6.2  # Recommended min Kernel version
-
-    if [[ ! $(dpkg -s boxes 2> /dev/null) ]]; then apt-get install -y boxes > /dev/null; fi  # Install boxes if missing
-
+    
     # Run PVE check
     if [ "$pve_vers" -lt 7 ]; then
         # Display msg for less than PVE7
@@ -88,9 +86,67 @@ function pve_version_status() {
     done
 }
 
+#--- Basic bash sw requirements
+
+function bash_shell_dep() {
+  # Function checks for basic bash shell sw.
+  # This func does not require prerequisite 'pvesource_bash_defaults.sh
+
+  #--- Install BC
+  if [[ ! $(dpkg -s bc 2> /dev/null) ]]; then
+    apt-get install -y bc
+  fi
+
+  #--- Check for linux ascii boxes
+  if command -v boxes > /dev/null; then
+    current_ver=$(boxes -v | awk '{print $3}')  # Get the current version of boxes
+  else
+    current_ver=0
+  fi
+  latest_ver_tag=$(curl -s https://api.github.com/repos/ascii-boxes/boxes/releases/latest | grep -oP '"tag_name": "\K(.*?)(?=")')  # Get the latest version from GitHub releases
+  latest_ver=$(echo "$latest_ver_tag" | sed 's/^v//')  # Remove the leading 'v' from the version number
+  # Compare versions
+  if [[ "$current_ver" < "$latest_ver" ]]; then
+    echo "Updating ascii boxes to version $latest_ver_tag..."
+
+    # Remove old apt install
+    if [[ $(boxes -v 2> /dev/null) ]]; then
+      apt-get remove -y boxes > /dev/null
+    fi
+
+    # Remove old manual install
+    if [ -f "/usr/bin/boxes" ]; then
+      rm "/usr/bin/boxes"
+    fi
+
+    # Install prerequisites 
+    apt-get install -y build-essential diffutils flex bison libunistring-dev libpcre2-dev libcmocka-dev git vim-common
+    
+    # Download the latest version from GitHub releases
+    wget "https://github.com/ascii-boxes/boxes/archive/$latest_ver_tag.tar.gz"
+
+    # Install boxes
+    tar -zxvf "$latest_ver_tag.tar.gz"
+    cd "boxes-$latest_ver"
+    make
+    make utest
+    make test
+    cp ~/"boxes-$latest_ver"/boxes /usr/bin
+
+    # Cleanup
+    cd /
+    rm -rf ~/"boxes-$latest_ver" "$latest_ver.tar.gz"
+    echo "Boxes update complete..."
+  fi
+}
+
+
 #---- Body -------------------------------------------------------------------------
 
 #---- Prerequisites
+
+# Check for Basic bash sw requirements
+bash_shell_dep
 
 # Check PVE version status
 pve_version_status
