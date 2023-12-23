@@ -93,4 +93,5 @@ downloads/unsorted,root,users,0750,:--x,65605:rwx,65607:r-x,65606:000,65608:000
 
 # Transcode Folders
 transcode/jellyfin,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
+transcode/tdarr,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
 transcode/vidcoderr,root,users,0750,:--x,65605:rwx,65607:rwx,65606:000,65608:000
