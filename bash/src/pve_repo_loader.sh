@@ -43,19 +43,19 @@ function pve_version_status() {
     if [ "$pve_vers" -lt 7 ]; then
         # Display msg for less than PVE7
         local msg_body1="#### URGENT: PROXMOX UPGRADE REQUIRED ####\n\nYour Proxmox version (v$pve_vers) is no longer supported. It is strongly recommended to update Proxmox to the latest version before proceeding with our scripts.\n\nIf you choose to continue using the current version, we cannot guarantee the stability or functionality of our scripts."
-        echo -e "\e[33m$(echo -e "$msg_body1" | fmt -s -w 80 | boxes -n utf8 -d stone -p a1l3 -s 84)\e[0m"  # Display msg
+        echo -e "\e[33m$(echo -e "$msg_body1" | fmt -s -w 80)\e[0m"  # Display msg
         echo
         sleep 0.5
     elif [ "$pve_vers" = 7 ] && [ "$(echo "$kernel_vers" | awk -F. '{print $1$2}')" -lt "$(echo "$pve7_kernel_min" | sed 's/\.//g')" ]; then
         # Display msg for PVE7 wrong kernel
         msg_body2="Your Proxmox (v$pve_vers) installation is supported, but it requires an update to the kernel. To enable LXC to use iGPU rendering in Medialab applications, you must upgrade your kernel to at least version v$pve7_kernel_min.\n\nHere are the CLI commands to perform the kernel upgrade:\n\n  -- apt update\n  -- apt install pve-kernel-$pve7_kernel_min\nAlternatively, we recommend updating Proxmox to the latest version for the best overall performance and compatibility."
-        echo -e "\e[33m$(echo -e "$msg_body2" | fmt -s -w 80 | boxes -n utf8 -d stone -p a1l3 -s 84)\e[0m"  # Display msg
+        echo -e "\e[33m$(echo -e "$msg_body2" | fmt -s -w 80)\e[0m"  # Display msg
         echo
         sleep 0.5
     elif [ "$pve_vers" = 8 ] && [ "$(echo "$kernel_vers" | awk -F. '{print $1$2}')" -lt "$(echo "$pve8_kernel_min" | sed 's/\.//g')" ]; then
         # Display msg for PVE8 wrong kernel
         msg_body3="Your Proxmox (v$pve_vers) installation is supported, but it requires an update to the kernel. To enable LXC to use iGPU rendering in Medialab applications, you must upgrade your kernel to at least version v$pve8_kernel_min.\n\nHere are the CLI commands to perform the kernel upgrade:\n\n  -- apt update\n  -- apt install pve-kernel-$pve8_kernel_min\nAlternatively, we recommend updating Proxmox to the latest version for the best overall performance and compatibility."
-        echo -e "\e[33m$(echo -e "$msg_body3" | fmt -s -w 80 | boxes -n utf8 -d stone -p a1l3 -s 84)\e[0m"  # Display msg
+        echo -e "\e[33m$(echo -e "$msg_body3" | fmt -s -w 80)\e[0m"  # Display msg
         echo
         sleep 0.5
     else
@@ -86,71 +86,9 @@ function pve_version_status() {
     done
 }
 
-#--- Basic bash sw requirements
-
-function bash_dep() {
-  # Function checks for basic bash shell sw.
-  # This func does not require prerequisite 'pvesource_bash_defaults.sh
-
-  #--- Install BC
-  if [[ ! $(dpkg -s bc 2> /dev/null) ]]; then
-    apt-get install -y bc
-  fi
-
-  #--- Check for linux ascii boxes
-  if command -v boxes > /dev/null; then
-    current_ver=$(boxes -v | awk '{print $3}')  # Get the current version of boxes
-  else
-    current_ver=0
-  fi
-  latest_ver_tag=$(curl -s https://api.github.com/repos/ascii-boxes/boxes/releases/latest | grep -oP '"tag_name": "\K(.*?)(?=")')  # Get the latest version from GitHub releases
-  latest_ver=$(echo "$latest_ver_tag" | sed 's/^v//')  # Remove the leading 'v' from the version number
-  # Compare versions
-  if [[ "$current_ver" < "$latest_ver" ]]; then
-    echo "Updating ascii boxes to version $latest_ver_tag..."
-
-    # Remove old apt install
-    if [[ $(boxes -v 2> /dev/null) ]]; then
-      apt-get remove -y boxes > /dev/null
-    fi
-
-    # Remove old manual install
-    if [ -f "/usr/bin/boxes" ]; then
-      rm -f "/usr/bin/boxes" 2> /dev/null
-      rm -f /usr/share/man/man1/boxes.1 2> /dev/null
-      rm -rf /usr/share/boxes 2> /dev/null
-    fi
-
-    # Install prerequisites 
-    apt-get install -y build-essential diffutils flex bison libunistring-dev libpcre2-dev libcmocka-dev git vim-common 2> /dev/null
-    
-    # Download the latest version from GitHub releases
-    wget "https://github.com/ascii-boxes/boxes/archive/$latest_ver_tag.tar.gz"
-
-    # Install boxes
-    tar -zxvf "$latest_ver_tag.tar.gz"
-    cd "boxes-$latest_ver"
-    make
-    make utest
-    make test
-    cp -f ~/"boxes-$latest_ver"/doc/boxes.1 /usr/share/man/man1
-    cp -f ~/"boxes-$latest_ver"/boxes-config /usr/share/boxes
-    cp -f ~/"boxes-$latest_ver"/out/boxes /usr/bin
-
-    # Cleanup
-    cd /
-    rm -rf ~/"boxes-$latest_ver" "$latest_ver.tar.gz"
-    echo "Boxes update complete..."
-  fi
-}
-
-
 #---- Body -------------------------------------------------------------------------
 
 #---- Prerequisites
-
-# Check for Basic bash sw requirements
-bash_dep
 
 # Check PVE version status
 pve_version_status

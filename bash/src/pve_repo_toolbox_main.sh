@@ -27,6 +27,9 @@ TEMP_DIR="$DIR/tmp"
 
 #---- Prerequisites
 
+# Install host SW dependencies
+source $DIR/common/bash/src/basic_bash_sw.sh
+
 # Run Bash Header
 source $COMMON_PVE_SRC_DIR/pvesource_bash_defaults.sh
 
