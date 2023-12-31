@@ -64,9 +64,12 @@ if [[ "$current_ver" < "$latest_ver" ]]; then
   # Install boxes
   tar -zxvf "$latest_ver_tag.tar.gz"
   cd "boxes-$latest_ver"
+  pwd
   make
   make utest
   make test
+  pwd
+
   cp -f "/boxes-$latest_ver/doc/boxes.1" /usr/share/man/man1
   cp -f "/boxes-$latest_ver/boxes-config" /usr/share/boxes
   cp -f "/boxes-$latest_ver/out/boxes" /usr/bin
