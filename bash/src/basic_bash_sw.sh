@@ -59,24 +59,22 @@ if [[ "$current_ver" < "$latest_ver" ]]; then
   apt-get install -y build-essential diffutils flex bison libunistring-dev libpcre2-dev libcmocka-dev git vim-common 2> /dev/null
 
   # Download the latest version from GitHub releases
-  wget "https://github.com/ascii-boxes/boxes/archive/$latest_ver_tag.tar.gz"
+  wget -P "/tmp" "https://github.com/ascii-boxes/boxes/archive/$latest_ver_tag.tar.gz"
 
   # Install boxes
-  tar -zxvf "$latest_ver_tag.tar.gz"
-  cd "boxes-$latest_ver"
-  pwd
+  tar -zxvf "/tmp/$latest_ver_tag.tar.gz" -C /tmp
+  cd "/tmp/boxes-$latest_ver"
   make
   make utest
   make test
-  pwd
 
-  cp -f "/boxes-$latest_ver/doc/boxes.1" /usr/share/man/man1
-  cp -f "/boxes-$latest_ver/boxes-config" /usr/share/boxes
-  cp -f "/boxes-$latest_ver/out/boxes" /usr/bin
+  cp -f "/tmp/boxes-$latest_ver/doc/boxes.1" /usr/share/man/man1
+  cp -f "/tmp/boxes-$latest_ver/boxes-config" /usr/share/boxes
+  cp -f "/tmp/boxes-$latest_ver/out/boxes" /usr/bin
 
   # Cleanup
-  cd /
-  rm -rf ~/"boxes-$latest_ver" "$latest_ver.tar.gz"
+  cd /tmp
+  rm -rf /tmp/"boxes-$latest_ver" "/tmp/$latest_ver.tar.gz"
   echo "Ascii Boxes install and update complete..."
 fi
 #-----------------------------------------------------------------------------------
