@@ -18,12 +18,15 @@ if [[ ! $(dpkg -s git 2> /dev/null) ]]; then
   apt-get install git -yqq
 fi
 
-
 #--- Install BC
 if [[ ! $(dpkg -s bc 2> /dev/null) ]]; then
   apt-get install bc -y
 fi
 
+#--- Install Curl
+if [[ ! $(dpkg -s curl 2> /dev/null) ]]; then
+  apt-get install curl -y
+fi
 
 #--- Check for linux ascii boxes
 if command -v boxes > /dev/null; then
@@ -64,14 +67,13 @@ if [[ "$current_ver" < "$latest_ver" ]]; then
   make
   make utest
   make test
-  cp -f ~/"boxes-$latest_ver"/doc/boxes.1 /usr/share/man/man1
-  cp -f ~/"boxes-$latest_ver"/boxes-config /usr/share/boxes
-  cp -f ~/"boxes-$latest_ver"/out/boxes /usr/bin
+  cp -f "/boxes-$latest_ver/doc/boxes.1" /usr/share/man/man1
+  cp -f "/boxes-$latest_ver/boxes-config" /usr/share/boxes
+  cp -f "/boxes-$latest_ver/out/boxes" /usr/bin
 
   # Cleanup
   cd /
   rm -rf ~/"boxes-$latest_ver" "$latest_ver.tar.gz"
   echo "Ascii Boxes install and update complete..."
 fi
-
 #-----------------------------------------------------------------------------------
