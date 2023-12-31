@@ -62,6 +62,7 @@ if [[ "$current_ver" < "$latest_ver" ]]; then
   wget -P "/tmp" "https://github.com/ascii-boxes/boxes/archive/$latest_ver_tag.tar.gz"
 
   # Install boxes
+  work_dir="$(pwd)"
   tar -zxvf "/tmp/$latest_ver_tag.tar.gz" -C /tmp
   cd "/tmp/boxes-$latest_ver"
   make
@@ -73,7 +74,7 @@ if [[ "$current_ver" < "$latest_ver" ]]; then
   cp -f "/tmp/boxes-$latest_ver/out/boxes" /usr/bin
 
   # Cleanup
-  cd /tmp
+  cd "$work_dir"
   rm -rf /tmp/"boxes-$latest_ver" "/tmp/$latest_ver.tar.gz"
   echo "Ascii Boxes install and update complete..."
 fi
