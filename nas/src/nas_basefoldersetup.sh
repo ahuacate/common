@@ -188,28 +188,27 @@ do
 
   # Add file '.stignore' for Syncthing
   if [ -d "$DIR_SCHEMA/$dir" ]; then
-    COMMON_STIGNORE="$COMMON_DIR/nas/src/nas_stignorelist"
-    DIR_STIGNORE="$DIR_SCHEMA/$dir/.stignore"
+    common_stignore="$COMMON_DIR/nas/src/nas_stignorelist"
+    file_stignore="$DIR_SCHEMA/$dir/.stignore"
 
     # Create missing '.stignore' file
-    if [ ! -f "$DIR_STIGNORE" ]; then
+    if [ ! -f "$file_stignore" ]; then
       touch "$DIR_SCHEMA/$dir/.stignore"
     fi
 
     # Read each line from the common ignore list
     while IFS= read -r pattern; do
         # Check if the pattern exists in the directory's .stignore file
-        if ! grep -qF "$pattern" "$DIR_STIGNORE"; then
+        if ! grep -qF "$pattern" "$file_stignore"; then
             # If not, append the pattern to the .stignore file
-            echo "$pattern" >> "$DIR_STIGNORE"
+            echo "$pattern" >> "$file_stignore"
             echo "Added: $pattern"
         else
             echo "Already exists: $pattern"
         fi
-    done < "$COMMON_STIGNORE"
+    done < "$common_stignore"
   fi
 done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
-
 
 # Create Default SubFolders
 if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then

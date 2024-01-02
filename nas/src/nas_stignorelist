@@ -22,3 +22,7 @@
 .kodirsync_storage
 (?i)\@SynoEAStream
 (?i)SYNOINDEX_MEDIA_INFO
+(?i)/cctv
+(?i)/homevideo
+(?i)/images
+(?i)/transcode

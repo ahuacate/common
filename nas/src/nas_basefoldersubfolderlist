@@ -10,15 +10,15 @@
 
 # Video Folders (Main)
 video/cctv,root,users,0750,:--x,65605:r-x,65606:rwx,65607:rwx,65608:000
-video/documentary,root,users,0750,:--x,65605:rwx,,65606:r-x,65607:rwx,65608:r-x
+video/documentary,root,users,0750,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
 video/documentary/series,root,users,0750,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/documentary/movies,root,users,0750,:--x,65605:rwx,,65606:r-x,65607:rwx,65608:r-x
-video/homevideo,root,users,1750,:--x,65605:rwx,,65606:000,65607:rwx,65608:rwx
-video/movies,root,users,0750,:--x,65605:rwx,,65606:r-x,65607:rwx,65608:r-x
+video/documentary/movies,root,users,0750,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+video/homevideo,root,users,1750,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
+video/movies,root,users,0750,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
 video/musicvideo,root,users,0750,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
 video/pron,root,users,0750,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
 video/series,root,users,0750,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/transcode,root,users,0750,:--x,65605:rwx,,65606:r-x,65607:rwx,65608:000
+video/transcode,root,users,0750,:--x,65605:rwx,65606:r-x,65607:rwx,65608:000
 
 # Video Folders (stream is for low bandwidth HEVC video)
 video/stream,root,users,0750,:--x,65605:r-x,65606:r-x,65607:r-x,65608:--x
