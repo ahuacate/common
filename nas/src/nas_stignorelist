@@ -1,0 +1,24 @@
+# Syncthing ignore files and paths
+# Use escape \ with special characters (\#)
+(?i)syncthing*
+\..*
+(?i)cache
+(?i)\#recycle
+(?i)\@eaDir
+(?i)lost+found
+(?i)ssh
+(?i).ssh
+(?i)images
+(?i)rsync_tmp
+(?i)tmp
+(?i)installer.run
+(?i)Thumbs.db
+(?i).DS_Store
+(?i)metadata
+.stfolder
+.stignore
+.partial~
+.foo_protect
+.kodirsync_storage
+(?i)\@SynoEAStream
+(?i)SYNOINDEX_MEDIA_INFO

@@ -10,22 +10,19 @@
 # Requires arg: 'DIR_SCHEMA' (use script: nas_identify_storagepath.sh)
 
 # Check for ACL installation
-if [[ ! $(dpkg -s acl 2> /dev/null) ]]
-then
+if [[ ! $(dpkg -s acl 2> /dev/null) ]]; then
   apt-get install -y acl 2> /dev/null
 fi
 
 # Check for chattr
-if [ ! $(chattr --help &> /dev/null; echo $?) = 1 ]
-then
+if [ ! $(chattr --help &> /dev/null; echo $?) = 1 ]; then
   apt-get -y install e2fsprogs > /dev/null
 fi
 
 #---- Static Variables -------------------------------------------------------------
 
 # Set extras variable Volume dir (if not set)
-if [ ! -n "${VOLUME_DIR}" ]
-then
+if [ ! -n "${VOLUME_DIR}" ]; then
   extra_DIR_SCHEMA=''
 else
   extra_DIR_SCHEMA="$VOLUME_DIR/"
@@ -39,11 +36,9 @@ fi
 #---- Create Arrays ( must be after setting 'DIR_SCHEMA' )
 # Create 'nas_basefolder_LIST' array
 nas_basefolder_LIST=()
-while IFS= read -r line
-do
+while IFS= read -r line; do
   [[ "$line" =~ (^\#.*$|^\s*$) ]] && continue
-    if [ ! -n "${VOLUME_DIR}" ]
-    then
+    if [ ! -n "${VOLUME_DIR}" ]; then
       nas_basefolder_LIST+=( "$line" )
     else
       nas_basefolder_LIST+=( "$VOLUME_DIR/$line" )
@@ -52,11 +47,9 @@ done < $COMMON_DIR/nas/src/nas_basefolderlist
 
 # Create 'nas_subfolder_LIST' array
 nas_subfolder_LIST=()
-while IFS= read -r line
-do
+while IFS= read -r line; do
   [[ "$line" =~ (^\#.*$|^\s*$) ]] && continue
-    if [ ! -n "${VOLUME_DIR}" ]
-    then
+    if [ ! -n "${VOLUME_DIR}" ]; then
       nas_subfolder_LIST+=( "$line" )
     else
       nas_subfolder_LIST+=( "$VOLUME_DIR/$line" )
@@ -73,8 +66,7 @@ echo
 nas_basefolder_extra_LIST=()
 while true
 do
-  if [ ${#nas_basefolder_extra_LIST[@]} = 0 ]
-  then
+  if [ ${#nas_basefolder_extra_LIST[@]} = 0 ]; then
     read -p "Do you want to create a additional custom shared folder (default 'n') [y/n]? " -n 1 -r YN
   else
     read -p "Do you want to another custom shared folder [y/n]? " -n 1 -r YN
@@ -86,7 +78,7 @@ do
       do
         # Function to input dir name
         input_dirname_val
-        if [ $(printf '%s\n' "${nas_basefolder_LIST[@]}" | awk -F',' '{ print $1 }' | grep -xqFe ${DIR_NAME} > /dev/null; echo $?) == 0 ];then
+        if [ $(printf '%s\n' "${nas_basefolder_LIST[@]}" | awk -F',' '{ print $1 }' | grep -xqFe ${DIR_NAME} > /dev/null; echo $?) == 0 ]; then
           warn "There are issues with your input:\n  1. The folder '${DIR_NAME}' already exists.\n  Try again..."
           echo
         else
@@ -103,26 +95,22 @@ do
       makeselect_input2
       singleselect SELECTED "$OPTIONS_STRING"
       # Set type
-      if [ "$RESULTS" = LEVEL01 ]
-      then
+      if [ "$RESULTS" = LEVEL01 ]; then
         nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,users,0750,65608:rwx,65607:rwx" )
         nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,users,0750,65608:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Standard User${NC} for folder '${DIR_NAME}'."
         echo
-      elif [ "$RESULTS" = LEVEL02 ]
-      then
+      elif [ "$RESULTS" = LEVEL02 ]; then
         nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65605,0750,65605:rwx,65607:rwx" )
         nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65605,0750,65605:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Medialab${NC} for folder '${DIR_NAME}'."
         echo
-      elif [ "$RESULTS" = LEVEL03 ]
-      then
+      elif [ "$RESULTS" = LEVEL03 ]; then
         nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65606,0750,65606:rwx,65607:rwx" )
         nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65606,0750,65606:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Homelab${NC} for folder '${DIR_NAME}'."
         echo
-      elif [ "$RESULTS" = LEVEL04 ]
-      then
+      elif [ "$RESULTS" = LEVEL04 ]; then
         nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65607,0750,65607:rwx" )
         nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65607,0750,65607:rwx" )
         info "You have selected: ${YELLOW}Privatelab${NC} for folder '${DIR_NAME}'."
@@ -141,8 +129,7 @@ do
 done
 
 # Create storage 'Volume'
-if [ -n "${VOLUME_DIR}" ]
-then
+if [ -n "${VOLUME_DIR}" ]; then
   find $DIR_SCHEMA/$VOLUME_DIR -name .foo_protect -exec chattr -i {} \;
   mkdir -p "$DIR_SCHEMA/$VOLUME_DIR"
   chmod 0755 "$DIR_SCHEMA/$VOLUME_DIR"
@@ -154,8 +141,7 @@ msg "Creating ${SECTION_HEAD} base folder shares..."
 echo
 while IFS=',' read -r dir desc user group permission acl_01 acl_02 acl_03 acl_04 acl_05
 do
-  if [ -d "$DIR_SCHEMA/$dir" ]
-  then
+  if [ -d "$DIR_SCHEMA/$dir" ]; then
     info "Pre-existing folder: ${UNDERLINE}"$DIR_SCHEMA/$dir"${NC}\n  Setting $group group permissions for existing folder."
     find $DIR_SCHEMA/$dir -name .foo_protect -exec chattr -i {} \;
     setfacl -bn "$DIR_SCHEMA/$dir"
@@ -199,18 +185,38 @@ do
     fi
     echo
   fi
+
+  # Add file '.stignore' for Syncthing
+  if [ -d "$DIR_SCHEMA/$dir" ]; then
+    COMMON_STIGNORE="$COMMON_DIR/nas/src/nas_stignorelist"
+    DIR_STIGNORE="$DIR_SCHEMA/$dir/.stignore"
+
+    # Create missing '.stignore' file
+    if [ ! -f "$DIR_STIGNORE" ]; then
+      touch "$DIR_SCHEMA/$dir/.stignore"
+    fi
+
+    # Read each line from the common ignore list
+    while IFS= read -r pattern; do
+        # Check if the pattern exists in the directory's .stignore file
+        if ! grep -qF "$pattern" "$DIR_STIGNORE"; then
+            # If not, append the pattern to the .stignore file
+            echo "$pattern" >> "$DIR_STIGNORE"
+            echo "Added: $pattern"
+        else
+            echo "Already exists: $pattern"
+        fi
+    done < "$COMMON_STIGNORE"
+  fi
 done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 
 
 # Create Default SubFolders
-if [ ! ${#nas_subfolder_LIST[@]} = 0 ]
-then
+if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
   msg "Creating $SECTION_HEAD subfolder shares..."
   echo
-  while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05
-  do
-    if [ -d "$DIR_SCHEMA/$dir" ]
-    then
+  while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+    if [ -d "$DIR_SCHEMA/$dir" ]; then
       info "${DIR_SCHEMA}/${dir} exists.\n  Setting $group group permissions for this folder."
       find $DIR_SCHEMA/$dir -name .foo_protect -exec chattr -i {} \;
       setfacl -bn "$DIR_SCHEMA/$dir"
@@ -255,18 +261,20 @@ then
       echo
     fi
   done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
+
   # Chattr set share points attributes to +a
   while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05
   do
-    touch "$DIR_SCHEMA/$dir/.foo_protect"
+    if [ ! -f "$DIR_SCHEMA/$dir/.foo_protect" ]; then
+      touch "$DIR_SCHEMA/$dir/.foo_protect"
+    fi
     chattr +i "$DIR_SCHEMA/$dir/.foo_protect"
     # chmod +t ${dir}/.foo_protect
   done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
 fi
 
-# Chattr set VOMUME_DIR attributes to +a
-if [ -n "${VOLUME_DIR}" ]
-then
+# Chattr set VOLUME_DIR attributes to +a
+if [ -n "${VOLUME_DIR}" ]; then
   touch "$DIR_SCHEMA/$VOLUME_DIR/.foo_protect"
   chattr +i "$DIR_SCHEMA/$VOLUME_DIR/.foo_protect"
 fi
