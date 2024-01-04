@@ -31,6 +31,7 @@ fi
 
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
+#---- Functions --------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
 #---- Create Arrays ( must be after setting 'DIR_SCHEMA' )
@@ -95,22 +96,22 @@ do
       makeselect_input2
       singleselect SELECTED "$OPTIONS_STRING"
       # Set type
-      if [ "$RESULTS" = LEVEL01 ]; then
+      if [ "$RESULTS" = "LEVEL01" ]; then
         nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,users,0750,65608:rwx,65607:rwx" )
         nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,users,0750,65608:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Standard User${NC} for folder '${DIR_NAME}'."
         echo
-      elif [ "$RESULTS" = LEVEL02 ]; then
+      elif [ "$RESULTS" = "LEVEL02" ]; then
         nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65605,0750,65605:rwx,65607:rwx" )
         nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65605,0750,65605:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Medialab${NC} for folder '${DIR_NAME}'."
         echo
-      elif [ "$RESULTS" = LEVEL03 ]; then
+      elif [ "$RESULTS" = "LEVEL03" ]; then
         nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65606,0750,65606:rwx,65607:rwx" )
         nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65606,0750,65606:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Homelab${NC} for folder '${DIR_NAME}'."
         echo
-      elif [ "$RESULTS" = LEVEL04 ]; then
+      elif [ "$RESULTS" = "LEVEL04" ]; then
         nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65607,0750,65607:rwx" )
         nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65607,0750,65607:rwx" )
         info "You have selected: ${YELLOW}Privatelab${NC} for folder '${DIR_NAME}'."
@@ -129,8 +130,8 @@ do
 done
 
 # Create storage 'Volume'
-if [ -n "${VOLUME_DIR}" ]; then
-  find $DIR_SCHEMA/$VOLUME_DIR -name .foo_protect -exec chattr -i {} \;
+if [ -n "$VOLUME_DIR" ]; then
+  find "$DIR_SCHEMA/$VOLUME_DIR" -name .foo_protect -exec chattr -i {} \;
   mkdir -p "$DIR_SCHEMA/$VOLUME_DIR"
   chmod 0755 "$DIR_SCHEMA/$VOLUME_DIR"
   chown root:users "$DIR_SCHEMA/$VOLUME_DIR"
@@ -142,45 +143,47 @@ echo
 while IFS=',' read -r dir desc user group permission acl_01 acl_02 acl_03 acl_04 acl_05
 do
   if [ -d "$DIR_SCHEMA/$dir" ]; then
-    info "Pre-existing folder: ${UNDERLINE}"$DIR_SCHEMA/$dir"${NC}\n  Setting $group group permissions for existing folder."
-    find $DIR_SCHEMA/$dir -name .foo_protect -exec chattr -i {} \;
+    info "Pre-existing folder: ${UNDERLINE}"$DIR_SCHEMA/$dir"${NC}\nSetting $group group permissions for existing folder."
+    find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
     setfacl -bn "$DIR_SCHEMA/$dir"
-    chgrp -R "${group}" "$DIR_SCHEMA/$dir" >/dev/null
-    chmod -R "${permission}" "$DIR_SCHEMA/$dir" >/dev/null
-    if [ ! -z ${acl_01} ]; then
+    chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
+    chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
+
+    # Set ACLs
+    if [ ! -z "$acl_01" ]; then
       setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
     fi
-    if [ ! -z ${acl_02} ]; then
+    if [ ! -z "$acl_02" ]; then
       setfacl -Rm g:${acl_02} "$DIR_SCHEMA/$dir"
     fi
-    if [ ! -z ${acl_03} ]; then
+    if [ ! -z "$acl_03" ]; then
       setfacl -Rm g:${acl_03} "$DIR_SCHEMA/$dir"
     fi
-    if [ ! -z ${acl_04} ]; then
+    if [ ! -z "$acl_04" ]; then
       setfacl -Rm g:${acl_04} "$DIR_SCHEMA/$dir"
     fi
-    if [ ! -z ${acl_05} ]; then
+    if [ ! -z "$acl_05" ]; then
       setfacl -Rm g:${acl_05} "$DIR_SCHEMA/$dir"
     fi
     echo
   else
     info "New base folder created:\n  ${WHITE}"$DIR_SCHEMA/$dir"${NC}"
     mkdir -p "$DIR_SCHEMA/$dir" >/dev/null
-    chgrp -R "${group}" "$DIR_SCHEMA/$dir" >/dev/null
-    chmod -R "${permission}" "$DIR_SCHEMA/$dir" >/dev/null
-    if [ ! -z ${acl_01} ]; then
+    chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
+    chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
+    if [ ! -z "$acl_01" ]; then
       setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
     fi
-    if [ ! -z ${acl_02} ]; then
+    if [ ! -z "$acl_02" ]; then
       setfacl -Rm g:${acl_02} "$DIR_SCHEMA/$dir"
     fi
-    if [ ! -z ${acl_03} ]; then
+    if [ ! -z "$acl_03" ]; then
       setfacl -Rm g:${acl_03} "$DIR_SCHEMA/$dir"
     fi
-    if [ ! -z ${acl_04} ]; then
+    if [ ! -z "$acl_04" ]; then
       setfacl -Rm g:${acl_04} "$DIR_SCHEMA/$dir"
     fi
-    if [ ! -z ${acl_05} ]; then
+    if [ ! -z "$acl_05" ]; then
       setfacl -Rm g:${acl_05} "$DIR_SCHEMA/$dir"
     fi
     echo
@@ -217,23 +220,23 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
   while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ -d "$DIR_SCHEMA/$dir" ]; then
       info "${DIR_SCHEMA}/${dir} exists.\n  Setting $group group permissions for this folder."
-      find $DIR_SCHEMA/$dir -name .foo_protect -exec chattr -i {} \;
+      find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
       setfacl -bn "$DIR_SCHEMA/$dir"
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
-      if [ ! -z ${acl_01} ]; then
+      if [ ! -z "$acl_01" ]; then
         setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
       fi
-      if [ ! -z ${acl_02} ]; then
+      if [ ! -z "$acl_02" ]; then
         setfacl -Rm g:${acl_02} "$DIR_SCHEMA/$dir"
       fi
-      if [ ! -z ${acl_03} ]; then
+      if [ ! -z "$acl_03" ]; then
         setfacl -Rm g:${acl_03} "$DIR_SCHEMA/$dir"
       fi
-      if [ ! -z ${acl_04} ]; then
+      if [ ! -z "$acl_04" ]; then
         setfacl -Rm g:${acl_04} "$DIR_SCHEMA/$dir"
       fi
-      if [ ! -z ${acl_05} ]; then
+      if [ ! -z "$acl_05" ]; then
         setfacl -Rm g:${acl_05} "$DIR_SCHEMA/$dir"
       fi
       echo
@@ -242,19 +245,19 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
       mkdir -p "$DIR_SCHEMA/$dir" >/dev/null
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
-      if [ ! -z ${acl_01} ]; then
+      if [ ! -z "$acl_01" ]; then
         setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
       fi
-      if [ ! -z ${acl_02} ]; then
+      if [ ! -z "$acl_02" ]; then
         setfacl -Rm g:${acl_02} "$DIR_SCHEMA/$dir"
       fi
-      if [ ! -z ${acl_03} ]; then
+      if [ ! -z "$acl_03" ]; then
         setfacl -Rm g:${acl_03} "$DIR_SCHEMA/$dir"
       fi
-      if [ ! -z ${acl_04} ]; then
+      if [ ! -z "$acl_04" ]; then
         setfacl -Rm g:${acl_04} "$DIR_SCHEMA/$dir"
       fi
-      if [ ! -z ${acl_05} ]; then
+      if [ ! -z "$acl_05" ]; then
         setfacl -Rm g:${acl_05} "$DIR_SCHEMA/$dir"
       fi
       echo
