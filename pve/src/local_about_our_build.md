@@ -1,4 +1,4 @@
-<h2>About the Ahuacate environment</h2>
+<h2>About the Ahuacate system environment</h2>
 
 All Ahuacate builds are constructed upon a shared Linux user, group, and file storage environment that caters to all our Proxmox Virtual Machines (VMs) and Linux Containers (LXCs).
 
