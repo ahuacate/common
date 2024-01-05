@@ -6,7 +6,7 @@ To ensure the proper functioning of any of our VMs and LXCs, <span style="color:
 
 <hr>
 
-<h5>Device naming conventions</h5>
+<h3>Device naming conventions</h3>
 
 We implement a straightforward device naming system for all devices, seamlessly compatible with our scripts. We strongly advise following this convention to prevent installation issues and ensure smooth operation.
 
@@ -15,7 +15,7 @@ We implement a straightforward device naming system for all devices, seamlessly 
 
 Our default local domain name is `local`.
 
-<h5>System wide Users and Groups</h5>
+<h3>System wide Users and Groups</h3>
 
 * `media:medialab - 1605:65605`: Encompasses all aspects related to media, such as movies, TV, and music.
 * `home:homelab - 1606:65606`: Pertains to smart home functionalities, such as cctv, HA, Syncthing, including medialab privileges.
@@ -24,7 +24,7 @@ Our default local domain name is `local`.
 
 Usernames media, home, and private are employed to execute Proxmox LXC software applications. For instance, the user media and group medialab are utilized for Sonarr, Radarr, and all media-related Proxmox LXCs. Similarly, the user home and group homelab are employed for HomeAssistant.
 
-<h5>Network-Attached Storage (NAS) for File Storage</h5>
+<h3>Network-Attached Storage (NAS) for File Storage</h3>
 
 Proxmox necessitates the presence of a NAS. Your NAS should feature a collection of folder shares within a 'storage volume.' These newly created folder shares are subsequently mounted by your Proxmox Virtual Environment (PVE) hosts as either NFS or SMB/CIFS mount points, contributing to the establishment of your PVE host backend storage (e.g., pve-01).
 
@@ -46,7 +46,7 @@ You can find comprehensive installation instructions, set up Easy Scripts, and r
 <a href="https://github.com/ahuacate/nas-hardmetal" target="_blank">Hardmetal NAS guide</a>
 <a href="https://github.com/ahuacate/pve-nas" target="_blank">Proxmox NAS VM guide</a>
 
-<h5>Proxmox Hosts</h5>
+<h3>Proxmox Hosts</h3>
 
 Once you have prepared your NAS shares, the next step is to configure your Proxmox hosts by setting up bind-mounted shared data, storage, and other necessary configurations.
 
