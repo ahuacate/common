@@ -7,22 +7,22 @@
 # Arg line: dir,description,user,group,permissions,followed by group ACLs
 # First ACL ':--x' sets ownership group permission (i.e sets 'users:--x')
 # Permissions must be in 3 character format (i.e rwx, r-x, rw-, r--, 000 )
-# Keep description length to less than 20 chracters
-# FOLDERNAME DESCRIPTION USER GROUP PERMISSIONS ACL
-audio,Audiobooks and podcasts storage,root,users,0750,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-backup,Backup storage,root,users,1750,:--x,65606:rwx,65607:rwx
-books,Books and magazine storage,root,users,0750,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
-cloudstorage,Cloud data storage,root,users,1750,:--x,65606:rwx,65607:rwx
-docker,Docker storage,root,users,0750,:--x,65606:rwx,65607:rwx
-downloads,Downloads folder,root,users,0755,:--x,65605:rwx,65607:rwx
-git,Git storage,root,users,0750,:--x,65607:rwx
-homes,User homes,root,users,0777
-music,Music storage,root,users,0755,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
-openvpn,OpenVPN file storage,root,users,0750,:--x,65607:rwx
-photo,Photo library storage,root,users,0750,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
-proxmox,Proxmox storage,root,users,0750,:--x,65607:rwx,65606:rwx
-public,Public folder for all,root,users,1777,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
-sshkey,SSH key storage,root,users,1750,:--x,65607:rwx
-video,Video library storage,root,users,0750,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
-tmp,Proxmox tmp storage,root,users,1777,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
-transcode,Transcoding folder,root,users,0750,:--x,65605:rwx,65607:rwx
+# Keep description length to less than 20 characters
+# FOLDERNAME DESCRIPTION USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+audio,Audiobooks and podcasts storage,root,users,0750,0,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+backup,Backup storage,root,users,1750,0,:--x,65606:rwx,65607:rwx
+books,Books and magazine storage,root,users,0750,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+cloudstorage,Cloud data storage,root,users,1750,0,:--x,65606:rwx,65607:rwx
+docker,Docker storage,root,users,0750,0,:--x,65606:rwx,65607:rwx
+downloads,Downloads folder,root,users,0755,0,:--x,65605:rwx,65607:rwx
+git,Git storage,root,users,0750,0,:--x,65607:rwx
+homes,User homes,root,users,0777,0
+music,Music storage,root,users,0755,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+openvpn,OpenVPN file storage,root,users,0750,0,:--x,65607:rwx
+photo,Photo library storage,root,users,0750,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+proxmox,Proxmox storage,root,users,0750,0,:--x,65607:rwx,65606:rwx
+public,Public folder for all,root,users,1777,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
+sshkey,SSH key storage,root,users,1750,0,:--x,65607:rwx
+video,Video library storage,root,users,0750,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+tmp,Proxmox tmp storage,root,users,1777,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
+transcode,Transcoding folder,root,users,0750,0,:--x,65605:rwx,65607:rwx
