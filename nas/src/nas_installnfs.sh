@@ -107,7 +107,7 @@ fi
 
 # Update NFS exports file
 msg "Creating new NFS exports..."
-while IFS=',' read -r dir desc user group permission user_groups
+while IFS=',' read -r dir desc user group permission inherit user_groups
 do
   [[ "$dir" =~ 'none' ]] && continue
   # Check for dir
