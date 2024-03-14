@@ -82,8 +82,13 @@ public/autoadd/vidcoderr/out_unsorted,root,users,0750,1,:--x,65605:rwx,65606:000
 
 # Tdarr Folders
 public/autoadd/tdarr,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
+public/autoadd/tdarr/in_documentary,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/tdarr/in_homevideo,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/tdarr/in_unsorted,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_movies,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_musicvideo,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_pron,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_series,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/tdarr/out_unsorted,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
 
 # Download Folders
