@@ -79,15 +79,17 @@ done < $COMMON_DIR/nas/src/nas_basefoldersubfolderlist
 #---- Create and set Folder Share Permissions
 section "Create and Set Folder Permissions"
 
-# Set extras variable Volume dir (if not set)
-if [ ! -n "${VOLUME_MAIN_DIR}" ]; then
-  extra_VOLUME_DIR=''
-else
-  extra_VOLUME_DIR="$VOLUME_DIR/"
-fi
+# # Set extras variable Volume dir (if not set)
+# if [ ! -n "${VOLUME_MAIN_DIR}" ]; then
+#   extra_VOLUME_DIR=''
+# else
+#   extra_VOLUME_DIR="$VOLUME_DIR/"
+# fi
 
 # Create Default Proxmox Share points
-msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n\nShared folders are the basic directories where you can store files and folders on your NAS. Below is a list of our default NAS shared folders. You can create additional 'custom' shared folders in the coming steps.\n\n$(while IFS=',' read -r var1 var2 var3; do "if [ '${var2}' -eq 0 ]; then DIR_SCHEMA="${DIR_MAIN_SCHEMA}"; elif [ '${var2}' -eq 1 ]; then DIR_SCHEMA="${DIR_FAST_SCHEMA}"; fi"; msg "\t--  ${DIR_SCHEMA}/'${var1}'"; done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" ))"
+msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n\nShared folders are the basic directories where you can store files and folders on your NAS. Below is a list of our default NAS shared folders. You can create additional 'custom' shared folders in the coming steps.\n\n$(while IFS=',' read -r var1 var2 var3; do "if [ '${var2}' -eq 0 ]; then DIR_SCHEMA="${DIR_MAIN_SCHEMA}"; elif [ '${var2}' -eq 1 ]; then DIR_SCHEMA="${DIR_FAST_SCHEMA}"; fi"; msg "\t--  ${DIR_SCHEMA}/'${var1}'"; done <<< $(printf '%s\n' "${nas_basefolder_LIST[@]}"))"
+
+
 echo
 nas_basefolder_extra_LIST=()
 while true
