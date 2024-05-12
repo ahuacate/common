@@ -1,8 +1,8 @@
-# Insert your base sub folders and group acl here!
-# Arg line: dir source,base folder,sub-folder,user,group,permissions,followed by sub folder group ACLs
+# Insert your base sub folders and group acl here.
 # First ACL ':--x' sets ownership group permission (i.e sets 'users:--x')
 # Permissions must be in 3 character format (i.e rwx, r-x, rw-, r--, 000 )
-# FOLDERNAME USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+# Set FAST argument for folder share to be created on a FAST NVMe/SSD storage volume or main storage volume (i.e '0' standard/main, '1'  for fast)
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
 # Note the GUID=Group ID
 # 65605=medialab
 # 65606=homelab
@@ -10,93 +10,106 @@
 # 65608=chrootjail
 
 # Video Folders (Main)
-video/cctv,root,users,0750,1,:--x,65605:r-x,65606:rwx,65607:rwx,65608:000
-video/documentary,root,users,0750,0,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/documentary/series,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/documentary/movies,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/homevideo,root,users,1750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
-video/movies,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/musicvideo,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
-video/pron,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
-video/series,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+video/cctv,0,root,users,0750,1,:--x,65605:r-x,65606:rwx,65607:rwx,65608:000
+video/documentary,0,root,users,0750,0,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+video/documentary/series,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+video/documentary/movies,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+video/homevideo,0,root,users,1750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
+video/movies,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+video/musicvideo,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
+video/pron,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
+video/series,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
 
 # Video Folders (stream is for low bandwidth HEVC video)
-video/stream,root,users,0750,0,:--x,65605:r-x,65606:r-x,65607:rwx,65608:--x
-video/stream/documentary,root,users,0750,0,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/stream/documentary/series,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/stream/documentary/movies,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/stream/movies,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-video/stream/musicvideo,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
-video/stream/pron,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
-video/stream/series,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+video/stream,0,root,users,0750,0,:--x,65605:r-x,65606:r-x,65607:rwx,65608:--x
+video/stream/documentary,0,root,users,0750,0,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+video/stream/documentary/series,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+video/stream/documentary/movies,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+video/stream/movies,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+video/stream/musicvideo,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
+video/stream/pron,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:rwx
+video/stream/series,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
 
 # Audio Book Folders
-audio/audiobooks,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-audio/podcasts,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+audio/audiobooks,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+audio/podcasts,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
 
 # Books Folders
-books/comics,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-books/ebooks,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-books/magazines,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+books/comics,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+books/ebooks,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+books/magazines,0,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
 
 # Proxmox Folders
-proxmox/backup,root,users,1750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+proxmox/backup,0,root,users,1750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
+
+
+# Here down are folder shares best set to use a fast access storage volume (i.e NVMe/SSD). If no fast volumes are available the installer script will automatically set the folder share to use the main storage volume
 
 # Public Folders
-public/autoadd,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
-public/autoadd/direct_import,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
-public/autoadd/torrent/manual-movies,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent/manual-series,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent/manual-documentary-series,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent/manual-documentary-movies,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent/readarr-books,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent/radarr-movies,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent/lidarr-music,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent/whisparr-pron,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent/sonarr-series,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/torrent/manual-unsorted,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
-public/autoadd/usenet/manual-movies,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet/manual-series,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet/manual-documentary-series,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet/manual-documentary-movies,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet/readarr-books,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet/radarr-movies,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet/lidarr-music,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet/whisparr-pron,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet/sonarr-series,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/usenet/manual-unsorted,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+public/autoadd,1,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
+public/autoadd/direct_import,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent,1,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
+public/autoadd/torrent/manual-movies,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/manual-series,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/manual-documentary-series,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/manual-documentary-movies,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/readarr-books,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/radarr-movies,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/lidarr-music,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/whisparr-pron,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/sonarr-series,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/manual-unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet,1,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
+public/autoadd/usenet/manual-movies,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/manual-series,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/manual-documentary-series,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/manual-documentary-movies,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/readarr-books,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/radarr-movies,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/lidarr-music,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/whisparr-pron,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/sonarr-series,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/manual-unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
 
 # Vidcoderr Folders
-public/autoadd/vidcoderr,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
-public/autoadd/vidcoderr/in_homevideo,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/vidcoderr/in_unsorted,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/vidcoderr/out_unsorted,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
-# public/autoadd/vidcoderr/in_stream,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
-# public/autoadd/vidcoderr/in_stream/documentary,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-# public/autoadd/vidcoderr/in_stream/movies,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-# public/autoadd/vidcoderr/in_stream/musicvideo,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-# public/autoadd/vidcoderr/in_stream/pron,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-# public/autoadd/vidcoderr/in_stream/series,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+public/autoadd/vidcoderr,1,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
+public/autoadd/vidcoderr/in_homevideo,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/vidcoderr/in_unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/vidcoderr/out_unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
+# public/autoadd/vidcoderr/in_stream,1,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
+# public/autoadd/vidcoderr/in_stream/documentary,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+# public/autoadd/vidcoderr/in_stream/movies,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+# public/autoadd/vidcoderr/in_stream/musicvideo,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+# public/autoadd/vidcoderr/in_stream/pron,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+# public/autoadd/vidcoderr/in_stream/series,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
 
 # Tdarr Folders
-public/autoadd/tdarr,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
-public/autoadd/tdarr/in_documentary,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/tdarr/in_homevideo,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/tdarr/in_unsorted,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/tdarr/in_movies,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/tdarr/in_musicvideo,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/tdarr/in_pron,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/tdarr/in_series,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-public/autoadd/tdarr/out_unsorted,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+public/autoadd/tdarr,1,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
+public/autoadd/tdarr/in_documentary,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_homevideo,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_movies,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_musicvideo,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_pron,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_series,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/out_unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
 
 # Download Folders
-downloads/torrent,root,users,0750,1,:--x,65605:rwx,65606:000,65607:r-x,65608:000
-downloads/usenet,root,users,0750,1,:--x,65605:rwx,65606:000,65607:r-x,65608:000
-downloads/unsorted,root,users,0750,1,:--x,65605:rwx,65606:000,65607:r-x,65608:000
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+downloads/torrent,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:r-x,65608:000
+downloads/usenet,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:r-x,65608:000
+downloads/unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:r-x,65608:000
 
 # Transcode Folders
-transcode/jellyfin,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
-transcode/tdarr,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
-transcode/vidcoderr,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+transcode/jellyfin,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
+transcode/tdarr,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
+transcode/vidcoderr,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000

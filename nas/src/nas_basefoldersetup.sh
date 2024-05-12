@@ -20,49 +20,74 @@ if [ ! $(chattr --help &> /dev/null; echo $?) = 1 ]; then
 fi
 
 #---- Static Variables -------------------------------------------------------------
-
-# Set extras variable Volume dir (if not set)
-if [ ! -n "${VOLUME_DIR}" ]; then
-  extra_DIR_SCHEMA=''
-else
-  extra_DIR_SCHEMA="$VOLUME_DIR/"
-fi
-
-
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
 #---- Functions --------------------------------------------------------------------
 #---- Body -------------------------------------------------------------------------
 
 #---- Create Arrays ( must be after setting 'DIR_SCHEMA' )
+
 # Create 'nas_basefolder_LIST' array
 nas_basefolder_LIST=()
 while IFS= read -r line; do
   [[ "$line" =~ (^\#.*$|^\s*$) ]] && continue
-    if [ ! -n "${VOLUME_DIR}" ]; then
+
+  # Check if fast storage location is enabled in source file
+  fast_var=$(echo "$line" | cut -d ',' -f 2)
+  if [ "$fast_var" -eq 0 ]; then
+    # Set for main volume (fast set to '0')
+    if [ ! -n "${VOLUME_MAIN_DIR}" ]; then
       nas_basefolder_LIST+=( "$line" )
     else
-      nas_basefolder_LIST+=( "$VOLUME_DIR/$line" )
+      nas_basefolder_LIST+=( "$VOLUME_MAIN_DIR/$line" )
     fi
+  elif [ "$fast_var" -eq 1 ]; then
+    # Set for fast volume (fast set to '1')
+    if [ ! -n "${VOLUME_FAST_DIR}" ]; then
+      nas_basefolder_LIST+=( "$line" )
+    else
+      nas_basefolder_LIST+=( "$VOLUME_FAST_DIR/$line" )
+    fi
+  fi
 done < $COMMON_DIR/nas/src/nas_basefolderlist
 
 # Create 'nas_subfolder_LIST' array
 nas_subfolder_LIST=()
 while IFS= read -r line; do
   [[ "$line" =~ (^\#.*$|^\s*$) ]] && continue
-    if [ ! -n "${VOLUME_DIR}" ]; then
+
+  # Check if fast storage location is enabled in source file
+  fast_var=$(echo "$line" | cut -d ',' -f 2)
+  if [ "$fast_var" -eq 0 ]; then
+    # Set for main volume (fast set to '0')
+    if [ ! -n "${VOLUME_MAIN_DIR}" ]; then
       nas_subfolder_LIST+=( "$line" )
     else
-      nas_subfolder_LIST+=( "$VOLUME_DIR/$line" )
+      nas_subfolder_LIST+=( "$VOLUME_MAIN_DIR/$line" )
     fi
+  elif [ "$fast_var" -eq 1 ]; then
+    # Set for fast volume (fast set to '1')
+    if [ ! -n "${VOLUME_FAST_DIR}" ]; then
+      nas_subfolder_LIST+=( "$line" )
+    else
+      nas_subfolder_LIST+=( "$VOLUME_FAST_DIR/$line" )
+    fi
+  fi
 done < $COMMON_DIR/nas/src/nas_basefoldersubfolderlist
 
 
-#---- Setting Folder Permissions
+#---- Create and set Folder Share Permissions
 section "Create and Set Folder Permissions"
 
+# Set extras variable Volume dir (if not set)
+if [ ! -n "${VOLUME_MAIN_DIR}" ]; then
+  extra_VOLUME_DIR=''
+else
+  extra_VOLUME_DIR="$VOLUME_DIR/"
+fi
+
 # Create Default Proxmox Share points
-msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n\nShared folders are the basic directories where you can store files and folders on your NAS. Below is a list of our default NAS shared folders. You can create additional 'custom' shared folders in the coming steps.\n\n$(while IFS=',' read -r var1 var2; do msg "\t--  ${DIR_SCHEMA}/'${var1}'"; done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" ))"
+msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n\nShared folders are the basic directories where you can store files and folders on your NAS. Below is a list of our default NAS shared folders. You can create additional 'custom' shared folders in the coming steps.\n\n$(while IFS=',' read -r var1 var2 var3; do "if [ '${var2}' -eq 0 ]; then DIR_SCHEMA="${DIR_MAIN_SCHEMA}"; elif [ '${var2}' -eq 1 ]; then DIR_SCHEMA="${DIR_FAST_SCHEMA}"; fi"; msg "\t--  ${DIR_SCHEMA}/'${var1}'"; done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" ))"
 echo
 nas_basefolder_extra_LIST=()
 while true
@@ -77,7 +102,7 @@ do
     [Yy]*)
       while true
       do
-        # Function to input dir name
+        # Function to input custom dir name
         input_dirname_val
         if [ $(printf '%s\n' "${nas_basefolder_LIST[@]}" | awk -F',' '{ print $1 }' | grep -xqFe ${DIR_NAME} > /dev/null; echo $?) == 0 ]; then
           warn "There are issues with your input:\n  1. The folder '${DIR_NAME}' already exists.\n  Try again..."
@@ -86,6 +111,37 @@ do
           break
         fi
       done
+
+      # Check if fast volume option is available (fast set to '1')
+      if [ ! -n "${VOLUME_MAIN_DIR}" ]; then
+        # Set extras variable Volume dir to none (if not set)
+        extra_VOLUME_DIR=''
+      else
+        if [ "$VOLUME_MAIN_DIR" == "$VOLUME_FAST_DIR" ]; then
+          extra_VOLUME_DIR="$VOLUME_MAIN_DIR/"
+          extra_fast_arg=0
+        else
+          msg "Which volume do you want create '${DIR_NAME}' in (main or fast)..."
+          # Make selection
+          OPTIONS_VALUES_INPUT=( "LEVEL01" "LEVEL02" )
+          OPTIONS_LABELS_INPUT=( "Main - standard main NAS volume" \
+          "Fast - dedicated fast and temporary NVMe or SSD supported volume" )
+          makeselect_input2
+          singleselect SELECTED "$OPTIONS_STRING"
+          # Set storage volume type
+          if [ "$RESULTS" = "LEVEL01" ]; then
+            # Set storage volume to 'main'
+            extra_VOLUME_DIR="$VOLUME_MAIN_DIR/"
+            extra_fast_arg=0
+          elif [ "$RESULTS" = "LEVEL02" ]; then
+            # Set storage volume to 'fast'
+            extra_VOLUME_DIR="$VOLUME_FAST_DIR/"
+            extra_fast_arg=1
+          fi
+        fi
+      fi
+
+      # Set custom folder permissions and rights
       msg "Select the group permission rights for '${DIR_NAME}' custom folder..."
       # Make selection
       OPTIONS_VALUES_INPUT=( "LEVEL01" "LEVEL02" "LEVEL03" "LEVEL04" )
@@ -97,23 +153,23 @@ do
       singleselect SELECTED "$OPTIONS_STRING"
       # Set type
       if [ "$RESULTS" = "LEVEL01" ]; then
-        nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,users,1,0750,65608:rwx,65607:rwx" )
-        nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,users,0750,1,65608:rwx,65607:rwx" )
+        nas_basefolder_LIST+=( "$extra_VOLUME_DIR$DIR_NAME,$extra_fast_arg,Custom folder,root,users,1,0750,65608:rwx,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "$extra_VOLUME_DIR$DIR_NAME,$extra_fast_arg,Custom folder,root,users,0750,1,65608:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Standard User${NC} for folder '${DIR_NAME}'."
         echo
       elif [ "$RESULTS" = "LEVEL02" ]; then
-        nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65605,0750,1m65605:rwx,65607:rwx" )
-        nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65605,0750,1,65605:rwx,65607:rwx" )
+        nas_basefolder_LIST+=( "$extra_VOLUME_DIR$DIR_NAME,$extra_fast_arg,Custom folder,root,65605,0750,1m65605:rwx,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "$extra_VOLUME_DIR$DIR_NAME,$extra_fast_arg,Custom folder,root,65605,0750,1,65605:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Medialab${NC} for folder '${DIR_NAME}'."
         echo
       elif [ "$RESULTS" = "LEVEL03" ]; then
-        nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65606,0750,1,65606:rwx,65607:rwx" )
-        nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65606,1,0750,65606:rwx,65607:rwx" )
+        nas_basefolder_LIST+=( "$extra_VOLUME_DIR$DIR_NAME,$extra_fast_arg,Custom folder,root,65606,0750,1,65606:rwx,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "$extra_VOLUME_DIR$DIR_NAME,$extra_fast_arg,Custom folder,root,65606,1,0750,65606:rwx,65607:rwx" )
         info "You have selected: ${YELLOW}Homelab${NC} for folder '${DIR_NAME}'."
         echo
       elif [ "$RESULTS" = "LEVEL04" ]; then
-        nas_basefolder_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65607,0750,1,65607:rwx" )
-        nas_basefolder_extra_LIST+=( "$extra_DIR_SCHEMA/$DIR_NAME,Custom folder,root,65607,0750,1,65607:rwx" )
+        nas_basefolder_LIST+=( "$extra_VOLUME_DIR$DIR_NAME,$extra_fast_arg,Custom folder,root,65607,0750,1,65607:rwx" )
+        nas_basefolder_extra_LIST+=( "$extra_VOLUME_DIR$DIR_NAME,$extra_fast_arg,Custom folder,root,65607,0750,1,65607:rwx" )
         info "You have selected: ${YELLOW}Privatelab${NC} for folder '${DIR_NAME}'."
         echo
       fi
@@ -129,27 +185,45 @@ do
   esac
 done
 
-# Create storage 'Volume'
-if [ -n "$VOLUME_DIR" ]; then
-  find "$DIR_SCHEMA/$VOLUME_DIR" -name .foo_protect -exec chattr -i {} \;
-  mkdir -p "$DIR_SCHEMA/$VOLUME_DIR"
-  chmod 0755 "$DIR_SCHEMA/$VOLUME_DIR"
-  chown root:users "$DIR_SCHEMA/$VOLUME_DIR"
+# Create storage 'Volume' folders
+if [ -n "$DIR_MAIN_SCHEMA" ] && [ -n "$VOLUME_MAIN_DIR" ]; then
+  find "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" -name .foo_protect -exec chattr -i {} \;
+  mkdir -p "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR"
+  chmod 0755 "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR"
+  chown root:users "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR"
+fi
+if [ -n "$DIR_FAST_SCHEMA" ] && [ -n "$VOLUME_FAST_DIR" ]; then
+  find "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" -name .foo_protect -exec chattr -i {} \;
+  mkdir -p "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
+  chmod 0755 "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
+  chown root:users "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
 fi
 
-# Create Proxmox Share points
+# Create Proxmox Main and Fast Share points
 msg "Creating ${SECTION_HEAD} base folder shares..."
 echo
-while IFS=',' read -r dir desc user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05
+while IFS=',' read -r dir fast desc user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05
 do
+  # Check if storage volume option, main or fast, and set 'DIR_SCHEMA' accordingly
+  if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+    DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
+  else
+    if [ "$fast" -eq 0 ]; then
+      DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use main volume
+    elif [ "$fast" -eq 1 ]; then
+      DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use fast volume
+    fi
+  fi
+
   if [ -d "$DIR_SCHEMA/$dir" ]; then
+    # Check if folder share exists and update permissions
     info "Pre-existing folder: ${UNDERLINE}"$DIR_SCHEMA/$dir"${NC}\nSetting $group group permissions for existing folder."
     find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
     setfacl -bn "$DIR_SCHEMA/$dir"
     chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
     chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
 
-    # Set ACLs
+    # Modify existing folder ACLs
     if [ ! -z "$acl_01" ]; then
       setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
     fi
@@ -167,24 +241,27 @@ do
     fi
     echo
   else
+    # Create new folder and apply permissions
     info "New base folder created:\n  ${WHITE}"$DIR_SCHEMA/$dir"${NC}"
     mkdir -p "$DIR_SCHEMA/$dir" >/dev/null
     chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
     chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
+
+    # Set new folder ACLs
     if [ ! -z "$acl_01" ]; then
-      setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
+      setfacl -Rd g:${acl_01} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_02" ]; then
-      setfacl -Rm g:${acl_02} "$DIR_SCHEMA/$dir"
+      setfacl -Rd g:${acl_02} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_03" ]; then
-      setfacl -Rm g:${acl_03} "$DIR_SCHEMA/$dir"
+      setfacl -Rd g:${acl_03} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_04" ]; then
-      setfacl -Rm g:${acl_04} "$DIR_SCHEMA/$dir"
+      setfacl -Rd g:${acl_04} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_05" ]; then
-      setfacl -Rm g:${acl_05} "$DIR_SCHEMA/$dir"
+      setfacl -Rd g:${acl_05} "$DIR_SCHEMA/$dir"
     fi
     echo
   fi
@@ -201,29 +278,43 @@ do
 
     # Read each line from the common ignore list
     while IFS= read -r pattern; do
-        # Check if the pattern exists in the directory's .stignore file
-        if ! grep -qF "$pattern" "$file_stignore"; then
-            # If not, append the pattern to the .stignore file
-            echo "$pattern" >> "$file_stignore"
-            echo "Added: $pattern"
-        else
-            echo "Already exists: $pattern"
-        fi
+      # Check if the pattern exists in the directory's .stignore file
+      if ! grep -qF "$pattern" "$file_stignore"; then
+        # If not, append the pattern to the .stignore file
+        echo "$pattern" >> "$file_stignore"
+        echo "Added: $pattern"
+      else
+        echo "Already exists: $pattern"
+      fi
     done < "$common_stignore"
   fi
 done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 
-# Create Default SubFolders
+
+# Create Proxmox sub-folder Share points
 if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
   msg "Creating $SECTION_HEAD subfolder shares..."
   echo
-  while IFS=',' read -r dir user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
+  while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
+    # Check if storage volume option, main or fast, and set 'DIR_SCHEMA' accordingly
+    if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+      DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
+    else
+      if [ "$fast" -eq 0 ]; then
+        DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use main volume
+      elif [ "$fast" -eq 1 ]; then
+        DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use fast volume
+      fi
+    fi
+
     if [ -d "$DIR_SCHEMA/$dir" ]; then
-      info "${DIR_SCHEMA}/${dir} exists.\n  Setting $group group permissions for this folder."
+      info "${DIR_SCHEMA}/${dir} exists.\n  Setting $group group permissions for this folder"
       find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
       setfacl -bn "$DIR_SCHEMA/$dir"
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
+
+      # Modify existing folder ACLs
       if [ ! -z "$acl_01" ]; then
         setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
       fi
@@ -245,20 +336,22 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
       mkdir -p "$DIR_SCHEMA/$dir" >/dev/null
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
+
+      # Set new folder ACLs
       if [ ! -z "$acl_01" ]; then
-        setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
+        setfacl -Rd g:${acl_01} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_02" ]; then
-        setfacl -Rm g:${acl_02} "$DIR_SCHEMA/$dir"
+        setfacl -Rd g:${acl_02} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_03" ]; then
-        setfacl -Rm g:${acl_03} "$DIR_SCHEMA/$dir"
+        setfacl -Rd g:${acl_03} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_04" ]; then
-        setfacl -Rm g:${acl_04} "$DIR_SCHEMA/$dir"
+        setfacl -Rd g:${acl_04} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_05" ]; then
-        setfacl -Rm g:${acl_05} "$DIR_SCHEMA/$dir"
+        setfacl -Rd g:${acl_05} "$DIR_SCHEMA/$dir"
       fi
       echo
     fi
