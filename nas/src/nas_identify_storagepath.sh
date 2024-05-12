@@ -23,7 +23,7 @@ do
 done <<< $( df -hx tmpfs --output=target | sed '1d' | grep -v '/$\|^/dev.*\|^/var.*\|^/boot.*\|^/rpool.*\|/etc.*' )
 print_DISPLAY+=( "Other. Input your own storage path,-,-" )
 
-msg_box "#### PLEASE READ CAREFULLY - SELECT A MAIN STORAGE LOCATION ####\n\nA main storage location is a parent directory, LVM volume, ZPool, MergeFS Pool or another storage filesystem where standard basic folder shares like homes, music, photo and video storage folder and files will be created. This is normally your largest NAS storage location. A scan shows the following available storage locations:\n\n$(printf '%s\n' "${print_DISPLAY[@]}" | column -s "," -t -N "STORAGE DEVICE,FS TYPE,CAPACITY" | indent2)\n\nThe User must now select their maain storage location. Or select 'other' to manually input the full storage path."
+msg_box "#### PLEASE READ CAREFULLY - SELECT A MAIN STORAGE LOCATION ####\n\nA main storage location is a parent directory, LVM volume, ZPool, MergeFS Pool or another storage filesystem where standard basic folder shares like homes, music, photo and video storage folder and files will be created. This is normally your largest NAS storage location. A scan shows the following available storage locations:\n\n$(printf '%s\n' "${print_DISPLAY[@]}" | column -s "," -t -N "STORAGE DEVICE,FS TYPE,CAPACITY" | indent2)\n\nThe User must now select a main storage location. Or select 'other' to manually input the full storage path."
 echo
 msg "Select a main storage location from the menu:"
 while true
@@ -68,7 +68,7 @@ do
           case $YN in
             [Yy]*)
               info "Storage path set: ${YELLOW}$stor_path${NC}"
-              DIR_SCHEMA="$stor_path"
+              DIR_MAIN_SCHEMA="$stor_path"
               echo
               break 3
               ;;
@@ -99,7 +99,7 @@ done
 
 #---- Select or input a fast storage path ( set DIR_FAST_SCHEMA )
 
-section "Select a Fast or Temporary Storage Location"
+section "Select a Fast Storage Location"
 # Create print display
 print_DISPLAY=()
 while IFS=',' read -r dir
@@ -108,7 +108,7 @@ do
 done <<< $( df -hx tmpfs --output=target | sed '1d' | grep -v '/$\|^/dev.*\|^/var.*\|^/boot.*\|^/rpool.*\|/etc.*' )
 print_DISPLAY+=( "Other. Input your own storage path,-,-" )
 
-msg_box "#### PLEASE READ CAREFULLY - SELECT A FAST OR TEMPORARY STORAGE LOCATION ####\n\nA fast or temporary storage location is a parent directory, LVM volume, ZPool, MergeFS Pool or another storage filesystem where downloads, transcodes, public and temporary folders and files will be created. If you have a dedicated fast NVMe or SSD volume available then you should select it here. A scan shows the following available storage locations:\n\n$(printf '%s\n' "${print_DISPLAY[@]}" | column -s "," -t -N "STORAGE DEVICE,FS TYPE,CAPACITY" | indent2)\n\nThe User must now select a storage location. Or select 'other' to manually input the full storage path."
+msg_box "#### PLEASE READ CAREFULLY - SELECT A FAST STORAGE LOCATION ####\n\nA fast storage location is a parent directory, LVM volume, ZPool, MergeFS Pool or another storage filesystem where downloads, transcodes, public and temporary folders and files will be created. If you have a dedicated fast NVMe or SSD volume available then you should select it here. A scan shows the following available storage locations:\n\n$(printf '%s\n' "${print_DISPLAY[@]}" | column -s "," -t -N "STORAGE DEVICE,FS TYPE,CAPACITY" | indent2)\n\nThe User must now select a storage location. Or select 'other' to manually input the full storage path."
 echo
 msg "Select a fast or temporary storage location from the menu:"
 while true

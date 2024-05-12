@@ -223,21 +223,28 @@ do
     chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
     chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
 
+    # Check if 'DIR_SCHEMA/dir' has ACL enabled/ready
+    if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
+      acl_arg='-Rm' # File or directory has ACL values
+    else
+      acl_arg='-Rd' # File or directory does not have ACL values
+    fi
+
     # Modify existing folder ACLs
     if [ ! -z "$acl_01" ]; then
-      setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_02" ]; then
-      setfacl -Rm g:${acl_02} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_03" ]; then
-      setfacl -Rm g:${acl_03} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_04" ]; then
-      setfacl -Rm g:${acl_04} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_05" ]; then
-      setfacl -Rm g:${acl_05} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir"
     fi
     echo
   else
@@ -249,19 +256,19 @@ do
 
     # Set new folder ACLs
     if [ ! -z "$acl_01" ]; then
-      setfacl -Rd g:${acl_01} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_02" ]; then
-      setfacl -Rd g:${acl_02} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} "g:${acl_02}" "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_03" ]; then
-      setfacl -Rd g:${acl_03} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_04" ]; then
-      setfacl -Rd g:${acl_04} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir"
     fi
     if [ ! -z "$acl_05" ]; then
-      setfacl -Rd g:${acl_05} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir"
     fi
     echo
   fi
@@ -314,21 +321,28 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
 
+      # Check if 'DIR_SCHEMA/dir' has ACL enabled/ready
+      if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
+        acl_arg='-Rm' # File or directory has ACL values
+      else
+        acl_arg='-Rd' # File or directory does not have ACL values
+      fi
+
       # Modify existing folder ACLs
       if [ ! -z "$acl_01" ]; then
-        setfacl -Rm g:${acl_01} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_02" ]; then
-        setfacl -Rm g:${acl_02} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_03" ]; then
-        setfacl -Rm g:${acl_03} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_04" ]; then
-        setfacl -Rm g:${acl_04} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_05" ]; then
-        setfacl -Rm g:${acl_05} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir"
       fi
       echo
     else
@@ -337,28 +351,35 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
 
+      # Check if 'DIR_SCHEMA/dir' has ACL enabled/ready
+      if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
+        acl_arg='-Rm' # File or directory has ACL values
+      else
+        acl_arg='-Rd' # File or directory does not have ACL values
+      fi
+
       # Set new folder ACLs
       if [ ! -z "$acl_01" ]; then
-        setfacl -Rd g:${acl_01} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_02" ]; then
-        setfacl -Rd g:${acl_02} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_03" ]; then
-        setfacl -Rd g:${acl_03} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_04" ]; then
-        setfacl -Rd g:${acl_04} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir"
       fi
       if [ ! -z "$acl_05" ]; then
-        setfacl -Rd g:${acl_05} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir"
       fi
       echo
     fi
   done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
 
   # Chattr set share points attributes to +a
-  while IFS=',' read -r dir user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05
+  while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05
   do
     if [ ! -f "$DIR_SCHEMA/$dir/.foo_protect" ]; then
       touch "$DIR_SCHEMA/$dir/.foo_protect"
@@ -368,9 +389,17 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
   done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
 fi
 
-# Chattr set VOLUME_DIR attributes to +a
-if [ -n "${VOLUME_DIR}" ]; then
-  touch "$DIR_SCHEMA/$VOLUME_DIR/.foo_protect"
-  chattr +i "$DIR_SCHEMA/$VOLUME_DIR/.foo_protect"
+# Chattr set 'VOLUME_MAIN_DIR' & 'VOLUME_FAST_DIR' attributes to +a
+if [ -d "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" ]; then
+  if [ ! -f "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR/.foo_protect" ]; then
+    touch "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR/.foo_protect"
+    chattr +i "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR/.foo_protect"
+  fi
+fi
+if [ -d "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" ]; then
+  if [ ! -f "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR/.foo_protect" ]; then
+    touch "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR/.foo_protect"
+    chattr +i "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR/.foo_protect"
+  fi
 fi
 #-----------------------------------------------------------------------------------
