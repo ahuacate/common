@@ -222,12 +222,12 @@ while IFS=',' read -r dir fast desc user group permission inherit acl_01 acl_02 
 do
   # Check if storage volume option, main or fast, and set 'DIR_SCHEMA' accordingly
   if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
-    DIR_SCHEMA="$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" # Override 'fast' arg (fast not available)
+    DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
   else
     if [ "$fast" -eq 0 ]; then
-      DIR_SCHEMA="$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" # Set to use main volume
+      DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use main storage
     elif [ "$fast" -eq 1 ]; then
-      DIR_SCHEMA="$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" # Set to use fast volume
+      DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use fast storage
     fi
   fi
 
@@ -328,12 +328,12 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
   while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
     # Check if storage volume option, main or fast, and set 'DIR_SCHEMA' accordingly
     if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
-      DIR_SCHEMA="$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" # Override 'fast' arg (fast not available)
+      DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
     else
       if [ "$fast" -eq 0 ]; then
-        DIR_SCHEMA="$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" # Set to use main volume
+        DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use main storage
       elif [ "$fast" -eq 1 ]; then
-        DIR_SCHEMA="$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" # Set to use fast volume
+        DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use fast storage
       fi
     fi
 
