@@ -87,8 +87,16 @@ section "Create and Set Folder Permissions"
 # fi
 
 # Create Default Proxmox Share points
-msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n\nShared folders are the basic directories where you can store files and folders on your NAS. Below is a list of our default NAS shared folders. You can create additional 'custom' shared folders in the coming steps.\n\n$(while IFS=',' read -r var1 var2 var3; do "if [ '${var2}' -eq 0 ]; then DIR_SCHEMA="${DIR_MAIN_SCHEMA}"; elif [ '${var2}' -eq 1 ]; then DIR_SCHEMA="${DIR_FAST_SCHEMA}"; fi"; msg "\t--  ${DIR_SCHEMA}/'${var1}'"; done <<< $(printf '%s\n' "${nas_basefolder_LIST[@]}"))"
+msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n\nShared folders are the basic directories where you can store files and folders on your NAS. Below is a list of our default NAS shared folders. You can create additional 'custom' shared folders in the coming steps.
 
+$( while IFS=',' read -r var1 var2 var3; do
+if [ "$var2" -eq 0 ]; then
+DIR_SCHEMA="$DIR_MAIN_SCHEMA"
+elif [ "$var2" -eq 1 ]; then
+DIR_SCHEMA="$DIR_FAST_SCHEMA"
+fi
+msg "\t--  $DIR_SCHEMA/$var1"
+done <<< $(printf '%s\n' "${nas_basefolder_LIST[@]}") )"
 
 echo
 nas_basefolder_extra_LIST=()
@@ -194,11 +202,13 @@ if [ -n "$DIR_MAIN_SCHEMA" ] && [ -n "$VOLUME_MAIN_DIR" ]; then
   chmod 0755 "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR"
   chown root:users "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR"
 fi
-if [ -n "$DIR_FAST_SCHEMA" ] && [ -n "$VOLUME_FAST_DIR" ]; then
-  find "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" -name .foo_protect -exec chattr -i {} \;
-  mkdir -p "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
-  chmod 0755 "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
-  chown root:users "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
+if [ "$DIR_FAST_SCHEMA" != "$DIR_MAIN_SCHEMA" ]; then
+  if [ -n "$DIR_FAST_SCHEMA" ] && [ -n "$VOLUME_FAST_DIR" ]; then
+    find "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" -name .foo_protect -exec chattr -i {} \;
+    mkdir -p "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
+    chmod 0755 "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
+    chown root:users "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
+  fi
 fi
 
 # Create Proxmox Main and Fast Share points
@@ -225,7 +235,7 @@ do
     chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
     chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
 
-    # Check if 'DIR_SCHEMA/dir' has ACL enabled/ready
+    # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
     if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
       acl_arg='-Rm' # File or directory has ACL values
     else
@@ -255,6 +265,13 @@ do
     mkdir -p "$DIR_SCHEMA/$dir" >/dev/null
     chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
     chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
+
+    # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
+    if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
+      acl_arg='-Rm' # File or directory has ACL values
+    else
+      acl_arg='-Rd' # File or directory does not have ACL values
+    fi
 
     # Set new folder ACLs
     if [ ! -z "$acl_01" ]; then
@@ -323,7 +340,7 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
 
-      # Check if 'DIR_SCHEMA/dir' has ACL enabled/ready
+      # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
       if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
         acl_arg='-Rm' # File or directory has ACL values
       else
@@ -353,7 +370,7 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
 
-      # Check if 'DIR_SCHEMA/dir' has ACL enabled/ready
+      # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
       if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
         acl_arg='-Rm' # File or directory has ACL values
       else
@@ -398,10 +415,12 @@ if [ -d "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" ]; then
     chattr +i "$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR/.foo_protect"
   fi
 fi
-if [ -d "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" ]; then
-  if [ ! -f "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR/.foo_protect" ]; then
-    touch "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR/.foo_protect"
-    chattr +i "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR/.foo_protect"
+if [ "$DIR_FAST_SCHEMA" != "$DIR_MAIN_SCHEMA" ]; then
+  if [ -d "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" ]; then
+    if [ ! -f "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR/.foo_protect" ]; then
+      touch "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR/.foo_protect"
+      chattr +i "$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR/.foo_protect"
+    fi
   fi
 fi
 #-----------------------------------------------------------------------------------
