@@ -93,7 +93,7 @@ $( while IFS=',' read -r var1 var2 var3; do
 if [ "$var2" -eq 0 ]; then
   print_schema=".../main-storage"
 elif [ "$var2" -eq 1 ]; then
-  if [ "$DIR_FAST_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+  if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
     print_schema=".../main-storage"
   else
     print_schema=".../fast-storage"
@@ -222,12 +222,12 @@ while IFS=',' read -r dir fast desc user group permission inherit acl_01 acl_02 
 do
   # Check if storage volume option, main or fast, and set 'DIR_SCHEMA' accordingly
   if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
-    DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
+    DIR_SCHEMA="$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" # Override 'fast' arg (fast not available)
   else
     if [ "$fast" -eq 0 ]; then
-      DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use main volume
+      DIR_SCHEMA="$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" # Set to use main volume
     elif [ "$fast" -eq 1 ]; then
-      DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use fast volume
+      DIR_SCHEMA="$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" # Set to use fast volume
     fi
   fi
 
@@ -328,12 +328,12 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
   while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
     # Check if storage volume option, main or fast, and set 'DIR_SCHEMA' accordingly
     if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
-      DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
+      DIR_SCHEMA="$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" # Override 'fast' arg (fast not available)
     else
       if [ "$fast" -eq 0 ]; then
-        DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use main volume
+        DIR_SCHEMA="$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR" # Set to use main volume
       elif [ "$fast" -eq 1 ]; then
-        DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use fast volume
+        DIR_SCHEMA="$DIR_FAST_SCHEMA/$VOLUME_FAST_DIR" # Set to use fast volume
       fi
     fi
 
@@ -428,3 +428,6 @@ if [ "$DIR_FAST_SCHEMA" != "$DIR_MAIN_SCHEMA" ]; then
   fi
 fi
 #-----------------------------------------------------------------------------------
+echo "FAST - 'DIR_FAST_SCHEMA/VOLUME_FAST_DIR': $DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
+echo "MAIN - 'DIR_MAIN_SCHEMA/VOLUME_MAIN_DIR': $DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR"
+sleep 5

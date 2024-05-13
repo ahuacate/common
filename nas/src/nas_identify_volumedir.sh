@@ -152,6 +152,3 @@ else
   fi
 fi
 #-----------------------------------------------------------------------------------
-echo "FAST: $DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
-echo "MAIN: $DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR"
-sleep 5
