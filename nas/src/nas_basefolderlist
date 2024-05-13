@@ -29,7 +29,7 @@ video,0,Video library storage,root,users,0750,0,:--x,65605:rwx,65606:rwx,65607:r
 
 # DIR FAST ('0' off, '1' on) DESCRIPTION USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) 
 downloads,1,Downloads folder,root,users,0755,0,:--x,65605:rwx,65607:rwx
-app_data,1,Metadata folder for all apps,root,users,0755,0,:--x,65605:rwx,65607:rwx
+app_data,1,App data, metadata etc folder for all apps,root,users,0755,0,:--x,65605:rwx,65607:rwx
 public,1,Public folder for all,root,users,1777,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
 tmp,1,Proxmox tmp storage,root,users,1777,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
 transcode,1,Transcoding folder,root,users,0750,0,:--x,65605:rwx,65607:rwx

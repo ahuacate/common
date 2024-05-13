@@ -91,11 +91,15 @@ msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n\nShared folders are 
 
 $( while IFS=',' read -r var1 var2 var3; do
 if [ "$var2" -eq 0 ]; then
-DIR_SCHEMA="$DIR_MAIN_SCHEMA"
+  print_schema=".../main-storage"
 elif [ "$var2" -eq 1 ]; then
-DIR_SCHEMA="$DIR_FAST_SCHEMA"
+  if [ "$DIR_FAST_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+    print_schema=".../main-storage"
+  else
+    print_schema=".../fast-storage"
+  fi
 fi
-msg "\t--  $DIR_SCHEMA/$var1"
+msg "\t--  $print_schema/$var1"
 done <<< $(printf '%s\n' "${nas_basefolder_LIST[@]}") )"
 
 echo
