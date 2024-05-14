@@ -151,7 +151,7 @@ cat nas_basefolderlist nas_basefolderlist_extra \
 
 # Create new include conf files
 msg "Creating new SMB folder shares..."
-while IFS=',' read -r dir desc user group permission inherit user_groups
+while IFS=',' read -r dir fast desc user group permission inherit user_groups
 do
   # Check for dir
   if [ -d "$DIR_SCHEMA/$dir" ]
