@@ -414,7 +414,7 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
         DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use fast storage
       fi
     fi
-    
+
     if [ ! -f "$DIR_SCHEMA/$dir/.foo_protect" ]; then
       touch "$DIR_SCHEMA/$dir/.foo_protect"
     fi
@@ -439,6 +439,3 @@ if [ "$DIR_FAST_SCHEMA" != "$DIR_MAIN_SCHEMA" ]; then
   fi
 fi
 #-----------------------------------------------------------------------------------
-echo "FAST - 'DIR_FAST_SCHEMA/VOLUME_FAST_DIR': $DIR_FAST_SCHEMA/$VOLUME_FAST_DIR"
-echo "MAIN - 'DIR_MAIN_SCHEMA/VOLUME_MAIN_DIR': $DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR"
-sleep 5

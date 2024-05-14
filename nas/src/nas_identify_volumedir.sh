@@ -141,7 +141,7 @@ else
     fi
 
     # Set volume dir
-    VOLUME_FAST_DIR=$(printf '%s\n' "${RESULTS[@]}" | sed "s|${DIR_FAST_SCHEMA}/||")
+    VOLUME_FAST_DIR=$(printf '%s\n' "${RESULTS[@]}" | sed -e "s|${DIR_FAST_SCHEMA}/||")
   fi
 
   #---- Create new volume dir
