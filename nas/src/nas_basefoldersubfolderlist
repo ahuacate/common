@@ -83,12 +83,6 @@ public/autoadd/vidcoderr,1,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,
 public/autoadd/vidcoderr/in_homevideo,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/vidcoderr/in_unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/vidcoderr/out_unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rwx
-# public/autoadd/vidcoderr/in_stream,1,root,users,0750,0,:--x,65605:r-x,65606:000,65607:r-x,65608:r--
-# public/autoadd/vidcoderr/in_stream/documentary,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-# public/autoadd/vidcoderr/in_stream/movies,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-# public/autoadd/vidcoderr/in_stream/musicvideo,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-# public/autoadd/vidcoderr/in_stream/pron,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
-# public/autoadd/vidcoderr/in_stream/series,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:rw-
 
 # Tdarr Folders
 # DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
@@ -104,12 +98,14 @@ public/autoadd/tdarr/out_unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,6
 
 # Download Folders
 # DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
-downloads/torrent,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:r-x,65608:000
-downloads/usenet,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:r-x,65608:000
-downloads/unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:r-x,65608:000
+downloads/torrent,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
+downloads/usenet,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
+downloads/unsorted,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
+downloads/shared,1,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
 
 # Transcode Folders
 # DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
 transcode/jellyfin,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
 transcode/tdarr,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
 transcode/vidcoderr,1,root,users,0750,1,:--x,65605:rwx,65606:000,65607:rwx,65608:000
+transcode/cctv,1,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000

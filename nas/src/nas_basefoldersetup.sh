@@ -241,9 +241,19 @@ do
 
     # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
     if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-      acl_arg='-Rm' # File or directory has ACL values
+      # Modify ACL
+      if [ "$inherit" -eq 1 ]; then
+        acl_arg='-R -d -m' # inherit permissions applied ('0' off, '1' on)
+      else
+        acl_arg='-R -m' # inherit permissions NOT applied ('0' off, '1' on)
+      fi
     else
-      acl_arg='-Rd' # File or directory does not have ACL values
+      # New ACL
+      if [ "$inherit" -eq 1 ]; then
+        acl_arg='-R -d' # inherit permissions applied ('0' off, '1' on)
+      else
+        acl_arg='-R' # inherit permissions NOT applied ('0' off, '1' on)
+      fi
     fi
 
     # Modify existing folder ACLs
@@ -272,9 +282,19 @@ do
 
     # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
     if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-      acl_arg='-Rm' # File or directory has ACL values
+      # Modify ACL
+      if [ "$inherit" -eq 1 ]; then
+        acl_arg='-R -d -m' # inherit permissions applied ('0' off, '1' on)
+      else
+        acl_arg='-R -m' # inherit permissions NOT applied ('0' off, '1' on)
+      fi
     else
-      acl_arg='-Rd' # File or directory does not have ACL values
+      # New ACL
+      if [ "$inherit" -eq 1 ]; then
+        acl_arg='-R -d' # inherit permissions applied ('0' off, '1' on)
+      else
+        acl_arg='-R' # inherit permissions NOT applied ('0' off, '1' on)
+      fi
     fi
 
     # Set new folder ACLs
@@ -346,9 +366,19 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
 
       # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
       if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-        acl_arg='-Rm' # File or directory has ACL values
+        # Modify ACL
+        if [ "$inherit" -eq 1 ]; then
+          acl_arg='-R -d -m' # inherit permissions applied ('0' off, '1' on)
+        else
+          acl_arg='-R -m' # inherit permissions NOT applied ('0' off, '1' on)
+        fi
       else
-        acl_arg='-Rd' # File or directory does not have ACL values
+        # New ACL
+        if [ "$inherit" -eq 1 ]; then
+          acl_arg='-R -d' # inherit permissions applied ('0' off, '1' on)
+        else
+          acl_arg='-R' # inherit permissions NOT applied ('0' off, '1' on)
+        fi
       fi
 
       # Modify existing folder ACLs
@@ -376,9 +406,19 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
 
       # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
       if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-        acl_arg='-Rm' # File or directory has ACL values
+        # Modify ACL
+        if [ "$inherit" -eq 1 ]; then
+          acl_arg='-R -d -m' # inherit permissions applied ('0' off, '1' on)
+        else
+          acl_arg='-R -m' # inherit permissions NOT applied ('0' off, '1' on)
+        fi
       else
-        acl_arg='-Rd' # File or directory does not have ACL values
+        # New ACL
+        if [ "$inherit" -eq 1 ]; then
+          acl_arg='-R -d' # inherit permissions applied ('0' off, '1' on)
+        else
+          acl_arg='-R' # inherit permissions NOT applied ('0' off, '1' on)
+        fi
       fi
 
       # Set new folder ACLs
