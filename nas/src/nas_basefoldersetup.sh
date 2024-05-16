@@ -241,36 +241,55 @@ do
 
     # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
     if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-      # Modify ACL
+      # Modify ACL (inherit: '0' off, '1' on)
       if [ "$inherit" -eq 1 ]; then
-        acl_arg='-R -d -m' # inherit permissions applied ('0' off, '1' on)
+        acl_arg='-R -m' # ACL applied
+        acl_arg_inherit='-R -d -m' # ACL inherit permissions applied
       else
-        acl_arg='-R -m' # inherit permissions NOT applied ('0' off, '1' on)
+        acl_arg='-R -m' # ACL applied
+        acl_arg_inherit='' # ACL inherit set to none
       fi
     else
-      # New ACL
+      # New ACL (inherit: '0' off, '1' on)
       if [ "$inherit" -eq 1 ]; then
-        acl_arg='-R -d' # inherit permissions applied ('0' off, '1' on)
+        acl_arg='-R' # ACL applied
+        acl_arg_inherit='-R -d' # ACL inherit permissions applied
       else
-        acl_arg='-R' # inherit permissions NOT applied ('0' off, '1' on)
+        acl_arg='-R' # ACL applied
+        acl_arg_inherit='' # ACL inherit set to none
       fi
     fi
 
     # Modify existing folder ACLs
     if [ ! -z "$acl_01" ]; then
-      setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_01} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     if [ ! -z "$acl_02" ]; then
-      setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_02} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     if [ ! -z "$acl_03" ]; then
-      setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_03} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     if [ ! -z "$acl_04" ]; then
-      setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_04} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     if [ ! -z "$acl_05" ]; then
-      setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_05} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     echo
   else
@@ -282,36 +301,55 @@ do
 
     # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
     if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-      # Modify ACL
+      # Modify ACL (inherit: '0' off, '1' on)
       if [ "$inherit" -eq 1 ]; then
-        acl_arg='-R -d -m' # inherit permissions applied ('0' off, '1' on)
+        acl_arg='-R -m' # ACL applied
+        acl_arg_inherit='-R -d -m' # ACL inherit permissions applied
       else
-        acl_arg='-R -m' # inherit permissions NOT applied ('0' off, '1' on)
+        acl_arg='-R -m' # ACL applied
+        acl_arg_inherit='' # ACL inherit set to none
       fi
     else
-      # New ACL
+      # New ACL (inherit: '0' off, '1' on)
       if [ "$inherit" -eq 1 ]; then
-        acl_arg='-R -d' # inherit permissions applied ('0' off, '1' on)
+        acl_arg='-R' # ACL applied
+        acl_arg_inherit='-R -d' # ACL inherit permissions applied
       else
-        acl_arg='-R' # inherit permissions NOT applied ('0' off, '1' on)
+        acl_arg='-R' # ACL applied
+        acl_arg_inherit='' # ACL inherit set to none
       fi
     fi
 
     # Set new folder ACLs
     if [ ! -z "$acl_01" ]; then
-      setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_01} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     if [ ! -z "$acl_02" ]; then
-      setfacl ${acl_arg} "g:${acl_02}" "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_02} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     if [ ! -z "$acl_03" ]; then
-      setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_03} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     if [ ! -z "$acl_04" ]; then
-      setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_04} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     if [ ! -z "$acl_05" ]; then
-      setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir"
+      setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir" # set ACL dir only
+      if [ -n "$acl_arg_inherit" ]; then
+        setfacl ${acl_arg_inherit} g:${acl_05} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+      fi
     fi
     echo
   fi
@@ -366,36 +404,55 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
 
       # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
       if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-        # Modify ACL
+        # Modify ACL (inherit: '0' off, '1' on)
         if [ "$inherit" -eq 1 ]; then
-          acl_arg='-R -d -m' # inherit permissions applied ('0' off, '1' on)
+          acl_arg='-R -m' # ACL applied
+          acl_arg_inherit='-R -d -m' # ACL inherit permissions applied
         else
-          acl_arg='-R -m' # inherit permissions NOT applied ('0' off, '1' on)
+          acl_arg='-R -m' # ACL applied
+          acl_arg_inherit='' # ACL inherit set to none
         fi
       else
-        # New ACL
+        # New ACL (inherit: '0' off, '1' on)
         if [ "$inherit" -eq 1 ]; then
-          acl_arg='-R -d' # inherit permissions applied ('0' off, '1' on)
+          acl_arg='-R' # ACL applied
+          acl_arg_inherit='-R -d' # ACL inherit permissions applied
         else
-          acl_arg='-R' # inherit permissions NOT applied ('0' off, '1' on)
+          acl_arg='-R' # ACL applied
+          acl_arg_inherit='' # ACL inherit set to none
         fi
       fi
 
       # Modify existing folder ACLs
       if [ ! -z "$acl_01" ]; then
-        setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_01} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       if [ ! -z "$acl_02" ]; then
-        setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_02} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       if [ ! -z "$acl_03" ]; then
-        setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_03} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       if [ ! -z "$acl_04" ]; then
-        setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_04} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       if [ ! -z "$acl_05" ]; then
-        setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_05} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       echo
     else
@@ -406,36 +463,55 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
 
       # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
       if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-        # Modify ACL
+        # Modify ACL (inherit: '0' off, '1' on)
         if [ "$inherit" -eq 1 ]; then
-          acl_arg='-R -d -m' # inherit permissions applied ('0' off, '1' on)
+          acl_arg='-R -m' # ACL applied
+          acl_arg_inherit='-R -d -m' # ACL inherit permissions applied
         else
-          acl_arg='-R -m' # inherit permissions NOT applied ('0' off, '1' on)
+          acl_arg='-R -m' # ACL applied
+          acl_arg_inherit='' # ACL inherit set to none
         fi
       else
-        # New ACL
+        # New ACL (inherit: '0' off, '1' on)
         if [ "$inherit" -eq 1 ]; then
-          acl_arg='-R -d' # inherit permissions applied ('0' off, '1' on)
+          acl_arg='-R' # ACL applied
+          acl_arg_inherit='-R -d' # ACL inherit permissions applied
         else
-          acl_arg='-R' # inherit permissions NOT applied ('0' off, '1' on)
+          acl_arg='-R' # ACL applied
+          acl_arg_inherit='' # ACL inherit set to none
         fi
       fi
 
       # Set new folder ACLs
       if [ ! -z "$acl_01" ]; then
-        setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_01} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       if [ ! -z "$acl_02" ]; then
-        setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_02} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       if [ ! -z "$acl_03" ]; then
-        setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_03} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       if [ ! -z "$acl_04" ]; then
-        setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_04} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       if [ ! -z "$acl_05" ]; then
-        setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir"
+        setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir" # set ACL dir only
+        if [ -n "$acl_arg_inherit" ]; then
+          setfacl ${acl_arg_inherit} g:${acl_05} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
+        fi
       fi
       echo
     fi
