@@ -62,7 +62,7 @@ set_share_acl () {
   acl_list=("$acl_01" "$acl_02" "$acl_03" "$acl_04" "$acl_05")
 
   # Apply ACLs for each group in the list
-  for acl in "${acl_list[@]}"; then
+  for acl in "${acl_list[@]}"; do
     if [ -n "$acl" ]; then
       setfacl $acl_arg g:"$acl" "$DIR_SCHEMA/$dir"
       if [ -n "$acl_arg_inherit" ]; then
