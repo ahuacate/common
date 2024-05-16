@@ -70,38 +70,6 @@ set_share_acl () {
       fi
     fi
   done
-
-  # # Modify existing folder ACLs
-  # if [ ! -z "$acl_01" ]; then
-  #   setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir" # set ACL dir only
-  #   if [ -n "$acl_arg_inherit" ]; then
-  #     setfacl ${acl_arg_inherit} g:${acl_01} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-  #   fi
-  # fi
-  # if [ ! -z "$acl_02" ]; then
-  #   setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir" # set ACL dir only
-  #   if [ -n "$acl_arg_inherit" ]; then
-  #     setfacl ${acl_arg_inherit} g:${acl_02} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-  #   fi
-  # fi
-  # if [ ! -z "$acl_03" ]; then
-  #   setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir" # set ACL dir only
-  #   if [ -n "$acl_arg_inherit" ]; then
-  #     setfacl ${acl_arg_inherit} g:${acl_03} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-  #   fi
-  # fi
-  # if [ ! -z "$acl_04" ]; then
-  #   setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir" # set ACL dir only
-  #   if [ -n "$acl_arg_inherit" ]; then
-  #     setfacl ${acl_arg_inherit} g:${acl_04} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-  #   fi
-  # fi
-  # if [ ! -z "$acl_05" ]; then
-  #   setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir" # set ACL dir only
-  #   if [ -n "$acl_arg_inherit" ]; then
-  #     setfacl ${acl_arg_inherit} g:${acl_05} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-  #   fi
-  # fi
 }
 
 #---- Body -------------------------------------------------------------------------
@@ -159,13 +127,6 @@ done < $COMMON_DIR/nas/src/nas_basefoldersubfolderlist
 
 #---- Create and set Folder Share Permissions
 section "Create and Set Folder Permissions"
-
-# # Set extras variable Volume dir (if not set)
-# if [ ! -n "${VOLUME_MAIN_DIR}" ]; then
-#   extra_VOLUME_DIR=''
-# else
-#   extra_VOLUME_DIR="$VOLUME_DIR/"
-# fi
 
 # Create Default Proxmox Share points
 msg_box "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n\nShared folders are the basic directories where you can store files and folders on your NAS. Below is a list of our default NAS shared folders. You can create additional 'custom' shared folders in the coming steps.
@@ -383,58 +344,8 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
 
-      # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
-      if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-        # Modify ACL (inherit: '0' off, '1' on)
-        if [ "$inherit" -eq 1 ]; then
-          acl_arg='-R -m' # ACL applied
-          acl_arg_inherit='-R -d -m' # ACL inherit 'on'
-        else
-          acl_arg='-R -m' # ACL applied
-          acl_arg_inherit='' # ACL inherit 'off'
-        fi
-      else
-        # New ACL (inherit: '0' off, '1' on)
-        if [ "$inherit" -eq 1 ]; then
-          acl_arg='-R' # ACL applied
-          acl_arg_inherit='-R -d' # ACL inherit 'on'
-        else
-          acl_arg='-R' # ACL applied
-          acl_arg_inherit='' # ACL inherit 'off'
-        fi
-      fi
-
-      # Modify existing folder ACLs
-      if [ ! -z "$acl_01" ]; then
-        setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_01} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
-      if [ ! -z "$acl_02" ]; then
-        setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_02} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
-      if [ ! -z "$acl_03" ]; then
-        setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_03} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
-      if [ ! -z "$acl_04" ]; then
-        setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_04} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
-      if [ ! -z "$acl_05" ]; then
-        setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_05} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
+      # Run Func 'set_share_acl'
+      set_share_acl
       echo
     else
       info "New subfolder created:\n  ${WHITE}"$DIR_SCHEMA/$dir"${NC}"
@@ -442,58 +353,8 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
       chgrp -R "$group" "$DIR_SCHEMA/$dir" >/dev/null
       chmod -R "$permission" "$DIR_SCHEMA/$dir" >/dev/null
 
-      # Check if 'DIR_SCHEMA/dir' already has ACLs (sets option to modify or create new ACLS)
-      if getfacl "$DIR_SCHEMA/$dir" >/dev/null 2>&1; then
-        # Modify ACL (inherit: '0' off, '1' on)
-        if [ "$inherit" -eq 1 ]; then
-          acl_arg='-R -m' # ACL applied
-          acl_arg_inherit='-R -d -m' # ACL inherit 'on'
-        else
-          acl_arg='-R -m' # ACL applied
-          acl_arg_inherit='' # ACL inherit 'off'
-        fi
-      else
-        # New ACL (inherit: '0' off, '1' on)
-        if [ "$inherit" -eq 1 ]; then
-          acl_arg='-R' # ACL applied
-          acl_arg_inherit='-R -d' # ACL inherit 'on'
-        else
-          acl_arg='-R' # ACL applied
-          acl_arg_inherit='' # ACL inherit 'off'
-        fi
-      fi
-
-      # Set new folder ACLs
-      if [ ! -z "$acl_01" ]; then
-        setfacl ${acl_arg} g:${acl_01} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_01} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
-      if [ ! -z "$acl_02" ]; then
-        setfacl ${acl_arg} g:${acl_02} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_02} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
-      if [ ! -z "$acl_03" ]; then
-        setfacl ${acl_arg} g:${acl_03} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_03} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
-      if [ ! -z "$acl_04" ]; then
-        setfacl ${acl_arg} g:${acl_04} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_04} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
-      if [ ! -z "$acl_05" ]; then
-        setfacl ${acl_arg} g:${acl_05} "$DIR_SCHEMA/$dir" # set ACL dir only
-        if [ -n "$acl_arg_inherit" ]; then
-          setfacl ${acl_arg_inherit} g:${acl_05} "$DIR_SCHEMA/$dir" # set default inherit permissions ('0' off, '1' on)
-        fi
-      fi
+      # Run Func 'set_share_acl'
+      set_share_acl
       echo
     fi
   done <<< $(printf "%s\n" "${nas_subfolder_LIST[@]}")
