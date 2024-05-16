@@ -244,19 +244,19 @@ do
       # Modify ACL (inherit: '0' off, '1' on)
       if [ "$inherit" -eq 1 ]; then
         acl_arg='-R -m' # ACL applied
-        acl_arg_inherit='-R -d -m' # ACL inherit permissions applied
+        acl_arg_inherit='-R -d -m' # ACL inherit 'on'
       else
         acl_arg='-R -m' # ACL applied
-        acl_arg_inherit='' # ACL inherit set to none
+        acl_arg_inherit='' # ACL inherit 'off'
       fi
     else
       # New ACL (inherit: '0' off, '1' on)
       if [ "$inherit" -eq 1 ]; then
         acl_arg='-R' # ACL applied
-        acl_arg_inherit='-R -d' # ACL inherit permissions applied
+        acl_arg_inherit='-R -d' # ACL inherit 'on'
       else
         acl_arg='-R' # ACL applied
-        acl_arg_inherit='' # ACL inherit set to none
+        acl_arg_inherit='' # ACL inherit 'off'
       fi
     fi
 
@@ -304,19 +304,19 @@ do
       # Modify ACL (inherit: '0' off, '1' on)
       if [ "$inherit" -eq 1 ]; then
         acl_arg='-R -m' # ACL applied
-        acl_arg_inherit='-R -d -m' # ACL inherit permissions applied
+        acl_arg_inherit='-R -d -m' # ACL inherit 'on'
       else
         acl_arg='-R -m' # ACL applied
-        acl_arg_inherit='' # ACL inherit set to none
+        acl_arg_inherit='' # ACL inherit 'off'
       fi
     else
       # New ACL (inherit: '0' off, '1' on)
       if [ "$inherit" -eq 1 ]; then
         acl_arg='-R' # ACL applied
-        acl_arg_inherit='-R -d' # ACL inherit permissions applied
+        acl_arg_inherit='-R -d' # ACL inherit 'on'
       else
         acl_arg='-R' # ACL applied
-        acl_arg_inherit='' # ACL inherit set to none
+        acl_arg_inherit='' # ACL inherit 'off'
       fi
     fi
 
@@ -407,19 +407,19 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
         # Modify ACL (inherit: '0' off, '1' on)
         if [ "$inherit" -eq 1 ]; then
           acl_arg='-R -m' # ACL applied
-          acl_arg_inherit='-R -d -m' # ACL inherit permissions applied
+          acl_arg_inherit='-R -d -m' # ACL inherit 'on'
         else
           acl_arg='-R -m' # ACL applied
-          acl_arg_inherit='' # ACL inherit set to none
+          acl_arg_inherit='' # ACL inherit 'off'
         fi
       else
         # New ACL (inherit: '0' off, '1' on)
         if [ "$inherit" -eq 1 ]; then
           acl_arg='-R' # ACL applied
-          acl_arg_inherit='-R -d' # ACL inherit permissions applied
+          acl_arg_inherit='-R -d' # ACL inherit 'on'
         else
           acl_arg='-R' # ACL applied
-          acl_arg_inherit='' # ACL inherit set to none
+          acl_arg_inherit='' # ACL inherit 'off'
         fi
       fi
 
@@ -466,19 +466,19 @@ if [ ! ${#nas_subfolder_LIST[@]} = 0 ]; then
         # Modify ACL (inherit: '0' off, '1' on)
         if [ "$inherit" -eq 1 ]; then
           acl_arg='-R -m' # ACL applied
-          acl_arg_inherit='-R -d -m' # ACL inherit permissions applied
+          acl_arg_inherit='-R -d -m' # ACL inherit 'on'
         else
           acl_arg='-R -m' # ACL applied
-          acl_arg_inherit='' # ACL inherit set to none
+          acl_arg_inherit='' # ACL inherit 'off'
         fi
       else
         # New ACL (inherit: '0' off, '1' on)
         if [ "$inherit" -eq 1 ]; then
           acl_arg='-R' # ACL applied
-          acl_arg_inherit='-R -d' # ACL inherit permissions applied
+          acl_arg_inherit='-R -d' # ACL inherit 'on'
         else
           acl_arg='-R' # ACL applied
-          acl_arg_inherit='' # ACL inherit set to none
+          acl_arg_inherit='' # ACL inherit 'off'
         fi
       fi
 
