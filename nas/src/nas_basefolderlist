@@ -11,14 +11,14 @@
 # Keep description length to less than 20 characters
 
 # DIR FAST ('0' off, '1' on) DESCRIPTION USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
-audio,0,Audiobooks and podcasts storage,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-backup,0,Backup storage,root,users,1750,1,:--x,65606:rwx,65607:rwx
-books,0,Books and magazine storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+audio,0,Audiobook and podcast storage,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+backup,0,Backup storage,root,users,1750,1,:--x,65605:r-x,65606:rwx,65607:rwx
+books,0,Book and magazine storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
 cloudstorage,0,Cloud data storage,root,users,1750,1,:--x,65606:rwx,65607:rwx
-docker,0,Docker storage,root,users,0750,1,:--x,65606:rwx,65607:rwx
+docker,0,Docker storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx
 git,0,Git storage,root,users,0750,1,:--x,65607:rwx
 homes,0,User homes,root,users,0777,0
-music,0,Music storage,root,users,0755,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+music,0,Music library storage,root,users,0755,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
 openvpn,0,OpenVPN file storage,root,users,0750,1,:--x,65607:rwx
 photo,0,Photo library storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
 proxmox,0,Proxmox storage,root,users,0750,1,:--x,65607:rwx,65606:rwx
@@ -28,8 +28,8 @@ video,0,Video library storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:r
 # Here down are folder shares best set to use a fast access storage volume (i.e NVMe/SSD). If no fast volumes are available the installer script will automatically set the folder share to use the main storage volume
 
 # DIR FAST ('0' off, '1' on) DESCRIPTION USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
-downloads,1,Downloads folder,root,users,0755,1,:--x,65605:rwx,65607:rwx
-app_data,1,App data, metadata etc folder for all,root,users,0755,1,:--x,65605:rwx,65606:rwx,65607:rwx
-public,1,Public folder for all,root,users,1777,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
-tmp,1,General shared tmp storage,root,users,1777,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
-transcode,1,Transcoding folder,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx
+app_data,1,App data and metadata etc folder,root,users,0755,1,:--x,65605:rwx,65606:rwx,65607:rwx
+downloads,1,Download folder,root,users,0755,1,:--x,65605:rwx,65607:rwx
+public,1,Public folder,root,users,1777,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
+tmp,1,General shared temp folder,root,users,1777,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
+transcode,1,Transcode folder,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx
