@@ -28,7 +28,7 @@ video,0,Video library storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:r
 # Here down are folder shares best set to use a fast access storage volume (i.e NVMe/SSD). If no fast volumes are available the installer script will automatically set the folder share to use the main storage volume
 
 # DIR FAST ('0' off, '1' on) DESCRIPTION USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
-app_data,1,App data and metadata etc folder,root,users,0755,1,:--x,65605:rwx,65606:rwx,65607:rwx
+appdata,1,Application install folder,root,users,0755,1,:--x,65605:rwx,65606:rwx,65607:rwx
 downloads,1,Download folder,root,users,0755,1,:--x,65605:rwx,65607:rwx
 public,1,Public folder,root,users,1777,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
 tmp,1,General shared temp folder,root,users,1777,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx

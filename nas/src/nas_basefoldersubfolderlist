@@ -51,10 +51,15 @@ proxmox/backup,0,root,users,1750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
 # DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
 docker/backup,0,root,users,1750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
 docker/compose,0,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
-docker/containers,0,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
-docker/config,0,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
 
 # Here down are folder shares best set to use a fast access storage volume (i.e NVMe/SSD). If no fast volumes are available the installer script will automatically set the folder share to use the main storage volume
+
+# App data Folders
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+appdata/docker,1,root,users,0750,1,:--x,65605:r-x,65606:r-x,65607:r-x,65608:r--
+appdata/docker/data,1,root,users,0750,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
+appdata/docker/config,1,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
+appdata/docker/var,1,root,users,0755,0,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000
 
 # Public Folders
 # DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
