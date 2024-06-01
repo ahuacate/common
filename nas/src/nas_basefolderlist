@@ -5,31 +5,31 @@
 # 65607=privatelab
 # 65608=chrootjail
 # Arg line: dir,fast,description,user,group,permissions,followed by group ACLs
-# First ACL ':--x' sets ownership group permission (i.e sets 'users:--x')
+# First ACL ':--x' sets ownership group permission (i.e sets 'users:r-x')
 # Permissions must be in 3 character format (i.e rwx, r-x, rw-, r--, 000 )
 # Set option for preferred FAST NVMe/SSD storage volume or standard disk (i.e rust) storage volume ('0' standard, '1' on for fast)
 # Keep description length to less than 20 characters
 
 # DIR FAST ('0' off, '1' on) DESCRIPTION USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
-audio,0,Audiobook and podcast storage,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
-backup,0,Backup storage,root,users,1750,1,:--x,65605:r-x,65606:rwx,65607:rwx
-books,0,Book and magazine storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
-cloudstorage,0,Cloud data storage,root,users,1750,1,:--x,65606:rwx,65607:rwx
-docker,0,Docker storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx
-git,0,Git storage,root,users,0750,1,:--x,65607:rwx
+audio,0,Audiobook and podcast storage,root,users,0750,1,:r-x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
+backup,0,Backup storage,root,users,1750,1,:r-x,65605:r-x,65606:rwx,65607:rwx
+books,0,Book and magazine storage,root,users,0750,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+cloudstorage,0,Cloud data storage,root,users,1750,1,:r-x,65606:rwx,65607:rwx
+docker,0,Docker storage,root,users,0750,1,:r-x,65605:rwx,65606:rwx,65607:rwx
+git,0,Git storage,root,users,0750,1,:r-x,65607:rwx
 homes,0,User homes,root,users,0777,0
-music,0,Music library storage,root,users,0755,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
-openvpn,0,OpenVPN file storage,root,users,0750,1,:--x,65607:rwx
-photo,0,Photo library storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
-proxmox,0,Proxmox storage,root,users,0750,1,:--x,65607:rwx,65606:rwx
-sshkey,0,SSH key storage,root,users,1750,1,:--x,65607:rwx
-video,0,Video library storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:r-
+music,0,Music library storage,root,users,0755,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+openvpn,0,OpenVPN file storage,root,users,0750,1,:r-x,65607:rwx
+photo,0,Photo library storage,root,users,0750,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+proxmox,0,Proxmox storage,root,users,0750,1,:r-x,65607:rwx,65606:rwx
+sshkey,0,SSH key storage,root,users,1750,1,:r-x,65607:rwx
+video,0,Video library storage,root,users,0750,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:r-
 
 # Here down are folder shares best set to use a fast access storage volume (i.e NVMe/SSD). If no fast volumes are available the installer script will automatically set the folder share to use the main storage volume
 
 # DIR FAST ('0' off, '1' on) DESCRIPTION USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
-appdata,1,Application install folder,root,users,0755,1,:--x,65605:rwx,65606:rwx,65607:rwx
-downloads,1,Download folder,root,users,0755,1,:--x,65605:rwx,65607:rwx
-public,1,Public folder,root,users,1777,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
-tmp,1,General shared temp folder,root,users,1777,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
-transcode,1,Transcode folder,root,users,0750,1,:--x,65605:rwx,65606:r-x,65607:rwx
+appdata,1,Application install folder,root,users,0755,1,:r-x,65605:rwx,65606:rwx,65607:rwx
+downloads,1,Download folder,root,users,0755,1,:r-x,65605:rwx,65607:rwx
+public,1,Public folder,root,users,1777,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
+tmp,1,General shared temp folder,root,users,1777,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
+transcode,1,Transcode folder,root,users,0750,1,:r-x,65605:rwx,65606:r-x,65607:rwx
