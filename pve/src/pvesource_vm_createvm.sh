@@ -209,8 +209,6 @@ if [ -n "${OS_DIST}" ] && [ -n "${OSVERSION}" ]; then
   eval OS_TMPL_URL='$'${OS_DIST^^}_${OSVERSION}_URL
   OS_TMPL_FILENAME="${OS_TMPL_URL##*/}"
 
-  echo hello5
-
   # Check for existing template
   while read -r storage
   do
@@ -247,6 +245,8 @@ if [ -n "${OTHER_OS_URL}" ]; then
 
   # Set OS_TMPL filename
   OS_TMPL_FILENAME=$(wget --spider --server-response $OS_TMPL_URL 2>&1 | grep -i content-disposition | awk -F"filename=" '{if ($2) print $2}' | tr -d '"')
+  echo $OS_TMPL_FILENAME
+  echo hello6
   if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]; then
     # Set tmpl location
     OS_TMPL=$(pvesm list local | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
