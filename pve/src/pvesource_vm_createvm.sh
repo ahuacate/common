@@ -234,22 +234,32 @@ fi
 if [ -n "${OTHER_OS_URL}" ]; then
   # Download src Custom iso/img
   OS_TMPL_URL="$OTHER_OS_URL"
-  echo "$hello1: $OS_TMPL_URL"
   msg "Downloading installation iso/img ( be patient, might take a while )..."
-  while true
-  do
-    wget -qNLc -T 15 --show-progress --content-disposition -c $OS_TMPL_URL -P $OS_TMPL_PATH && break
+  while true; do
+    wget_output=$(wget -qNLc -T 15 --show-progress --content-disposition -c "$OS_TMPL_URL" -P "$OS_TMPL_PATH" 2>&1)
+    
+    # Check if wget was successful
+    if [[ $? -eq 0 ]]; then
+      # Extract the filename from wget output
+      OS_TMPL_FILENAME=$(echo "$wget_output" | grep -oP '(?<=Saving to: ‘).*(?=’)')
+      if [ -z "$OS_TMPL_FILENAME" ]; then
+        # Fallback if filename could not be extracted
+        OS_TMPL_FILENAME=$(basename "$OS_TMPL_URL")
+      fi
+      break
+    else
+      echo "Download failed. Retrying..."
+    fi
   done
 
   # Set OS_TMPL filename
-  OS_TMPL_FILENAME=$(wget --spider --server-response $OS_TMPL_URL 2>&1 | grep -i content-disposition | awk -F"filename=" '{if ($2) print $2}' | tr -d '"')
-  echo $OS_TMPL_FILENAME
-  echo hello6
+  # OS_TMPL_FILENAME=$(wget --spider --server-response $OS_TMPL_URL 2>&1 | grep -i content-disposition | awk -F"filename=" '{if ($2) print $2}' | tr -d '"')
+  # echo $OS_TMPL_FILENAME
+  # echo hello6
   if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]; then
     # Set tmpl location
     OS_TMPL=$(pvesm list local | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
   fi
-  echo
 fi
 
 # VM Install dir location
