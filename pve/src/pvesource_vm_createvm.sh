@@ -234,7 +234,7 @@ fi
 if [ -n "${OTHER_OS_URL}" ]; then
   # Download src Custom iso/img
   OS_TMPL_URL="$OTHER_OS_URL"
-  echo $hello1: $OS_TMPL_URL"
+  echo "$hello1: $OS_TMPL_URL"
   msg "Downloading installation iso/img ( be patient, might take a while )..."
   while true
   do
