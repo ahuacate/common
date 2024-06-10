@@ -117,8 +117,8 @@ function make_vm_create_LIST() {
         elif [[ "${string_name}" =~ ^scsi[0-9]$ ]] && [[ "${j}" =~ ^SCSI[0-9]_[A-Z]+$ ]]; then
           arr_LIST+=( "$(echo ${j,,} | sed -e "s/^\(SCSI[0-9]\)_//i")=${i}" )
         # CDROM args
-        elif [[ "${string_name}" =~ ^cdrom$ ]] && [[ "${j}" =~ ^ISO_SRC$ ]]; then
-          arr_LIST+=( "${OS_TMPL}" )
+        # elif [[ "${string_name}" =~ ^cdrom$ ]] && [[ "${j}" =~ ^ISO_SRC$ ]]; then
+        #   arr_LIST+=( "${OS_TMPL}" )
         # NET args 
         elif [[ "${string_name}" =~ ^net[0-9]$ ]] && [[ "${j}" =~ ^TAG$ ]] && [[ "${i}" =~ (0|1) ]]; then
           continue
@@ -205,6 +205,7 @@ if [ -n "${OS_DIST}" ] && [ -n "${OSVERSION}" ]; then
   # Match download SRC for Generic OS compatible images
   eval OS_TMPL_URL='$'${OS_DIST^^}_${OSVERSION}_URL
   OS_TMPL_FILENAME="${OS_TMPL_URL##*/}"
+
   # Check for existing template
   while read -r storage
   do
@@ -214,6 +215,7 @@ if [ -n "${OS_DIST}" ] && [ -n "${OSVERSION}" ]; then
       break
     fi
   done < <( pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}' )
+
   # Download Generic OS compatible images
   if [ -n "${OS_TMPL}" ]; then
     msg "Downloading installation iso/img ( be patient, might take a while )..."
@@ -237,6 +239,7 @@ if [ -n "${OTHER_OS_URL}" ]; then
   do
     wget -qNLc -T 15 --show-progress --content-disposition -c $OS_TMPL_URL -P $OS_TMPL_PATH && break
   done
+
   # Set OS_TMPL filename
   OS_TMPL_FILENAME=$(wget --spider --server-response $OS_TMPL_URL 2>&1 | grep -i content-disposition | awk -F"filename=" '{if ($2) print $2}' | tr -d '"')
   if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]; then
