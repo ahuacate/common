@@ -37,8 +37,7 @@ printsection() {
   found=false
 
   # Run function
-  while read line
-  do
+  while read line; do
     [[ $found == false && "$line" != "#----[${section}]" ]] && continue
     [[ $found == true && "${line:0:6}" == '#----[' ]] && break
     found=true
@@ -91,54 +90,43 @@ function make_vm_create_LIST() {
   arr_LIST=()
   results_LIST=()
 
-  while IFS== read var value
-  do
+  while IFS== read var value; do
     eval $var=$value
     eval i='$'$var
 
     # Check enable option
-    if [[ "$var" =~ ^OPTION_STATUS$ ]] && [[ "$i" =~ ^0\:.*$ ]]
-    then
+    if [[ "$var" =~ ^OPTION_STATUS$ ]] && [[ "$i" =~ ^0\:.*$ ]]; then
       break
-    elif [[ "$var" =~ ^OPTION_STATUS$ ]] && [[ "$i" =~ ^1\:[\-a-z_]+[0-9]?+$ ]]
-    then
+    elif [[ "$var" =~ ^OPTION_STATUS$ ]] && [[ "$i" =~ ^1\:[\-a-z_]+[0-9]?+$ ]]; then
       string_name=$(echo $i | awk -F':' '{ print $NF }')
       arr_LIST+=( "--${string_name}" )
       continue
-    elif [[ "$var" =~ ^OPTION_STATUS$ ]] && [[ "$i" =~ ^1\:0$ ]]
-    then
+    elif [[ "$var" =~ ^OPTION_STATUS$ ]] && [[ "$i" =~ ^1\:0$ ]]; then
       unset string_name
       continue
     fi
     # Make array value
-    if [ -n "${i}" ]
-    then
+    if [ -n "${i}" ]; then
       # j=$(echo ${var} | sed -e "s/^\(VM\|CT\)_//i")
       mod_list='QEMU\|VGA'
       j=$(echo ${var} | sed -e "s/^\(VM\|CT\)_//i" -e "s/^\(${mod_list}\)_//i" )
       if [ -n "${string_name}" ]; then
         # SCSI args
-        if [[ "${string_name}" =~ ^scsi[0-9]$ ]] && [[ "${j}" =~ ^SCSI[0-9]_SIZE$ ]]
-        then
+        if [[ "${string_name}" =~ ^scsi[0-9]$ ]] && [[ "${j}" =~ ^SCSI[0-9]_SIZE$ ]]; then
           arr_LIST+=( "${VOLUME}:${i}" )
-        elif [[ "${string_name}" =~ ^scsi[0-9]$ ]] && [[ "${j}" =~ ^SCSI[0-9]_[A-Z]+$ ]]
-        then
+        elif [[ "${string_name}" =~ ^scsi[0-9]$ ]] && [[ "${j}" =~ ^SCSI[0-9]_[A-Z]+$ ]]; then
           arr_LIST+=( "$(echo ${j,,} | sed -e "s/^\(SCSI[0-9]\)_//i")=${i}" )
         # CDROM args
-        elif [[ "${string_name}" =~ ^cdrom$ ]] && [[ "${j}" =~ ^ISO_SRC$ ]]
-        then
+        elif [[ "${string_name}" =~ ^cdrom$ ]] && [[ "${j}" =~ ^ISO_SRC$ ]]; then
           arr_LIST+=( "${OS_TMPL}" )
         # NET args 
-        elif [[ "${string_name}" =~ ^net[0-9]$ ]] && [[ "${j}" =~ ^TAG$ ]] && [[ "${i}" =~ (0|1) ]]
-        then
+        elif [[ "${string_name}" =~ ^net[0-9]$ ]] && [[ "${j}" =~ ^TAG$ ]] && [[ "${i}" =~ (0|1) ]]; then
           continue
         # IPv4 args
-        elif [[ "${string_name}" =~ ^ipconfig[0-9]$ ]] && [[ "${j}" =~ ^IP$ ]] && [[ "${i}" =~ ${ip4_regex} ]]
-        then
+        elif [[ "${string_name}" =~ ^ipconfig[0-9]$ ]] && [[ "${j}" =~ ^IP$ ]] && [[ "${i}" =~ ${ip4_regex} ]]; then
           arr_LIST+=( "${j,,}=${i}/${CIDR}" )
         # IPv6 args
-        elif [[ "${string_name}" =~ ^ipconfig[0-9]$ ]] && [[ "${j}" =~ ^IP$ ]] && [[ "${i}" =~ ${ip6_regex} ]]
-        then
+        elif [[ "${string_name}" =~ ^ipconfig[0-9]$ ]] && [[ "${j}" =~ ^IP$ ]] && [[ "${i}" =~ ${ip6_regex} ]]; then
           arr_LIST+=( "${j,,}=${i}/${CIDR6}" )
         # Standard string
         else
@@ -151,10 +139,8 @@ function make_vm_create_LIST() {
   done <<< $(printsection ${section_name} < ${PRESET_VAR_SRC})
 
   # Assemble 'results' array
-  if [ "${#arr_LIST[@]}" != '0' ]
-  then
-    if [ -n "${string_name}" ]
-    then
+  if [ "${#arr_LIST[@]}" != '0' ]; then
+    if [ -n "${string_name}" ]; then
       # Add arr string options to results_LIST
       results_LIST+=( "$(echo "${arr_LIST[*]}" | sed 's/ /,/2g')" )
     else
@@ -167,8 +153,7 @@ function make_vm_create_LIST() {
   fi
 
   # Create list by name
-  if [ -n "${list_name}" ]
-  then
+  if [ -n "${list_name}" ]; then
     name=${list_name}
     unset $name
     for ((i=0; i<${#results_LIST[@]}; ++i)) ; do
@@ -211,37 +196,32 @@ pveam update >/dev/null
 # Template path
 OS_TMPL_PATH='/var/lib/vz/template/iso'
 # Check template path exists
-if [ ! -d "$OS_TMPL_PATH" ]
-then
+if [ ! -d "$OS_TMPL_PATH" ]; then
 	mkdir -p "$OS_TMPL_PATH"
 fi
 
 # Check for Generic OS local availability
-if [ -n "${OS_DIST}" ] && [ -n "${OSVERSION}" ]
-then
+if [ -n "${OS_DIST}" ] && [ -n "${OSVERSION}" ]; then
   # Match download SRC for Generic OS compatible images
   eval OS_TMPL_URL='$'${OS_DIST^^}_${OSVERSION}_URL
   OS_TMPL_FILENAME="${OS_TMPL_URL##*/}"
   # Check for existing template
   while read -r storage
   do
-    if [[ $(pvesm list $storage | grep "\/${OS_TMPL_FILENAME}") ]]
-    then
+    if [[ $(pvesm list $storage | grep "\/${OS_TMPL_FILENAME}") ]]; then
       # Set existing tmpl location
       OS_TMPL=$(pvesm list $storage | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
       break
     fi
   done < <( pvesm status -content vztmpl -enabled | awk 'NR>1 {print $1}' )
   # Download Generic OS compatible images
-  if [ -n "${OS_TMPL}" ]
-  then
+  if [ -n "${OS_TMPL}" ]; then
     msg "Downloading installation iso/img ( be patient, might take a while )..."
     while true
     do
       wget -qNLc -T 15 --show-progress -c $OS_TMPL_URL -O $OS_TMPL_PATH/$OS_TMPL_FILENAME && break
     done
-    if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]
-    then
+    if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]; then
       # Set tmpl location
       OS_TMPL=$(pvesm list local | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
     fi
@@ -249,8 +229,7 @@ then
 fi
 
 # Check for Custom OS local availability
-if [ -n "${OTHER_OS_URL}" ]
-then
+if [ -n "${OTHER_OS_URL}" ]; then
   # Download src Custom iso/img
   OS_TMPL_URL="$OTHER_OS_URL"
   msg "Downloading installation iso/img ( be patient, might take a while )..."
@@ -260,8 +239,7 @@ then
   done
   # Set OS_TMPL filename
   OS_TMPL_FILENAME=$(wget --spider --server-response $OS_TMPL_URL 2>&1 | grep -i content-disposition | awk -F"filename=" '{if ($2) print $2}' | tr -d '"')
-  if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]
-  then
+  if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]; then
     # Set tmpl location
     OS_TMPL=$(pvesm list local | grep "\/${OS_TMPL_FILENAME}" | awk '{print $1}')
   fi
@@ -270,17 +248,14 @@ fi
 
 # VM Install dir location
 rootdir_LIST=( $(pvesm status --content rootdir -enabled | awk 'NR>1 {print $1}') )
-if [ "${#rootdir_LIST[@]}" = 0 ]
-then
+if [ "${#rootdir_LIST[@]}" = 0 ]; then
   warn "Aborting install. A error has occurred:\n  --  Cannot determine a valid VM image storage location.\n  --  Cannot proceed until the User creates a storage location (i.e local-lvm, local-zfs).\nAborting installation..."
   echo
   sleep 2
   exit 0
-elif [ "${#rootdir_LIST[@]}" = 1 ]
-then
+elif [ "${#rootdir_LIST[@]}" = 1 ]; then
   VOLUME="${rootdir_LIST[0]}"
-elif [ "${#rootdir_LIST[@]}" -gt 1 ]
-then
+elif [ "${#rootdir_LIST[@]}" -gt 1 ]; then
   msg "Multiple PVE storage locations have been detected to use as a VM root volume.\n\n$(pvesm status -content rootdir -enabled | awk 'BEGIN { FIELDWIDTHS="$fieldwidths"; OFS=":" } { $6 = $6 / 1048576 } { if(NR>1) print $1, $2, $3, int($6) }' | column -s ":" -t -N "LOCATION,TYPE,STATUS,CAPACITY (GB)" | indent2)\n\nThe User must make a selection."
   OPTIONS_VALUES_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
   OPTIONS_LABELS_INPUT=$(printf '%s\n' "${rootdir_LIST[@]}")
@@ -305,8 +280,7 @@ do
   # Run func 
   make_vm_create_LIST "$line"
   # Add results to input_LIST
-  if [ ! "${#results_LIST[@]}" = 0 ]
-  then
+  if [ ! "${#results_LIST[@]}" = 0 ]; then
     input_LIST+=( "$(printf '%s\n' "${results_LIST[@]}")" )
   fi
 done < <( printf '%s\n' "${section_category_LIST[@]}" )
