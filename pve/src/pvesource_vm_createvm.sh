@@ -209,6 +209,8 @@ if [ -n "${OS_DIST}" ] && [ -n "${OSVERSION}" ]; then
   eval OS_TMPL_URL='$'${OS_DIST^^}_${OSVERSION}_URL
   OS_TMPL_FILENAME="${OS_TMPL_URL##*/}"
 
+  echo hello5
+
   # Check for existing template
   while read -r storage
   do
