@@ -120,6 +120,7 @@ function make_vm_create_LIST() {
         elif [[ "${string_name}" =~ ^cdrom$ ]] && [[ "${j}" =~ ^ISO_SRC$ ]]; then
           arr_LIST+=( "${OS_TMPL}" )
           echo "${OS_TMPL}"
+          echo hello
           sleep 2
         # NET args 
         elif [[ "${string_name}" =~ ^net[0-9]$ ]] && [[ "${j}" =~ ^TAG$ ]] && [[ "${i}" =~ (0|1) ]]; then
