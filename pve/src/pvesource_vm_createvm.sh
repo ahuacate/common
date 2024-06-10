@@ -119,9 +119,6 @@ function make_vm_create_LIST() {
         # CDROM args
         elif [[ "${string_name}" =~ ^cdrom$ ]] && [[ "${j}" =~ ^ISO_SRC$ ]]; then
           arr_LIST+=( "${OS_TMPL}" )
-          echo "${OS_TMPL}"
-          echo hello
-          sleep 2
         # NET args 
         elif [[ "${string_name}" =~ ^net[0-9]$ ]] && [[ "${j}" =~ ^TAG$ ]] && [[ "${i}" =~ (0|1) ]]; then
           continue
@@ -237,6 +234,7 @@ fi
 if [ -n "${OTHER_OS_URL}" ]; then
   # Download src Custom iso/img
   OS_TMPL_URL="$OTHER_OS_URL"
+  echo $hello1: $OS_TMPL_URL"
   msg "Downloading installation iso/img ( be patient, might take a while )..."
   while true
   do
