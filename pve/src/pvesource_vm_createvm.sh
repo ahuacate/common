@@ -301,6 +301,7 @@ done < <( printf '%s\n' "${section_category_LIST[@]}" )
 
 # Create VM
 msg "Creating ${HOSTNAME^} VM..."
+printf '%s ' "${input_LIST[@]}"
 qm create $(printf '%s ' "${input_LIST[@]}")
 echo
 #-----------------------------------------------------------------------------------
