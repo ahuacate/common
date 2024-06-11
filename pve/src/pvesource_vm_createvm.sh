@@ -234,7 +234,7 @@ fi
 if [ -n "${OTHER_OS_URL}" ]; then
   # Download src Custom iso/img
   OS_TMPL_URL="$OTHER_OS_URL"
-  msg "Downloading installation iso/img ( be patient, might take a while )..."
+  msg "Downloading installation custom iso/img ( be patient, might take a while )..."
   while true; do
     wget_output=$(wget -qNLc -T 15 --show-progress --content-disposition -c "$OS_TMPL_URL" -P "$OS_TMPL_PATH" 2>&1)
     
