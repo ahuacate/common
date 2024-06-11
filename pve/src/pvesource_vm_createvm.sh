@@ -221,7 +221,7 @@ if [ -n "${OS_DIST}" ] && [ -n "${OSVERSION}" ]; then
     msg "Downloading installation iso/img ( be patient, might take a while )..."
     while true
     do
-      wget -qNLc -T 15 --show-progress -c $OS_TMPL_URL -O $OS_TMPL_PATH/$OS_TMPL_FILENAME && break
+      wget -qNLc -T 15 --show-progress--progress=bar -c $OS_TMPL_URL -O $OS_TMPL_PATH/$OS_TMPL_FILENAME && break
     done
     if [[ $(pvesm list local | grep "\/${OS_TMPL_FILENAME}") ]]; then
       # Set tmpl location
@@ -236,7 +236,7 @@ if [ -n "${OTHER_OS_URL}" ]; then
   OS_TMPL_URL="$OTHER_OS_URL"
   msg "Downloading installation custom iso/img ( be patient, might take a while )..."
   while true; do
-    wget_output=$(wget -qNLc -T 15 --show-progress --content-disposition -c "$OS_TMPL_URL" -P "$OS_TMPL_PATH" 2>&1)
+    wget_output=$(wget -qNLc -T 15 --show-progress --progress=bar --content-disposition -c "$OS_TMPL_URL" -P "$OS_TMPL_PATH")
     
     # Check if wget was successful
     if [[ $? -eq 0 ]]; then
