@@ -28,6 +28,11 @@ if [[ ! $(dpkg -s curl 2> /dev/null) ]]; then
   apt-get install curl -y
 fi
 
+#--- Install wGet
+if [[ ! $(dpkg -s wget 2> /dev/null) ]]; then
+  apt-get install wget -y
+fi
+
 #--- Install jq
 if [[ ! $(dpkg -s jq 2> /dev/null) ]]; then
   apt-get install jq -y
