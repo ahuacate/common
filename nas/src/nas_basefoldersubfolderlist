@@ -12,6 +12,10 @@
 # Video Folders (Main)
 # DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
 video/cctv,0,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx,65608:000
+video/cctv/video,0,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx,65608:000
+video/cctv/audio,0,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx,65608:000
+video/cctv/photo,0,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx,65608:000
+video/cctv/snapshot,0,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx,65608:000
 video/documentary,0,root,users,0750,0,:r-x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
 video/documentary/series,0,root,users,0750,1,:r-x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
 video/documentary/movies,0,root,users,0750,1,:r-x,65605:rwx,65606:r-x,65607:rwx,65608:r-x
@@ -120,3 +124,10 @@ transcode/mediaserver,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,656
 transcode/tdarr,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:000
 transcode/vidcoderr,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:000
 transcode/cctv,1,root,users,0750,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:000
+
+# CCTV Folders
+# DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
+cctv/audio,1,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx,65608:000
+cctv/video,1,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx,65608:000
+cctv/photo,1,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx,65608:000
+cctv/snapshot,1,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx,65608:000

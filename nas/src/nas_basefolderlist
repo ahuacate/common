@@ -18,7 +18,7 @@ cloudstorage,0,Cloud data storage,root,users,1750,1,:r-x,65606:rwx,65607:rwx
 docker,0,Docker storage,root,users,0750,1,:r-x,65605:rwx,65606:rwx,65607:rwx
 git,0,Git storage,root,users,0750,1,:r-x,65607:rwx
 homes,0,User homes,root,users,0777,0
-music,0,Music library storage,root,users,0755,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
+music,0,Music library storage,root,users,0750,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
 openvpn,0,OpenVPN file storage,root,users,0750,1,:r-x,65607:rwx
 photo,0,Photo library storage,root,users,0750,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:r-x
 proxmox,0,Proxmox storage,root,users,0750,1,:r-x,65607:rwx,65606:rwx
@@ -29,6 +29,7 @@ video,0,Video library storage,root,users,0750,1,:r-x,65605:rwx,65606:rwx,65607:r
 
 # DIR FAST ('0' off, '1' on) DESCRIPTION USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
 appdata,1,Application install folder,root,users,0755,1,:r-x,65605:rwx,65606:rwx,65607:rwx
+cctv,1,CCTV folder,root,users,0750,1,:r-x,65605:r-x,65606:rwx,65607:rwx
 downloads,1,Download folder,root,users,0755,1,:r-x,65605:rwx,65607:rwx
 public,1,Public folder,root,users,1777,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
 tmp,1,General shared temp folder,root,users,1777,1,:r-x,65605:rwx,65606:rwx,65607:rwx,65608:rwx
