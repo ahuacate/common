@@ -71,26 +71,44 @@ public/autoadd,1,root,users,0750,0,:r-x,65605:r-x,65606:000,65607:r-x,65608:r--
 public/autoadd/direct_import,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent,1,root,users,0750,0,:r-x,65605:r-x,65606:000,65607:r-x,65608:r--
 public/autoadd/torrent/manual-movies,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/manual-movies-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent/manual-series,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/manual-series-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent/manual-documentary-series,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/manual-documentary-series-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent/manual-documentary-movies,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/manual-documentary-movies-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent/readarr-books,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent/radarr-movies,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/radarr-movies-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent/lidarr-music,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/lidarr-music-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent/whisparr-pron,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/whisparr-pron-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent/sonarr-series,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/sonarr-series-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/torrent/manual-unsorted,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/torrent/manual-unsorted-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet,1,root,users,0750,0,:r-x,65605:r-x,65606:000,65607:r-x,65608:r--
 public/autoadd/usenet/manual-movies,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/manual-movies-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet/manual-series,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/manual-series-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet/manual-documentary-series,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/manual-documentary-series-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet/manual-documentary-movies,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/manual-documentary-movies-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet/readarr-books,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet/radarr-movies,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/radarr-movies-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet/lidarr-music,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/lidarr-music-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet/whisparr-pron,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/whisparr-pron-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet/sonarr-series,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/sonarr-series-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/usenet/manual-unsorted,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/usenet/manual-unsorted-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 
 # Vidcoderr Folders
 # DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
@@ -110,6 +128,14 @@ public/autoadd/tdarr/in_musicvideo,1,root,users,0750,1,:r-x,65605:rwx,65606:000,
 public/autoadd/tdarr/in_pron,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/tdarr/in_series,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
 public/autoadd/tdarr/out_unsorted,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rwx
+public/autoadd/tdarr/in_documentary-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_homevideo-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_unsorted-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_movies-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_musicvideo-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_pron-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/in_series-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rw-
+public/autoadd/tdarr/out_unsorted-stream,1,root,users,0750,1,:r-x,65605:rwx,65606:000,65607:rwx,65608:rwx
 
 # Download Folders
 # DIR FAST ('0' off, '1' on) USER GROUP PERMISSIONS INHERIT ('0' off, '1' on) ACL
