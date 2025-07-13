@@ -77,4 +77,10 @@ pct exec $CTID -- apt-get install acl -yqq 2> /dev/null
 msg "Installing BC..."
 pct exec $CTID -- apt-get install bc -yqq 2> /dev/null
 echo
+
+# msg "Rebooting LXC"
+wait 2
+msg "Rebooting LXC..."
+pct_stop_waitloop
+pct_start_waitloop
 #-----------------------------------------------------------------------------------
